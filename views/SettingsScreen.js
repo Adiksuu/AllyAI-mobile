@@ -1,0 +1,172 @@
+import React from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../api/theme/colors";
+
+const SettingsScreen = () => {
+    const settingsItems = [
+        {
+            icon: "person-outline",
+            title: "Account",
+            subtitle: "Manage your account",
+        },
+        {
+            icon: "notifications-outline",
+            title: "Notifications",
+            subtitle: "Configure alerts",
+        },
+        {
+            icon: "shield-outline",
+            title: "Privacy",
+            subtitle: "Data and privacy settings",
+        },
+        {
+            icon: "language-outline",
+            title: "Language",
+            subtitle: "App language",
+        },
+        {
+            icon: "moon-outline",
+            title: "Theme",
+            subtitle: "Dark mode settings",
+        },
+        {
+            icon: "help-circle-outline",
+            title: "Help & Support",
+            subtitle: "Get help",
+        },
+    ];
+
+    return (
+        <ScrollView style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.title}>Settings</Text>
+                <Text style={styles.subtitle}>Customize your experience</Text>
+
+                <View style={styles.settingsList}>
+                    {settingsItems.map((item, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.settingItem}
+                        >
+                            <View style={styles.settingIcon}>
+                                <Ionicons
+                                    name={item.icon}
+                                    size={24}
+                                    color={colors.accent.lightBlue}
+                                />
+                            </View>
+                            <View style={styles.settingContent}>
+                                <Text style={styles.settingTitle}>
+                                    {item.title}
+                                </Text>
+                                <Text style={styles.settingSubtitle}>
+                                    {item.subtitle}
+                                </Text>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.text.muted}
+                            />
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                <View style={styles.infoCard}>
+                    <Text style={styles.infoTitle}>About AllyAI</Text>
+                    <Text style={styles.infoText}>Version 1.0.0</Text>
+                    <Text style={styles.infoText}>
+                        Built with React Native & Expo
+                    </Text>
+                </View>
+            </View>
+        </ScrollView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background.primary,
+    },
+    content: {
+        flex: 1,
+        padding: 20,
+        paddingTop: 60,
+        paddingBottom: 100, // Space for navigation bar
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: colors.text.primary,
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: colors.text.secondary,
+        marginBottom: 30,
+    },
+    settingsList: {
+        backgroundColor: colors.background.card,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border.primary,
+        marginBottom: 20,
+    },
+    settingItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border.secondary,
+    },
+    settingIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.background.secondary,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+    },
+    settingContent: {
+        flex: 1,
+    },
+    settingTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: colors.text.primary,
+        marginBottom: 2,
+    },
+    settingSubtitle: {
+        fontSize: 14,
+        color: colors.text.secondary,
+    },
+    infoCard: {
+        backgroundColor: colors.background.card,
+        padding: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border.primary,
+    },
+    infoTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.accent.lightBlue,
+        marginBottom: 10,
+    },
+    infoText: {
+        fontSize: 14,
+        color: colors.text.secondary,
+        marginBottom: 4,
+    },
+});
+
+export default SettingsScreen;
