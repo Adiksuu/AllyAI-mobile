@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Appearance } from "react-native";
+import { getThemeColors } from "../api/theme/colors";
 
 const ThemeContext = createContext();
 
@@ -16,10 +18,20 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
     const [currentTheme, setCurrentTheme] = useState("auto");
     const [isLoading, setIsLoading] = useState(true);
+    const [systemTheme, setSystemTheme] = useState(Appearance.getColorScheme());
 
     // Load theme from AsyncStorage on app start
     useEffect(() => {
         loadTheme();
+    }, []);
+
+    // Listen to system theme changes
+    useEffect(() => {
+        const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+            setSystemTheme(colorScheme);
+        });
+
+        return () => subscription?.remove();
     }, []);
 
     const loadTheme = async () => {
@@ -54,11 +66,28 @@ export const ThemeProvider = ({ children }) => {
         return themeNames[themeCode] || "Auto";
     };
 
+    // Get the actual theme to use (resolves "auto" to system theme)
+    const getEffectiveTheme = () => {
+        if (currentTheme === "auto") {
+            return systemTheme || "dark";
+        }
+        return currentTheme;
+    };
+
+    // Get theme-aware colors
+    const getColors = () => {
+        const effectiveTheme = getEffectiveTheme();
+        return getThemeColors(effectiveTheme);
+    };
+
     const value = {
         currentTheme,
         changeTheme,
         getThemeDisplayName,
         isLoading,
+        getEffectiveTheme,
+        getColors,
+        colors: getColors(), // Current colors based on theme
     };
 
     return (

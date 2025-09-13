@@ -7,8 +7,8 @@ import {
     ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const LanguageModalContent = ({
     onLanguageSelect,
@@ -16,11 +16,14 @@ const LanguageModalContent = ({
     currentLanguage,
 }) => {
     const { t, getLanguages } = useTranslation();
+    const { colors } = useTheme();
     const languages = getLanguages();
 
     const handleLanguagePress = (language) => {
         onLanguageSelect(language);
     };
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.content}>
@@ -80,76 +83,77 @@ const LanguageModalContent = ({
     );
 };
 
-const styles = StyleSheet.create({
-    content: {
-        paddingHorizontal: 24,
-        maxHeight: 500,
-    },
-    introducingLabel: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: colors.text.secondary,
-        textAlign: "center",
-        letterSpacing: 1,
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        textAlign: "center",
-        marginBottom: 24,
-    },
-    languagesList: {
-        marginBottom: 24,
-        maxHeight: 300,
-    },
-    languageItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        marginBottom: 8,
-        borderRadius: 12,
-        backgroundColor: colors.background.secondary,
-        borderWidth: 1,
-        borderColor: "transparent",
-    },
-    selectedLanguageItem: {
-        backgroundColor: colors.background.card,
-        borderColor: colors.accent.lightBlue,
-    },
-    languageInfo: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1,
-    },
-    flag: {
-        fontSize: 24,
-        marginRight: 16,
-    },
-    languageName: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.primary,
-    },
-    selectedLanguageName: {
-        color: colors.accent.lightBlue,
-        fontWeight: "600",
-    },
-    buttonsContainer: {
-        gap: 12,
-    },
-    cancelButton: {
-        alignItems: "center",
-        paddingVertical: 12,
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        content: {
+            paddingHorizontal: 24,
+            maxHeight: 500,
+        },
+        introducingLabel: {
+            fontSize: 14,
+            fontWeight: "600",
+            color: colors.text.secondary,
+            textAlign: "center",
+            letterSpacing: 1,
+            marginBottom: 8,
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            textAlign: "center",
+            marginBottom: 24,
+        },
+        languagesList: {
+            marginBottom: 24,
+            maxHeight: 300,
+        },
+        languageItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            marginBottom: 8,
+            borderRadius: 12,
+            backgroundColor: colors.background.secondary,
+            borderWidth: 1,
+            borderColor: "transparent",
+        },
+        selectedLanguageItem: {
+            backgroundColor: colors.background.card,
+            borderColor: colors.accent.lightBlue,
+        },
+        languageInfo: {
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+        },
+        flag: {
+            fontSize: 24,
+            marginRight: 16,
+        },
+        languageName: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.primary,
+        },
+        selectedLanguageName: {
+            color: colors.accent.lightBlue,
+            fontWeight: "600",
+        },
+        buttonsContainer: {
+            gap: 12,
+        },
+        cancelButton: {
+            alignItems: "center",
+            paddingVertical: 12,
+        },
+        cancelButtonText: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.secondary,
+        },
+    });
 
 export default LanguageModalContent;

@@ -7,11 +7,12 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const ProfileScreen = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
 
     const profileItems = [
         {
@@ -40,6 +41,8 @@ const ProfileScreen = () => {
             subtitle: t("profile.dataExportSubtitle"),
         },
     ];
+
+    const styles = getStyles(colors);
 
     return (
         <ScrollView style={styles.container}>
@@ -110,102 +113,103 @@ const ProfileScreen = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background.primary,
-    },
-    content: {
-        flex: 1,
-        padding: 20,
-        paddingTop: 60,
-        paddingBottom: 100, // Space for navigation bar
-    },
-    profileHeader: {
-        alignItems: "center",
-        marginBottom: 30,
-    },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 16,
-        borderWidth: 2,
-        borderColor: colors.accent.lightBlue,
-    },
-    userName: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        marginBottom: 4,
-    },
-    userEmail: {
-        fontSize: 16,
-        color: colors.text.secondary,
-    },
-    statsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        backgroundColor: colors.background.card,
-        padding: 20,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 20,
-    },
-    statItem: {
-        alignItems: "center",
-    },
-    statNumber: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: colors.accent.lightBlue,
-        marginBottom: 4,
-    },
-    statLabel: {
-        fontSize: 12,
-        color: colors.text.secondary,
-        textAlign: "center",
-    },
-    menuList: {
-        backgroundColor: colors.background.card,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 20,
-    },
-    menuItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border.secondary,
-    },
-    menuIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    menuContent: {
-        flex: 1,
-    },
-    menuTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    menuSubtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background.primary,
+        },
+        content: {
+            flex: 1,
+            padding: 20,
+            paddingTop: 60,
+            paddingBottom: 100, // Space for navigation bar
+        },
+        profileHeader: {
+            alignItems: "center",
+            marginBottom: 30,
+        },
+        avatar: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 16,
+            borderWidth: 2,
+            borderColor: colors.accent.lightBlue,
+        },
+        userName: {
+            fontSize: 24,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            marginBottom: 4,
+        },
+        userEmail: {
+            fontSize: 16,
+            color: colors.text.secondary,
+        },
+        statsContainer: {
+            flexDirection: "row",
+            justifyContent: "space-around",
+            backgroundColor: colors.background.card,
+            padding: 20,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 20,
+        },
+        statItem: {
+            alignItems: "center",
+        },
+        statNumber: {
+            fontSize: 24,
+            fontWeight: "bold",
+            color: colors.accent.lightBlue,
+            marginBottom: 4,
+        },
+        statLabel: {
+            fontSize: 12,
+            color: colors.text.secondary,
+            textAlign: "center",
+        },
+        menuList: {
+            backgroundColor: colors.background.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 20,
+        },
+        menuItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border.secondary,
+        },
+        menuIcon: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        menuContent: {
+            flex: 1,
+        },
+        menuTitle: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        menuSubtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+    });
 
 export default ProfileScreen;

@@ -1,13 +1,16 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const EmailDisplay = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
     // Mock email - in real app this would come from user state/context
     const userEmail = "user@example.com";
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.container}>
@@ -35,43 +38,44 @@ const EmailDisplay = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: colors.background.card,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    content: {
-        flex: 1,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text.secondary,
-        marginBottom: 4,
-    },
-    email: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.primary,
-    },
-    editButton: {
-        padding: 8,
-        borderRadius: 8,
-        backgroundColor: colors.background.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        content: {
+            flex: 1,
+        },
+        label: {
+            fontSize: 14,
+            color: colors.text.secondary,
+            marginBottom: 4,
+        },
+        email: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.primary,
+        },
+        editButton: {
+            padding: 8,
+            borderRadius: 8,
+            backgroundColor: colors.background.secondary,
+        },
+    });
 
 export default EmailDisplay;

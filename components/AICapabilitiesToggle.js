@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const AICapabilitiesToggle = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
     const [capabilities, setCapabilities] = useState({
         webSearch: true,
         imageGeneration: true,
@@ -67,6 +68,8 @@ const AICapabilitiesToggle = () => {
         );
     };
 
+    const styles = getStyles(colors);
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -78,8 +81,12 @@ const AICapabilitiesToggle = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>{t("aiCapabilities.title")}</Text>
-                    <Text style={styles.subtitle}>{t("aiCapabilities.subtitle")} </Text>
+                    <Text style={styles.title}>
+                        {t("aiCapabilities.title")}
+                    </Text>
+                    <Text style={styles.subtitle}>
+                        {t("aiCapabilities.subtitle")}{" "}
+                    </Text>
                 </View>
             </View>
 
@@ -123,83 +130,84 @@ const AICapabilitiesToggle = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.background.card,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 12,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    content: {
-        flex: 1,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-    capabilitiesContainer: {
-        marginTop: 8,
-    },
-    capabilityItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border.secondary,
-        marginBottom: 8,
-        backgroundColor: colors.background.secondary,
-    },
-    capabilityContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1,
-    },
-    capabilityIcon: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.background.primary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 12,
-    },
-    capabilityText: {
-        flex: 1,
-    },
-    capabilityName: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    capabilityDescription: {
-        fontSize: 12,
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 12,
+        },
+        header: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 20,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        content: {
+            flex: 1,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        capabilitiesContainer: {
+            marginTop: 8,
+        },
+        capabilityItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: 12,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border.secondary,
+            marginBottom: 8,
+            backgroundColor: colors.background.secondary,
+        },
+        capabilityContent: {
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+        },
+        capabilityIcon: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: colors.background.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 12,
+        },
+        capabilityText: {
+            flex: 1,
+        },
+        capabilityName: {
+            fontSize: 14,
+            fontWeight: "500",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        capabilityDescription: {
+            fontSize: 12,
+            color: colors.text.secondary,
+        },
+    });
 
 export default AICapabilitiesToggle;

@@ -7,11 +7,13 @@ import {
     ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const ThemeModalContent = ({ onThemeSelect, onCancel, currentTheme }) => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const themes = [
         {
@@ -117,92 +119,93 @@ const ThemeModalContent = ({ onThemeSelect, onCancel, currentTheme }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    content: {
-        paddingHorizontal: 24,
-        maxHeight: 500,
-    },
-    introducingLabel: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: colors.text.secondary,
-        textAlign: "center",
-        letterSpacing: 1,
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        textAlign: "center",
-        marginBottom: 24,
-    },
-    themesList: {
-        marginBottom: 24,
-        maxHeight: 300,
-    },
-    themeItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        marginBottom: 8,
-        borderRadius: 12,
-        backgroundColor: colors.background.secondary,
-        borderWidth: 1,
-        borderColor: "transparent",
-    },
-    selectedThemeItem: {
-        backgroundColor: colors.background.card,
-        borderColor: colors.accent.lightBlue,
-    },
-    themeInfo: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1,
-    },
-    themeIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.primary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    themeTextContainer: {
-        flex: 1,
-    },
-    themeName: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    selectedThemeName: {
-        color: colors.accent.lightBlue,
-        fontWeight: "600",
-    },
-    themeDescription: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-    selectedThemeDescription: {
-        color: colors.text.secondary,
-    },
-    buttonsContainer: {
-        gap: 12,
-    },
-    cancelButton: {
-        alignItems: "center",
-        paddingVertical: 12,
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        content: {
+            paddingHorizontal: 24,
+            maxHeight: 500,
+        },
+        introducingLabel: {
+            fontSize: 14,
+            fontWeight: "600",
+            color: colors.text.secondary,
+            textAlign: "center",
+            letterSpacing: 1,
+            marginBottom: 8,
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            textAlign: "center",
+            marginBottom: 24,
+        },
+        themesList: {
+            marginBottom: 24,
+            maxHeight: 300,
+        },
+        themeItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            marginBottom: 8,
+            borderRadius: 12,
+            backgroundColor: colors.background.secondary,
+            borderWidth: 1,
+            borderColor: "transparent",
+        },
+        selectedThemeItem: {
+            backgroundColor: colors.background.card,
+            borderColor: colors.accent.lightBlue,
+        },
+        themeInfo: {
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+        },
+        themeIconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        themeTextContainer: {
+            flex: 1,
+        },
+        themeName: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        selectedThemeName: {
+            color: colors.accent.lightBlue,
+            fontWeight: "600",
+        },
+        themeDescription: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        selectedThemeDescription: {
+            color: colors.text.secondary,
+        },
+        buttonsContainer: {
+            gap: 12,
+        },
+        cancelButton: {
+            alignItems: "center",
+            paddingVertical: 12,
+        },
+        cancelButtonText: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.secondary,
+        },
+    });
 
 export default ThemeModalContent;

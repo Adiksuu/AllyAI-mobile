@@ -1,11 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { colors } from "../api/theme/colors";
 import { NewChatButton, PremiumUpgrade, ChatHistoryList } from "../components";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const HomeScreen = ({ onNavigateToChat }) => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
 
     const handleNewChat = () => {
         if (onNavigateToChat) {
@@ -29,6 +30,8 @@ const HomeScreen = ({ onNavigateToChat }) => {
         console.log("Clear history pressed");
     };
 
+    const styles = getStyles(colors);
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
@@ -48,28 +51,29 @@ const HomeScreen = ({ onNavigateToChat }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background.primary,
-    },
-    content: {
-        flex: 1,
-        padding: 20,
-        paddingTop: 60,
-        paddingBottom: 100, // Space for navigation bar
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 18,
-        color: colors.text.secondary,
-        marginBottom: 30,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background.primary,
+        },
+        content: {
+            flex: 1,
+            padding: 20,
+            paddingTop: 60,
+            paddingBottom: 100, // Space for navigation bar
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            marginBottom: 8,
+        },
+        subtitle: {
+            fontSize: 18,
+            color: colors.text.secondary,
+            marginBottom: 30,
+        },
+    });
 
 export default HomeScreen;

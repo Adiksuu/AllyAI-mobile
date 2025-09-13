@@ -217,7 +217,7 @@ export const pl = {
 
     // Account Management Screen
     accountManagement: {
-        title: "Zarządzanie Kontem",
+        title: "Konto",
         subtitle: "Zarządzaj swoim kontem i bezpieczeństwem",
         accountInfo: "Informacje o Koncie",
         security: "Bezpieczeństwo",

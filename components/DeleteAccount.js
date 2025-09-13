@@ -1,11 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const DeleteAccount = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
+
+    const styles = getStyles(colors);
 
     return (
         <TouchableOpacity style={styles.container}>
@@ -33,38 +36,39 @@ const DeleteAccount = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: colors.background.card,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    content: {
-        flex: 1,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.status.error,
-        marginBottom: 2,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        content: {
+            flex: 1,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.status.error,
+            marginBottom: 2,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+    });
 
 export default DeleteAccount;

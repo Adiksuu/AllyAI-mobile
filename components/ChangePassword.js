@@ -7,11 +7,12 @@ import {
     TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const ChangePassword = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -21,6 +22,8 @@ const ChangePassword = () => {
         // TODO: Implement password change functionality
         console.log("Changing password...");
     };
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.container}>
@@ -114,87 +117,88 @@ const ChangePassword = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.background.card,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 12,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    content: {
-        flex: 1,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-    form: {
-        marginTop: 8,
-    },
-    inputContainer: {
-        marginBottom: 16,
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: colors.text.primary,
-        marginBottom: 8,
-    },
-    inputWrapper: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: colors.background.secondary,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border.secondary,
-        minHeight: 48,
-    },
-    input: {
-        flex: 1,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        fontSize: 16,
-        color: colors.text.primary,
-        minHeight: 48,
-        textAlignVertical: "center",
-    },
-    eyeButton: {
-        padding: 12,
-    },
-    confirmButton: {
-        backgroundColor: colors.accent.lightBlue,
-        padding: 16,
-        borderRadius: 8,
-        alignItems: "center",
-        marginTop: 8,
-    },
-    confirmButtonText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.primary.black,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 12,
+        },
+        header: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 20,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        content: {
+            flex: 1,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        form: {
+            marginTop: 8,
+        },
+        inputContainer: {
+            marginBottom: 16,
+        },
+        inputLabel: {
+            fontSize: 14,
+            fontWeight: "500",
+            color: colors.text.primary,
+            marginBottom: 8,
+        },
+        inputWrapper: {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: colors.background.secondary,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border.secondary,
+            minHeight: 48,
+        },
+        input: {
+            flex: 1,
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+            fontSize: 16,
+            color: colors.text.primary,
+            minHeight: 48,
+            textAlignVertical: "center",
+        },
+        eyeButton: {
+            padding: 12,
+        },
+        confirmButton: {
+            backgroundColor: colors.accent.lightBlue,
+            padding: 16,
+            borderRadius: 8,
+            alignItems: "center",
+            marginTop: 8,
+        },
+        confirmButtonText: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.primary.black,
+        },
+    });
 
 export default ChangePassword;

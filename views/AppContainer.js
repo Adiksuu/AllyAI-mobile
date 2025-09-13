@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
-import { colors } from "../api/theme/colors";
+import { useTheme } from "../contexts/ThemeContext";
 import NavigationBar from "./NavigationBar";
 import HomeScreen from "./HomeScreen";
 import ChatScreen from "./ChatScreen";
@@ -12,6 +12,7 @@ import AIChatbotSettingsScreen from "./AIChatbotSettingsScreen";
 const AppContainer = () => {
     const [activeTab, setActiveTab] = useState("home");
     const [navigationStack, setNavigationStack] = useState([]);
+    const { colors, getEffectiveTheme } = useTheme();
 
     const handleNavigateToChat = (chatId = null) => {
         setActiveTab("chat");
@@ -86,10 +87,19 @@ const AppContainer = () => {
         }
     };
 
+    const effectiveTheme = getEffectiveTheme();
+    const statusBarStyle =
+        effectiveTheme === "light" ? "dark-content" : "light-content";
+
     return (
-        <View style={styles.container}>
+        <View
+            style={[
+                styles.container,
+                { backgroundColor: colors.background.primary },
+            ]}
+        >
             <StatusBar
-                barStyle="light-content"
+                barStyle={statusBarStyle}
                 backgroundColor={colors.background.primary}
                 translucent={false}
             />
@@ -107,7 +117,6 @@ const AppContainer = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background.primary,
     },
 });
 

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const ResetAISettings = () => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
     const [isResetting, setIsResetting] = useState(false);
 
     const handleResetSettings = () => {
@@ -32,6 +33,8 @@ const ResetAISettings = () => {
             ]
         );
     };
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.container}>
@@ -74,71 +77,74 @@ const ResetAISettings = () => {
                         isResetting && styles.resetButtonTextDisabled,
                     ]}
                 >
-                    {isResetting ? t("resetSettings.resetingButton") : t("resetSettings.resetButton")}
+                    {isResetting
+                        ? t("resetSettings.resetingButton")
+                        : t("resetSettings.resetButton")}
                 </Text>
             </TouchableOpacity>
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.background.card,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 12,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    content: {
-        flex: 1,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-    resetButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.status.warning,
-        backgroundColor: colors.background.secondary,
-    },
-    resetButtonDisabled: {
-        opacity: 0.6,
-    },
-    resetButtonText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.status.warning,
-        marginLeft: 8,
-    },
-    resetButtonTextDisabled: {
-        color: colors.text.muted,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 12,
+        },
+        header: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 20,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        content: {
+            flex: 1,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        resetButton: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.status.warning,
+            backgroundColor: colors.background.secondary,
+        },
+        resetButtonDisabled: {
+            opacity: 0.6,
+        },
+        resetButtonText: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.status.warning,
+            marginLeft: 8,
+        },
+        resetButtonTextDisabled: {
+            color: colors.text.muted,
+        },
+    });
 
 export default ResetAISettings;

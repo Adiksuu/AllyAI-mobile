@@ -8,7 +8,7 @@ import {
     Dimensions,
     PanResponder,
 } from "react-native";
-import { colors } from "../api/theme/colors";
+import { useTheme } from "../contexts/ThemeContext";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -22,6 +22,7 @@ const BottomSheetModal = ({
     closeThreshold = 100,
     velocityThreshold = 0.5,
 }) => {
+    const { colors } = useTheme();
     const slideAnim = React.useRef(new Animated.Value(screenHeight)).current;
     const isDragging = React.useRef(false);
 
@@ -87,6 +88,8 @@ const BottomSheetModal = ({
         },
     });
 
+    const styles = getStyles(colors);
+
     return (
         <Modal
             visible={visible}
@@ -118,31 +121,32 @@ const BottomSheetModal = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        justifyContent: "flex-end",
-    },
-    backdrop: {
-        flex: 1,
-    },
-    modal: {
-        backgroundColor: colors.background.primary,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingTop: 12,
-        paddingBottom: 34,
-    },
-    handle: {
-        width: 40,
-        height: 4,
-        backgroundColor: colors.border.secondary,
-        borderRadius: 2,
-        alignSelf: "center",
-        marginBottom: 20,
-        marginTop: 8,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "flex-end",
+        },
+        backdrop: {
+            flex: 1,
+        },
+        modal: {
+            backgroundColor: colors.background.primary,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingTop: 12,
+            paddingBottom: 34,
+        },
+        handle: {
+            width: 40,
+            height: 4,
+            backgroundColor: colors.border.secondary,
+            borderRadius: 2,
+            alignSelf: "center",
+            marginBottom: 20,
+            marginTop: 8,
+        },
+    });
 
 export default BottomSheetModal;

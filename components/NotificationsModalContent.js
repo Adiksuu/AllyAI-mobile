@@ -1,11 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const NotificationsModalContent = ({ onEnable, onNotNow }) => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
 
     const handleEnable = () => {
         onEnable();
@@ -14,6 +15,8 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
     const handleNotNow = () => {
         onNotNow();
     };
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.content}>
@@ -94,83 +97,84 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    content: {
-        paddingHorizontal: 24,
-    },
-    introducingLabel: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: colors.text.secondary,
-        textAlign: "center",
-        letterSpacing: 1,
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        textAlign: "center",
-        marginBottom: 32,
-    },
-    featuresList: {
-        marginBottom: 32,
-    },
-    featureItem: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        marginBottom: 24,
-    },
-    featureIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    featureContent: {
-        flex: 1,
-    },
-    featureTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 4,
-    },
-    featureDescription: {
-        fontSize: 14,
-        color: colors.text.secondary,
-        lineHeight: 20,
-    },
-    buttonsContainer: {
-        gap: 12,
-    },
-    enableButton: {
-        backgroundColor: colors.text.primary,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderRadius: 12,
-        gap: 8,
-    },
-    enableButtonText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.primary.black,
-    },
-    notNowButton: {
-        alignItems: "center",
-        paddingVertical: 12,
-    },
-    notNowButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        content: {
+            paddingHorizontal: 24,
+        },
+        introducingLabel: {
+            fontSize: 14,
+            fontWeight: "600",
+            color: colors.text.secondary,
+            textAlign: "center",
+            letterSpacing: 1,
+            marginBottom: 8,
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            textAlign: "center",
+            marginBottom: 32,
+        },
+        featuresList: {
+            marginBottom: 32,
+        },
+        featureItem: {
+            flexDirection: "row",
+            alignItems: "flex-start",
+            marginBottom: 24,
+        },
+        featureIcon: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        featureContent: {
+            flex: 1,
+        },
+        featureTitle: {
+            fontSize: 18,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 4,
+        },
+        featureDescription: {
+            fontSize: 14,
+            color: colors.text.secondary,
+            lineHeight: 20,
+        },
+        buttonsContainer: {
+            gap: 12,
+        },
+        enableButton: {
+            backgroundColor: colors.text.primary,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 16,
+            paddingHorizontal: 24,
+            borderRadius: 12,
+            gap: 8,
+        },
+        enableButtonText: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.primary.black,
+        },
+        notNowButton: {
+            alignItems: "center",
+            paddingVertical: 12,
+        },
+        notNowButtonText: {
+            fontSize: 16,
+            fontWeight: "500",
+            color: colors.text.secondary,
+        },
+    });
 
 export default NotificationsModalContent;

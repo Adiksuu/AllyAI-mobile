@@ -9,7 +9,7 @@ import {
     ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
+// Remove static colors import - we'll use theme context instead
 import Constants from "expo-constants";
 import { NotificationsModal, LanguageModal, ThemeModal } from "../components";
 import { useTranslation } from "../contexts/TranslationContext";
@@ -20,7 +20,12 @@ const SettingsScreen = ({ navigation }) => {
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const [showThemeModal, setShowThemeModal] = useState(false);
     const { t, currentLanguage, changeLanguage } = useTranslation();
-    const { currentTheme, changeTheme, isLoading: themeLoading } = useTheme();
+    const {
+        currentTheme,
+        changeTheme,
+        isLoading: themeLoading,
+        colors,
+    } = useTheme();
 
     const handleNotificationsPress = () => {
         setShowNotificationsModal(true);
@@ -93,6 +98,8 @@ const SettingsScreen = ({ navigation }) => {
             subtitle: t("settings.help.subtitle"),
         },
     ];
+
+    const styles = getStyles(colors);
 
     if (themeLoading) {
         return (
@@ -210,91 +217,92 @@ const SettingsScreen = ({ navigation }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background.primary,
-    },
-    content: {
-        flex: 1,
-        padding: 20,
-        paddingTop: 60,
-        paddingBottom: 100, // Space for navigation bar
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: colors.text.primary,
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 18,
-        color: colors.text.secondary,
-        marginBottom: 30,
-    },
-    settingsList: {
-        backgroundColor: colors.background.card,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-        marginBottom: 20,
-    },
-    settingItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border.secondary,
-    },
-    settingIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.background.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 16,
-    },
-    settingContent: {
-        flex: 1,
-    },
-    settingTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text.primary,
-        marginBottom: 2,
-    },
-    settingSubtitle: {
-        fontSize: 14,
-        color: colors.text.secondary,
-    },
-    infoCard: {
-        backgroundColor: colors.background.card,
-        padding: 20,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-    },
-    infoTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: colors.accent.lightBlue,
-        marginBottom: 10,
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.text.secondary,
-        marginBottom: 4,
-    },
-    loadingContainer: {
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    loadingText: {
-        marginTop: 16,
-        fontSize: 16,
-        color: colors.text.secondary,
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background.primary,
+        },
+        content: {
+            flex: 1,
+            padding: 20,
+            paddingTop: 60,
+            paddingBottom: 100, // Space for navigation bar
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            marginBottom: 8,
+        },
+        subtitle: {
+            fontSize: 18,
+            color: colors.text.secondary,
+            marginBottom: 30,
+        },
+        settingsList: {
+            backgroundColor: colors.background.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 20,
+        },
+        settingItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border.secondary,
+        },
+        settingIcon: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 16,
+        },
+        settingContent: {
+            flex: 1,
+        },
+        settingTitle: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text.primary,
+            marginBottom: 2,
+        },
+        settingSubtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        infoCard: {
+            backgroundColor: colors.background.card,
+            padding: 20,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        infoTitle: {
+            fontSize: 18,
+            fontWeight: "600",
+            color: colors.accent.lightBlue,
+            marginBottom: 10,
+        },
+        infoText: {
+            fontSize: 14,
+            color: colors.text.secondary,
+            marginBottom: 4,
+        },
+        loadingContainer: {
+            justifyContent: "center",
+            alignItems: "center",
+        },
+        loadingText: {
+            marginTop: 16,
+            fontSize: 16,
+            color: colors.text.secondary,
+        },
+    });
 
 export default SettingsScreen;

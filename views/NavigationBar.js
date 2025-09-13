@@ -7,13 +7,14 @@ import {
     Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../api/theme/colors";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
 const NavigationBar = ({ activeTab, onTabPress }) => {
     const { t } = useTranslation();
+    const { colors } = useTheme();
 
     const tabs = [
         {
@@ -41,6 +42,8 @@ const NavigationBar = ({ activeTab, onTabPress }) => {
             activeIcon: "person",
         },
     ];
+
+    const styles = getStyles(colors);
 
     return (
         <View style={styles.container}>
@@ -81,42 +84,43 @@ const NavigationBar = ({ activeTab, onTabPress }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: colors.navigation.background,
-    },
-    navBar: {
-        flexDirection: "row",
-        height: 70,
-        paddingHorizontal: 10,
-        paddingTop: 8,
-        paddingBottom: 8,
-    },
-    tab: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 8,
-        borderRadius: 8,
-        marginHorizontal: 2,
-    },
-    activeTab: {
-        backgroundColor: colors.background.secondary,
-    },
-    tabLabel: {
-        fontSize: 12,
-        color: colors.text.muted,
-        marginTop: 4,
-        fontWeight: "500",
-    },
-    activeTabLabel: {
-        color: colors.accent.lightBlue,
-        fontWeight: "600",
-    },
-});
+const getStyles = (colors) =>
+    StyleSheet.create({
+        container: {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.navigation.background,
+        },
+        navBar: {
+            flexDirection: "row",
+            height: 70,
+            paddingHorizontal: 10,
+            paddingTop: 8,
+            paddingBottom: 8,
+        },
+        tab: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 8,
+            borderRadius: 8,
+            marginHorizontal: 2,
+        },
+        activeTab: {
+            backgroundColor: colors.background.secondary,
+        },
+        tabLabel: {
+            fontSize: 12,
+            color: colors.text.muted,
+            marginTop: 4,
+            fontWeight: "500",
+        },
+        activeTabLabel: {
+            color: colors.accent.lightBlue,
+            fontWeight: "600",
+        },
+    });
 
 export default NavigationBar;
