@@ -170,10 +170,6 @@ export const pl = {
     profile: {
         title: "Profil",
         subtitle: "Zarządzaj swoim profilem",
-        personalInfo: "Informacje Osobiste",
-        personalInfoSubtitle: "Zaktualizuj swoje dane",
-        security: "Bezpieczeństwo",
-        securitySubtitle: "Hasło i bezpieczeństwo",
         subscription: "Subskrypcja",
         subscriptionSubtitle: "Zarządzaj swoim planem",
         usageStats: "Statystyki Użycia",
@@ -341,5 +337,25 @@ export const pl = {
             "Czy na pewno chcesz zresetować wszystkie ustawienia AI do wartości domyślnych? Ta akcja nie może zostać cofnięta.",
         resetButton: "Resetuj do domyślnych",
         resetingButton: "Resetowanie...",
+    },
+
+    premiumModal: {
+        intro: "ULEPSZ SWÓJ",
+        title: "Plan",
+        currentPlan: "Obecny Plan",
+        premiumPlan: "Plan Premium",
+        price: "20 zł/miesiąc",
+        upgradeButton: "Ulepsz Teraz",
+        current: "Obecny",
+        plans: {
+            free: {
+                name: "Darmowy",
+                desc: "Podstawowy dostęp do funkcji AllyAI. Ograniczona liczba rozmów miesięcznie.",
+            },
+            premium: {
+                name: "Premium",
+                desc: "Nieograniczone rozmowy, priorytetowe wsparcie i dostęp do wszystkich funkcji premium.",
+            },
+        },
     },
 };

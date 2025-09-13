@@ -9,22 +9,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import PremiumModal from "../components/PremiumModal";
 
 const ProfileScreen = () => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+    const [showPremiumModal, setShowPremiumModal] = React.useState(false);
 
     const profileItems = [
-        {
-            icon: "person-outline",
-            title: t("profile.personalInfo"),
-            subtitle: t("profile.personalInfoSubtitle"),
-        },
-        {
-            icon: "key-outline",
-            title: t("profile.security"),
-            subtitle: t("profile.securitySubtitle"),
-        },
         {
             icon: "card-outline",
             title: t("profile.subscription"),
@@ -43,6 +35,10 @@ const ProfileScreen = () => {
     ];
 
     const styles = getStyles(colors);
+
+    const handleSubscriptionPress = () => {
+        setShowPremiumModal(true);
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -84,7 +80,15 @@ const ProfileScreen = () => {
 
                 <View style={styles.menuList}>
                     {profileItems.map((item, index) => (
-                        <TouchableOpacity key={index} style={styles.menuItem}>
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.menuItem}
+                            onPress={
+                                index === 0
+                                    ? handleSubscriptionPress
+                                    : undefined
+                            }
+                        >
                             <View style={styles.menuIcon}>
                                 <Ionicons
                                     name={item.icon}
@@ -109,6 +113,10 @@ const ProfileScreen = () => {
                     ))}
                 </View>
             </View>
+            <PremiumModal
+                visible={showPremiumModal}
+                onClose={() => setShowPremiumModal(false)}
+            />
         </ScrollView>
     );
 };

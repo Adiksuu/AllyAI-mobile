@@ -1,12 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { NewChatButton, PremiumUpgrade, ChatHistoryList } from "../components";
+import PremiumModal from "../components/PremiumModal";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 const HomeScreen = ({ onNavigateToChat }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+    const [showPremiumModal, setShowPremiumModal] = React.useState(false);
 
     const handleNewChat = () => {
         if (onNavigateToChat) {
@@ -21,8 +23,7 @@ const HomeScreen = ({ onNavigateToChat }) => {
     };
 
     const handlePremiumUpgrade = () => {
-        // Handle premium upgrade logic
-        console.log("Premium upgrade pressed");
+        setShowPremiumModal(true);
     };
 
     const handleClearHistory = () => {
@@ -39,14 +40,16 @@ const HomeScreen = ({ onNavigateToChat }) => {
                 <Text style={styles.subtitle}>{t("home.subtitle")}</Text>
 
                 <PremiumUpgrade onPress={handlePremiumUpgrade} />
-
                 <NewChatButton onPress={handleNewChat} />
-
                 <ChatHistoryList
                     onChatPress={handleChatPress}
                     onClearHistory={handleClearHistory}
                 />
             </View>
+            <PremiumModal
+                visible={showPremiumModal}
+                onClose={() => setShowPremiumModal(false)}
+            />
         </ScrollView>
     );
 };

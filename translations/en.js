@@ -169,10 +169,6 @@ export const en = {
     profile: {
         title: "Profile",
         subtitle: "Manage your profile",
-        personalInfo: "Personal Information",
-        personalInfoSubtitle: "Update your details",
-        security: "Security",
-        securitySubtitle: "Password and security",
         subscription: "Subscription",
         subscriptionSubtitle: "Manage your plan",
         usageStats: "Usage Stats",
@@ -339,5 +335,25 @@ export const en = {
             "Are you sure you want to reset all AI settings to their default values? This action cannot be undone.",
         resetButton: "Reset to Defaults",
         resetingButton: "Resetting...",
+    },
+
+    premiumModal: {
+        intro: "UPGRADE YOUR",
+        title: "Plan",
+        currentPlan: "Current Plan",
+        premiumPlan: "Premium Plan",
+        price: "$5.00/month",
+        upgradeButton: "Upgrade Now",
+        current: "Current",
+        plans: {
+            free: {
+                name: "Free",
+                desc: "Basic access to AllyAI features. Limited conversations per month.",
+            },
+            premium: {
+                name: "Premium",
+                desc: "Unlimited conversations, priority support, and access to all premium features.",
+            },
+        },
     },
 };
