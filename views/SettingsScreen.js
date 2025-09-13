@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
 import Constants from "expo-constants";
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }) => {
     const settingsItems = [
         {
             icon: "person-outline",
@@ -55,6 +55,11 @@ const SettingsScreen = () => {
                         <TouchableOpacity
                             key={index}
                             style={styles.settingItem}
+                            onPress={() => {
+                                if (item.title === "Account") {
+                                    navigation.navigate("AccountManagement");
+                                }
+                            }}
                         >
                             <View style={styles.settingIcon}>
                                 <Ionicons
@@ -82,8 +87,12 @@ const SettingsScreen = () => {
 
                 <View style={styles.infoCard}>
                     <Text style={styles.infoTitle}>About AllyAI</Text>
-                    <Text style={styles.infoText}>Version {Constants.expoConfig?.version}</Text>
-                    <Text style={styles.infoText}>Updated on {Constants.expoConfig?.extra?.updateDate}</Text>
+                    <Text style={styles.infoText}>
+                        Version {Constants.expoConfig?.version}
+                    </Text>
+                    <Text style={styles.infoText}>
+                        Updated on {Constants.expoConfig?.extra?.updateDate}
+                    </Text>
                 </View>
             </View>
         </ScrollView>

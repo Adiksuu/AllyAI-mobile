@@ -6,9 +6,11 @@ import HomeScreen from "./HomeScreen";
 import ChatScreen from "./ChatScreen";
 import SettingsScreen from "./SettingsScreen";
 import ProfileScreen from "./ProfileScreen";
+import AccountManagementScreen from "./AccountManagementScreen";
 
 const AppContainer = () => {
     const [activeTab, setActiveTab] = useState("home");
+    const [navigationStack, setNavigationStack] = useState([]);
 
     const handleNavigateToChat = (chatId = null) => {
         setActiveTab("chat");
@@ -18,14 +20,39 @@ const AppContainer = () => {
         }
     };
 
+    const navigation = {
+        navigate: (screenName) => {
+            if (screenName === "AccountManagement") {
+                setNavigationStack((prev) => [...prev, "AccountManagement"]);
+            }
+        },
+        goBack: () => {
+            setNavigationStack((prev) => prev.slice(0, -1));
+        },
+    };
+
     const renderScreen = () => {
+        // Check if we're in a nested screen
+        if (navigationStack.length > 0) {
+            const currentScreen = navigationStack[navigationStack.length - 1];
+            switch (currentScreen) {
+                case "AccountManagement":
+                    return <AccountManagementScreen navigation={navigation} />;
+                default:
+                    return (
+                        <HomeScreen onNavigateToChat={handleNavigateToChat} />
+                    );
+            }
+        }
+
+        // Main tab screens
         switch (activeTab) {
             case "home":
                 return <HomeScreen onNavigateToChat={handleNavigateToChat} />;
             case "chat":
                 return <ChatScreen />;
             case "settings":
-                return <SettingsScreen />;
+                return <SettingsScreen navigation={navigation} />;
             case "profile":
                 return <ProfileScreen />;
             default:
@@ -41,7 +68,12 @@ const AppContainer = () => {
                 translucent={false}
             />
             {renderScreen()}
-            <NavigationBar activeTab={activeTab} onTabPress={setActiveTab} />
+            {navigationStack.length === 0 && (
+                <NavigationBar
+                    activeTab={activeTab}
+                    onTabPress={setActiveTab}
+                />
+            )}
         </View>
     );
 };
