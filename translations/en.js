@@ -53,6 +53,7 @@ export const en = {
             version: "Version",
             updated: "Updated on",
         },
+        loading: "Loading settings...",
     },
 
     // Language Modal
@@ -62,6 +63,22 @@ export const en = {
         languages: {
             en: "English",
             pl: "Polish",
+        },
+    },
+
+    // Theme Modal
+    themeModal: {
+        title: "Theme",
+        selectTheme: "SELECT YOUR",
+        themes: {
+            light: "Light",
+            dark: "Dark",
+            auto: "Auto",
+        },
+        descriptions: {
+            light: "Always use light theme",
+            dark: "Always use dark theme",
+            auto: "Follow system settings",
         },
     },
 
@@ -321,6 +338,6 @@ export const en = {
         alertMessage:
             "Are you sure you want to reset all AI settings to their default values? This action cannot be undone.",
         resetButton: "Reset to Defaults",
-        resetingButton: "Resetting..."
+        resetingButton: "Resetting...",
     },
 };

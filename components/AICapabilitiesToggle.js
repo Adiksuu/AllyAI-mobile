@@ -38,7 +38,7 @@ const AICapabilitiesToggle = () => {
             id: "memoryContext",
             name: t("aiCapabilities.memoryContext.name"),
             description: t("aiCapabilities.memoryContext.description"),
-            icon: "brain-outline",
+            icon: "archive-outline",
         },
         {
             id: "voiceResponse",

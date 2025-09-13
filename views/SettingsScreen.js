@@ -5,17 +5,22 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
+    Linking,
+    ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
 import Constants from "expo-constants";
-import { NotificationsModal, LanguageModal } from "../components";
+import { NotificationsModal, LanguageModal, ThemeModal } from "../components";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const SettingsScreen = ({ navigation }) => {
     const [showNotificationsModal, setShowNotificationsModal] = useState(false);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const [showThemeModal, setShowThemeModal] = useState(false);
     const { t, currentLanguage, changeLanguage } = useTranslation();
+    const { currentTheme, changeTheme, isLoading: themeLoading } = useTheme();
 
     const handleNotificationsPress = () => {
         setShowNotificationsModal(true);
@@ -41,6 +46,19 @@ const SettingsScreen = ({ navigation }) => {
     const handleLanguageSelect = async (language) => {
         await changeLanguage(language.code);
         console.log("Language changed to:", language.name);
+    };
+
+    const handleThemePress = () => {
+        setShowThemeModal(true);
+    };
+
+    const handleCloseThemeModal = () => {
+        setShowThemeModal(false);
+    };
+
+    const handleThemeSelect = async (theme) => {
+        await changeTheme(theme.code);
+        console.log("Theme changed to:", theme.name);
     };
 
     const settingsItems = [
@@ -76,6 +94,18 @@ const SettingsScreen = ({ navigation }) => {
         },
     ];
 
+    if (themeLoading) {
+        return (
+            <View style={[styles.container, styles.loadingContainer]}>
+                <ActivityIndicator
+                    size="large"
+                    color={colors.accent.lightBlue}
+                />
+                <Text style={styles.loadingText}>{t("settings.loading")}</Text>
+            </View>
+        );
+    }
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
@@ -105,6 +135,16 @@ const SettingsScreen = ({ navigation }) => {
                                     item.title === t("settings.language.title")
                                 ) {
                                     handleLanguagePress();
+                                } else if (
+                                    item.title === t("settings.theme.title")
+                                ) {
+                                    handleThemePress();
+                                } else if (
+                                    item.title === t("settings.help.title")
+                                ) {
+                                    Linking.openURL(
+                                        "https://github.com/Adiksuu/AllyAI-mobile"
+                                    );
                                 }
                             }}
                         >
@@ -158,6 +198,13 @@ const SettingsScreen = ({ navigation }) => {
                 onClose={handleCloseLanguageModal}
                 onLanguageSelect={handleLanguageSelect}
                 currentLanguage={currentLanguage}
+            />
+
+            <ThemeModal
+                visible={showThemeModal}
+                onClose={handleCloseThemeModal}
+                onThemeSelect={handleThemeSelect}
+                currentTheme={currentTheme}
             />
         </ScrollView>
     );
@@ -238,6 +285,15 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text.secondary,
         marginBottom: 4,
+    },
+    loadingContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: colors.text.secondary,
     },
 });
 

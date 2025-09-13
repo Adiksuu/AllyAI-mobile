@@ -16,3 +16,5 @@ export { default as AICapabilitiesToggle } from "./AICapabilitiesToggle";
 export { default as ResetAISettings } from "./ResetAISettings";
 export { default as LanguageModal } from "./LanguageModal";
 export { default as LanguageModalContent } from "./LanguageModalContent";
+export { default as ThemeModal } from "./ThemeModal";
+export { default as ThemeModalContent } from "./ThemeModalContent";

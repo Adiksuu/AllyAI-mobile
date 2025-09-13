@@ -53,6 +53,7 @@ export const pl = {
             version: "Wersja",
             updated: "Zaktualizowano",
         },
+        loading: "Ładowanie ustawień...",
     },
 
     // Language Modal
@@ -62,6 +63,22 @@ export const pl = {
         languages: {
             en: "Angielski",
             pl: "Polski",
+        },
+    },
+
+    // Theme Modal
+    themeModal: {
+        title: "Motyw",
+        selectTheme: "WYBIERZ SWÓJ",
+        themes: {
+            light: "Jasny",
+            dark: "Ciemny",
+            auto: "Automatyczny",
+        },
+        descriptions: {
+            light: "Zawsze używaj jasnego motywu",
+            dark: "Zawsze używaj ciemnego motywu",
+            auto: "Dopasuj do ustawień systemu",
         },
     },
 
@@ -323,6 +340,6 @@ export const pl = {
         alertMessage:
             "Czy na pewno chcesz zresetować wszystkie ustawienia AI do wartości domyślnych? Ta akcja nie może zostać cofnięta.",
         resetButton: "Resetuj do domyślnych",
-        resetingButton: "Resetowanie..."
+        resetingButton: "Resetowanie...",
     },
 };
