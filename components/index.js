@@ -7,3 +7,5 @@ export { default as ChangePassword } from "./ChangePassword";
 export { default as LogoutButton } from "./LogoutButton";
 export { default as DeleteAccount } from "./DeleteAccount";
 export { default as NotificationsModal } from "./NotificationsModal";
+export { default as BottomSheetModal } from "./BottomSheetModal";
+export { default as NotificationsModalContent } from "./NotificationsModalContent";
