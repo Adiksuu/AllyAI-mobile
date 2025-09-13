@@ -34,14 +34,14 @@ const SettingsScreen = ({ navigation }) => {
             subtitle: "Manage your account",
         },
         {
+            icon: "chatbox-outline",
+            title: "AI Chatbot",
+            subtitle: "Configure your AI settings",
+        },
+        {
             icon: "notifications-outline",
             title: "Notifications",
             subtitle: "Configure alerts",
-        },
-        {
-            icon: "shield-outline",
-            title: "Privacy",
-            subtitle: "Data and privacy settings",
         },
         {
             icon: "language-outline",
@@ -74,6 +74,8 @@ const SettingsScreen = ({ navigation }) => {
                             onPress={() => {
                                 if (item.title === "Account") {
                                     navigation.navigate("AccountManagement");
+                                } else if (item.title === "AI Chatbot") {
+                                    navigation.navigate("AIChatbotSettings");
                                 } else if (item.title === "Notifications") {
                                     handleNotificationsPress();
                                 }

@@ -7,6 +7,7 @@ import ChatScreen from "./ChatScreen";
 import SettingsScreen from "./SettingsScreen";
 import ProfileScreen from "./ProfileScreen";
 import AccountManagementScreen from "./AccountManagementScreen";
+import AIChatbotSettingsScreen from "./AIChatbotSettingsScreen";
 
 const AppContainer = () => {
     const [activeTab, setActiveTab] = useState("home");
@@ -24,6 +25,8 @@ const AppContainer = () => {
         navigate: (screenName) => {
             if (screenName === "AccountManagement") {
                 setNavigationStack((prev) => [...prev, "AccountManagement"]);
+            } else if (screenName === "AIChatbotSettings") {
+                setNavigationStack((prev) => [...prev, "AIChatbotSettings"]);
             }
         },
         goBack: () => {
@@ -59,6 +62,8 @@ const AppContainer = () => {
             switch (currentScreen) {
                 case "AccountManagement":
                     return <AccountManagementScreen navigation={navigation} />;
+                case "AIChatbotSettings":
+                    return <AIChatbotSettingsScreen navigation={navigation} />;
                 default:
                     return (
                         <HomeScreen onNavigateToChat={handleNavigateToChat} />
