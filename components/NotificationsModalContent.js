@@ -2,8 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const NotificationsModalContent = ({ onEnable, onNotNow }) => {
+    const { t } = useTranslation();
+
     const handleEnable = () => {
         onEnable();
     };
@@ -14,8 +17,10 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
 
     return (
         <View style={styles.content}>
-            <Text style={styles.introducingLabel}>MANAGE THE</Text>
-            <Text style={styles.title}>Notifications</Text>
+            <Text style={styles.introducingLabel}>
+                {t("notificationsModal.manageNotifications")}
+            </Text>
+            <Text style={styles.title}>{t("notificationsModal.title")}</Text>
 
             <View style={styles.featuresList}>
                 <View style={styles.featureItem}>
@@ -27,9 +32,13 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
                         />
                     </View>
                     <View style={styles.featureContent}>
-                        <Text style={styles.featureTitle}>Stay Tuned</Text>
+                        <Text style={styles.featureTitle}>
+                            {t("notificationsModal.features.stayTuned.title")}
+                        </Text>
                         <Text style={styles.featureDescription}>
-                            Receive information about a possible app update
+                            {t(
+                                "notificationsModal.features.stayTuned.description"
+                            )}
                         </Text>
                     </View>
                 </View>
@@ -44,11 +53,14 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
                     </View>
                     <View style={styles.featureContent}>
                         <Text style={styles.featureTitle}>
-                            Instant Insights
+                            {t(
+                                "notificationsModal.features.instantInsights.title"
+                            )}
                         </Text>
                         <Text style={styles.featureDescription}>
-                            Get immediate AI-driven insights and recommendations
-                            tailored to your needs
+                            {t(
+                                "notificationsModal.features.instantInsights.description"
+                            )}
                         </Text>
                     </View>
                 </View>
@@ -64,14 +76,18 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
                         size={20}
                         color={colors.primary.black}
                     />
-                    <Text style={styles.enableButtonText}>Enable</Text>
+                    <Text style={styles.enableButtonText}>
+                        {t("common.enable")}
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.notNowButton}
                     onPress={handleNotNow}
                 >
-                    <Text style={styles.notNowButtonText}>Not Now</Text>
+                    <Text style={styles.notNowButtonText}>
+                        {t("notificationsModal.notNow")}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>

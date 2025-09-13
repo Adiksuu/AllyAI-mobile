@@ -2,8 +2,10 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const EmailDisplay = () => {
+    const { t } = useTranslation();
     // Mock email - in real app this would come from user state/context
     const userEmail = "user@example.com";
 
@@ -17,7 +19,9 @@ const EmailDisplay = () => {
                 />
             </View>
             <View style={styles.content}>
-                <Text style={styles.label}>Email Address</Text>
+                <Text style={styles.label}>
+                    {t("accountManagement.email.title")}
+                </Text>
                 <Text style={styles.email}>{userEmail}</Text>
             </View>
             <TouchableOpacity style={styles.editButton}>

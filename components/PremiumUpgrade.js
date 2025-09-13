@@ -7,8 +7,11 @@ import {
     ImageBackground,
 } from "react-native";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const PremiumUpgrade = ({ onPress }) => {
+    const { t } = useTranslation();
+
     return (
         <TouchableOpacity
             style={styles.container}
@@ -22,14 +25,16 @@ const PremiumUpgrade = ({ onPress }) => {
             >
                 <View style={styles.overlay}>
                     <View style={styles.content}>
-                        <Text style={styles.title}>Premium Plan</Text>
-                        <Text style={styles.subtitle}>Unlock access to many features and get unlimited AI conversations</Text>
+                        <Text style={styles.title}>{t("premium.title")}</Text>
+                        <Text style={styles.subtitle}>
+                            {t("premium.subtitle")}
+                        </Text>
                         <TouchableOpacity
                             style={styles.upgradeButton}
                             onPress={onPress}
                         >
                             <Text style={styles.upgradeButtonText}>
-                                Upgrade Plan
+                                {t("premium.upgradeButton")}
                             </Text>
                         </TouchableOpacity>
                     </View>

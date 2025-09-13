@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -9,10 +9,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
 import Constants from "expo-constants";
-import { NotificationsModal } from "../components";
+import { NotificationsModal, LanguageModal } from "../components";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const SettingsScreen = ({ navigation }) => {
     const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+    const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const { t, currentLanguage, changeLanguage } = useTranslation();
 
     const handleNotificationsPress = () => {
         setShowNotificationsModal(true);
@@ -27,44 +30,57 @@ const SettingsScreen = ({ navigation }) => {
         console.log("Notifications enabled");
     };
 
+    const handleLanguagePress = () => {
+        setShowLanguageModal(true);
+    };
+
+    const handleCloseLanguageModal = () => {
+        setShowLanguageModal(false);
+    };
+
+    const handleLanguageSelect = async (language) => {
+        await changeLanguage(language.code);
+        console.log("Language changed to:", language.name);
+    };
+
     const settingsItems = [
         {
             icon: "person-outline",
-            title: "Account",
-            subtitle: "Manage your account",
+            title: t("settings.account.title"),
+            subtitle: t("settings.account.subtitle"),
         },
         {
             icon: "chatbox-outline",
-            title: "AI Chatbot",
-            subtitle: "Configure your AI settings",
+            title: t("settings.aiChatbot.title"),
+            subtitle: t("settings.aiChatbot.subtitle"),
         },
         {
             icon: "notifications-outline",
-            title: "Notifications",
-            subtitle: "Configure alerts",
+            title: t("settings.notifications.title"),
+            subtitle: t("settings.notifications.subtitle"),
         },
         {
             icon: "language-outline",
-            title: "Language",
-            subtitle: "App language",
+            title: t("settings.language.title"),
+            subtitle: t("settings.language.subtitle"),
         },
         {
             icon: "moon-outline",
-            title: "Theme",
-            subtitle: "Dark mode settings",
+            title: t("settings.theme.title"),
+            subtitle: t("settings.theme.subtitle"),
         },
         {
             icon: "help-circle-outline",
-            title: "Help & Support",
-            subtitle: "Get help",
+            title: t("settings.help.title"),
+            subtitle: t("settings.help.subtitle"),
         },
     ];
 
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Settings</Text>
-                <Text style={styles.subtitle}>Customize your experience</Text>
+                <Text style={styles.title}>{t("settings.title")}</Text>
+                <Text style={styles.subtitle}>{t("settings.subtitle")}</Text>
 
                 <View style={styles.settingsList}>
                     {settingsItems.map((item, index) => (
@@ -72,12 +88,23 @@ const SettingsScreen = ({ navigation }) => {
                             key={index}
                             style={styles.settingItem}
                             onPress={() => {
-                                if (item.title === "Account") {
+                                if (
+                                    item.title === t("settings.account.title")
+                                ) {
                                     navigation.navigate("AccountManagement");
-                                } else if (item.title === "AI Chatbot") {
+                                } else if (
+                                    item.title === t("settings.aiChatbot.title")
+                                ) {
                                     navigation.navigate("AIChatbotSettings");
-                                } else if (item.title === "Notifications") {
+                                } else if (
+                                    item.title ===
+                                    t("settings.notifications.title")
+                                ) {
                                     handleNotificationsPress();
+                                } else if (
+                                    item.title === t("settings.language.title")
+                                ) {
+                                    handleLanguagePress();
                                 }
                             }}
                         >
@@ -106,12 +133,16 @@ const SettingsScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.infoCard}>
-                    <Text style={styles.infoTitle}>About AllyAI</Text>
-                    <Text style={styles.infoText}>
-                        Version {Constants.expoConfig?.version}
+                    <Text style={styles.infoTitle}>
+                        {t("settings.about.title")}
                     </Text>
                     <Text style={styles.infoText}>
-                        Updated on {Constants.expoConfig?.extra?.updateDate}
+                        {t("settings.about.version")}{" "}
+                        {Constants.expoConfig?.version}
+                    </Text>
+                    <Text style={styles.infoText}>
+                        {t("settings.about.updated")}{" "}
+                        {Constants.expoConfig?.extra?.updateDate}
                     </Text>
                 </View>
             </View>
@@ -120,6 +151,13 @@ const SettingsScreen = ({ navigation }) => {
                 visible={showNotificationsModal}
                 onClose={handleCloseModal}
                 onEnable={handleEnableNotifications}
+            />
+
+            <LanguageModal
+                visible={showLanguageModal}
+                onClose={handleCloseLanguageModal}
+                onLanguageSelect={handleLanguageSelect}
+                currentLanguage={currentLanguage}
             />
         </ScrollView>
     );

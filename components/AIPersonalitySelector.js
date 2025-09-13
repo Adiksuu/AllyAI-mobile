@@ -2,33 +2,35 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const AIPersonalitySelector = () => {
+    const { t } = useTranslation();
     const [selectedPersonality, setSelectedPersonality] = useState("friendly");
 
     const personalities = [
         {
             id: "friendly",
-            name: "Friendly",
-            description: "Warm, approachable, and conversational",
+            name: t("aiPersonality.friendly.name"),
+            description: t("aiPersonality.friendly.description"),
             icon: "happy-outline",
         },
         {
             id: "professional",
-            name: "Professional",
-            description: "Formal, precise, and business-focused",
+            name: t("aiPersonality.professional.name"),
+            description: t("aiPersonality.professional.description"),
             icon: "briefcase-outline",
         },
         {
             id: "creative",
-            name: "Creative",
-            description: "Imaginative, artistic, and expressive",
+            name: t("aiPersonality.creative.name"),
+            description: t("aiPersonality.creative.description"),
             icon: "color-palette-outline",
         },
         {
             id: "analytical",
-            name: "Analytical",
-            description: "Logical, data-driven, and methodical",
+            name: t("aiPersonality.analytical.name"),
+            description: t("aiPersonality.analytical.description"),
             icon: "analytics-outline",
         },
     ];
@@ -50,10 +52,8 @@ const AIPersonalitySelector = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>AI Personality</Text>
-                    <Text style={styles.subtitle}>
-                        Choose how your AI assistant behaves
-                    </Text>
+                    <Text style={styles.title}>{t("aiPersonality.title")}</Text>
+                    <Text style={styles.subtitle}>{t("aiPersonality.subtitle")}</Text>
                 </View>
             </View>
 

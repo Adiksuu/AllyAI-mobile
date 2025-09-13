@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const AICapabilitiesToggle = () => {
+    const { t } = useTranslation();
     const [capabilities, setCapabilities] = useState({
         webSearch: true,
         imageGeneration: true,
@@ -16,14 +18,14 @@ const AICapabilitiesToggle = () => {
     const capabilityItems = [
         {
             id: "webSearch",
-            name: "Web Search",
-            description: "Search the internet for real-time information",
+            name: t("aiCapabilities.webSearch.name"),
+            description: t("aiCapabilities.webSearch.description"),
             icon: "globe-outline",
         },
         {
             id: "imageGeneration",
-            name: "Image Generation",
-            description: "Create images from text descriptions",
+            name: t("aiCapabilities.imageGeneration.name"),
+            description: t("aiCapabilities.imageGeneration.description"),
             icon: "image-outline",
         },
         // {
@@ -34,20 +36,20 @@ const AICapabilitiesToggle = () => {
         // },
         {
             id: "memoryContext",
-            name: "Memory & Context",
-            description: "Remember previous conversations",
+            name: t("aiCapabilities.memoryContext.name"),
+            description: t("aiCapabilities.memoryContext.description"),
             icon: "brain-outline",
         },
         {
             id: "voiceResponse",
-            name: "Voice Response",
-            description: "Speak responses aloud",
+            name: t("aiCapabilities.voiceResponse.name"),
+            description: t("aiCapabilities.voiceResponse.description"),
             icon: "volume-high-outline",
         },
         {
             id: "fileAnalysis",
-            name: "File Analysis",
-            description: "Analyze uploaded documents",
+            name: t("aiCapabilities.fileAnalysis.name"),
+            description: t("aiCapabilities.fileAnalysis.description"),
             icon: "document-text-outline",
         },
     ];
@@ -76,10 +78,8 @@ const AICapabilitiesToggle = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>AI Capabilities</Text>
-                    <Text style={styles.subtitle}>
-                        Enable or disable AI features
-                    </Text>
+                    <Text style={styles.title}>{t("aiCapabilities.title")}</Text>
+                    <Text style={styles.subtitle}>{t("aiCapabilities.subtitle")} </Text>
                 </View>
             </View>
 

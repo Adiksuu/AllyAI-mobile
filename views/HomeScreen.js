@@ -2,8 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { colors } from "../api/theme/colors";
 import { NewChatButton, PremiumUpgrade, ChatHistoryList } from "../components";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const HomeScreen = ({ onNavigateToChat }) => {
+    const { t } = useTranslation();
+
     const handleNewChat = () => {
         if (onNavigateToChat) {
             onNavigateToChat();
@@ -29,8 +32,8 @@ const HomeScreen = ({ onNavigateToChat }) => {
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Welcome to AllyAI</Text>
-                <Text style={styles.subtitle}>Your AI Assistant</Text>
+                <Text style={styles.title}>{t("home.title")}</Text>
+                <Text style={styles.subtitle}>{t("home.subtitle")}</Text>
 
                 <PremiumUpgrade onPress={handlePremiumUpgrade} />
 

@@ -2,27 +2,29 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ResponseStyleSelector = () => {
+    const { t } = useTranslation();
     const [selectedStyle, setSelectedStyle] = useState("balanced");
 
     const responseStyles = [
         {
             id: "concise",
-            name: "Concise",
-            description: "Short, direct answers",
+            name: t("responseStyle.concise.name"),
+            description: t("responseStyle.concise.description"),
             icon: "arrow-up-outline",
         },
         {
             id: "balanced",
-            name: "Balanced",
-            description: "Moderate length responses",
+            name: t("responseStyle.balanced.name"),
+            description: t("responseStyle.balanced.description"),
             icon: "remove-outline",
         },
         {
             id: "detailed",
-            name: "Detailed",
-            description: "Comprehensive explanations",
+            name: t("responseStyle.detailed.name"),
+            description: t("responseStyle.detailed.description"),
             icon: "arrow-down-outline",
         },
     ];
@@ -44,10 +46,8 @@ const ResponseStyleSelector = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Response Style</Text>
-                    <Text style={styles.subtitle}>
-                        Control how detailed AI responses are
-                    </Text>
+                    <Text style={styles.title}>{t("responseStyle.title")}</Text>
+                    <Text style={styles.subtitle}>{t("responseStyle.subtitle")} </Text>
                 </View>
             </View>
 
@@ -68,8 +68,8 @@ const ResponseStyleSelector = () => {
                                     size={20}
                                     color={
                                         selectedStyle === style.id
-                                        ? colors.accent.lightBlue
-                                        : colors.text.primary
+                                            ? colors.accent.lightBlue
+                                            : colors.text.primary
                                     }
                                 />
                             </View>

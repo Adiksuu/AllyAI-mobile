@@ -8,36 +8,39 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
+    const { t } = useTranslation();
+
     // Mock data - replace with real data from your state/API
     const chatHistory = [
         {
             id: "1",
-            title: "React Native Navigation Help",
-            lastMessage: "How do I implement bottom tabs?",
-            timestamp: "2 hours ago",
+            title: t("chatHistory.recentChats.1.title"),
+            lastMessage: t("chatHistory.recentChats.1.lastMessage"),
+            timestamp: t("chatHistory.recentChats.1.timestamp"),
             messageCount: 5,
         },
         {
             id: "2",
-            title: "JavaScript Async/Await",
-            lastMessage: "Can you explain promises?",
-            timestamp: "1 day ago",
+            title: t("chatHistory.recentChats.2.title"),
+            lastMessage: t("chatHistory.recentChats.2.lastMessage"),
+            timestamp: t("chatHistory.recentChats.2.timestamp"),
             messageCount: 12,
         },
         {
             id: "3",
-            title: "Mobile App Design",
-            lastMessage: "What's the best color scheme?",
-            timestamp: "3 days ago",
+            title: t("chatHistory.recentChats.3.title"),
+            lastMessage: t("chatHistory.recentChats.3.lastMessage"),
+            timestamp: t("chatHistory.recentChats.3.timestamp"),
             messageCount: 8,
         },
         {
             id: "4",
-            title: "API Integration",
-            lastMessage: "How to handle errors?",
-            timestamp: "1 week ago",
+            title: t("chatHistory.recentChats.4.title"),
+            lastMessage: t("chatHistory.recentChats.4.lastMessage"),
+            timestamp: t("chatHistory.recentChats.4.timestamp"),
             messageCount: 15,
         },
     ];
@@ -49,13 +52,15 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Recent Chats</Text>
+                <Text style={styles.title}>{t("home.recentChats")}</Text>
                 {chatHistory.length > 0 && (
                     <TouchableOpacity
                         onPress={onClearHistory}
                         style={styles.clearButton}
                     >
-                        <Text style={styles.clearText}>Clear All</Text>
+                        <Text style={styles.clearText}>
+                            {t("chatHistory.clearAll")}
+                        </Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -67,9 +72,11 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                         size={48}
                         color={colors.text.muted}
                     />
-                    <Text style={styles.emptyTitle}>No conversations yet</Text>
+                    <Text style={styles.emptyTitle}>
+                        {t("chatHistory.emptyTitle")}
+                    </Text>
                     <Text style={styles.emptySubtitle}>
-                        Start your first chat with AllyAI
+                        {t("chatHistory.emptySubtitle")}
                     </Text>
                 </View>
             ) : (

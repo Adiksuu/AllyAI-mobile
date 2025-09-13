@@ -2,8 +2,11 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const NewChatButton = ({ onPress }) => {
+    const { t } = useTranslation();
+
     return (
         <TouchableOpacity
             style={styles.container}
@@ -18,10 +21,8 @@ const NewChatButton = ({ onPress }) => {
                 />
             </View>
             <View style={styles.textContainer}>
-                <Text style={styles.title}>Start New Chat</Text>
-                <Text style={styles.subtitle}>
-                    Begin a conversation with AllyAI
-                </Text>
+                <Text style={styles.title}>{t("home.newChat")}</Text>
+                <Text style={styles.subtitle}>{t("home.newChatSubtitle")}</Text>
             </View>
             <Ionicons
                 name="chevron-forward"

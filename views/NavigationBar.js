@@ -8,27 +8,35 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const { width } = Dimensions.get("window");
 
 const NavigationBar = ({ activeTab, onTabPress }) => {
+    const { t } = useTranslation();
+
     const tabs = [
-        { id: "home", label: "Home", icon: "home-outline", activeIcon: "home" },
+        {
+            id: "home",
+            label: t("navigation.home"),
+            icon: "home-outline",
+            activeIcon: "home",
+        },
         {
             id: "chat",
-            label: "Chat",
+            label: t("navigation.chat"),
             icon: "chatbubble-outline",
             activeIcon: "chatbubble",
         },
         {
             id: "settings",
-            label: "Settings",
+            label: t("navigation.settings"),
             icon: "settings-outline",
             activeIcon: "settings",
         },
         {
             id: "profile",
-            label: "Profile",
+            label: t("navigation.profile"),
             icon: "person-outline",
             activeIcon: "person",
         },

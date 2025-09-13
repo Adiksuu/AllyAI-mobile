@@ -2,8 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const LogoutButton = () => {
+    const { t } = useTranslation();
+
     return (
         <TouchableOpacity style={styles.container}>
             <View style={styles.iconContainer}>
@@ -14,8 +17,12 @@ const LogoutButton = () => {
                 />
             </View>
             <View style={styles.content}>
-                <Text style={styles.title}>Logout</Text>
-                <Text style={styles.subtitle}>Sign out of your account</Text>
+                <Text style={styles.title}>
+                    {t("accountManagement.logout.title")}
+                </Text>
+                <Text style={styles.subtitle}>
+                    {t("accountManagement.logout.subtitle")}
+                </Text>
             </View>
             <Ionicons
                 name="chevron-forward"

@@ -8,8 +8,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ChangePassword = () => {
+    const { t } = useTranslation();
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -31,22 +33,28 @@ const ChangePassword = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Change Password</Text>
+                    <Text style={styles.title}>
+                        {t("accountManagement.password.title")}
+                    </Text>
                     <Text style={styles.subtitle}>
-                        Update your password for security
+                        {t("accountManagement.password.subtitle")}
                     </Text>
                 </View>
             </View>
 
             <View style={styles.form}>
                 <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Current Password</Text>
+                    <Text style={styles.inputLabel}>
+                        {t("changePassword.currentPassword")}
+                    </Text>
                     <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             value={currentPassword}
                             onChangeText={setCurrentPassword}
-                            placeholder="Enter current password"
+                            placeholder={t(
+                                "changePassword.currentPasswordPlaceholder"
+                            )}
                             placeholderTextColor={colors.text.muted}
                             secureTextEntry={!showCurrentPassword}
                         />
@@ -66,13 +74,17 @@ const ChangePassword = () => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>New Password</Text>
+                    <Text style={styles.inputLabel}>
+                        {t("changePassword.newPassword")}
+                    </Text>
                     <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             value={newPassword}
                             onChangeText={setNewPassword}
-                            placeholder="Enter new password"
+                            placeholder={t(
+                                "changePassword.newPasswordPlaceholder"
+                            )}
                             placeholderTextColor={colors.text.muted}
                             secureTextEntry={!showNewPassword}
                         />
@@ -94,7 +106,7 @@ const ChangePassword = () => {
                     onPress={handleChangePassword}
                 >
                     <Text style={styles.confirmButtonText}>
-                        Change Password
+                        {t("changePassword.confirmButton")}
                     </Text>
                 </TouchableOpacity>
             </View>

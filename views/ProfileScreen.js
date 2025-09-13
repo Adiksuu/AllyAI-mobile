@@ -8,33 +8,36 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ProfileScreen = () => {
+    const { t } = useTranslation();
+
     const profileItems = [
         {
             icon: "person-outline",
-            title: "Personal Information",
-            subtitle: "Update your details",
+            title: t("profile.personalInfo"),
+            subtitle: t("profile.personalInfoSubtitle"),
         },
         {
             icon: "key-outline",
-            title: "Security",
-            subtitle: "Password and security",
+            title: t("profile.security"),
+            subtitle: t("profile.securitySubtitle"),
         },
         {
             icon: "card-outline",
-            title: "Subscription",
-            subtitle: "Manage your plan",
+            title: t("profile.subscription"),
+            subtitle: t("profile.subscriptionSubtitle"),
         },
         {
             icon: "analytics-outline",
-            title: "Usage Stats",
-            subtitle: "View your activity",
+            title: t("profile.usageStats"),
+            subtitle: t("profile.usageStatsSubtitle"),
         },
         {
             icon: "download-outline",
-            title: "Data Export",
-            subtitle: "Download your data",
+            title: t("profile.dataExport"),
+            subtitle: t("profile.dataExportSubtitle"),
         },
     ];
 
@@ -49,22 +52,30 @@ const ProfileScreen = () => {
                             color={colors.accent.lightBlue}
                         />
                     </View>
-                    <Text style={styles.userName}>AllyAI User</Text>
-                    <Text style={styles.userEmail}>user@allyai.com</Text>
+                    <Text style={styles.userName}>{t("profile.userName")}</Text>
+                    <Text style={styles.userEmail}>
+                        {t("profile.userEmail")}
+                    </Text>
                 </View>
 
                 <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>42</Text>
-                        <Text style={styles.statLabel}>Conversations</Text>
+                        <Text style={styles.statLabel}>
+                            {t("profile.conversations")}
+                        </Text>
                     </View>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>1.2K</Text>
-                        <Text style={styles.statLabel}>Messages</Text>
+                        <Text style={styles.statLabel}>
+                            {t("profile.messages")}
+                        </Text>
                     </View>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>7</Text>
-                        <Text style={styles.statLabel}>Days Active</Text>
+                        <Text style={styles.statLabel}>
+                            {t("profile.daysActive")}
+                        </Text>
                     </View>
                 </View>
 

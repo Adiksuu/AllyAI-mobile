@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 import {
     AIPersonalitySelector,
     ResponseStyleSelector,
@@ -17,6 +18,8 @@ import {
 } from "../components";
 
 const AIChatbotSettingsScreen = ({ navigation }) => {
+    const { t } = useTranslation();
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
@@ -31,39 +34,47 @@ const AIChatbotSettingsScreen = ({ navigation }) => {
                             color={colors.text.primary}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.title}>AI Chatbot</Text>
+                    <Text style={styles.title}>
+                        {t("aiChatbotSettings.title")}
+                    </Text>
                 </View>
 
                 <Text style={styles.subtitle}>
-                    Configure your AI assistant settings
+                    {t("aiChatbotSettings.subtitle")}
                 </Text>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
-                        Personality & Behavior
+                        {t("aiChatbotSettings.personality.title")}
                     </Text>
                     <AIPersonalitySelector />
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Response Style</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("aiChatbotSettings.responseStyle.title")}
+                    </Text>
                     <ResponseStyleSelector />
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
-                        Conversation Settings
+                        {t("aiChatbotSettings.conversationLength.title")}
                     </Text>
                     <ConversationLengthSelector />
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>AI Capabilities</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("aiChatbotSettings.capabilities.title")}
+                    </Text>
                     <AICapabilitiesToggle />
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Reset Settings</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("aiChatbotSettings.resetSettings.title")}
+                    </Text>
                     <ResetAISettings />
                 </View>
             </View>

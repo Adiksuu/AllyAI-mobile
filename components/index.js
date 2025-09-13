@@ -14,3 +14,5 @@ export { default as ResponseStyleSelector } from "./ResponseStyleSelector";
 export { default as ConversationLengthSelector } from "./ConversationLengthSelector";
 export { default as AICapabilitiesToggle } from "./AICapabilitiesToggle";
 export { default as ResetAISettings } from "./ResetAISettings";
+export { default as LanguageModal } from "./LanguageModal";
+export { default as LanguageModalContent } from "./LanguageModalContent";

@@ -2,21 +2,23 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ResetAISettings = () => {
+    const { t } = useTranslation();
     const [isResetting, setIsResetting] = useState(false);
 
     const handleResetSettings = () => {
         Alert.alert(
-            "Reset AI Settings",
-            "Are you sure you want to reset all AI settings to their default values? This action cannot be undone.",
+            t("resetSettings.alertTitle"),
+            t("resetSettings.alertMessage"),
             [
                 {
-                    text: "Cancel",
+                    text: t("common.cancel"),
                     style: "cancel",
                 },
                 {
-                    text: "Reset",
+                    text: t("resetSettings.resetButton"),
                     style: "destructive",
                     onPress: () => {
                         setIsResetting(true);
@@ -42,9 +44,11 @@ const ResetAISettings = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Reset Settings</Text>
+                    <Text style={styles.title}>
+                        {t("aiChatbotSettings.resetSettings.title")}
+                    </Text>
                     <Text style={styles.subtitle}>
-                        Restore all AI settings to defaults
+                        {t("aiChatbotSettings.resetSettings.subtitle")}
                     </Text>
                 </View>
             </View>
@@ -70,7 +74,7 @@ const ResetAISettings = () => {
                         isResetting && styles.resetButtonTextDisabled,
                     ]}
                 >
-                    {isResetting ? "Resetting..." : "Reset to Defaults"}
+                    {isResetting ? t("resetSettings.resetingButton") : t("resetSettings.resetButton")}
                 </Text>
             </TouchableOpacity>
         </View>

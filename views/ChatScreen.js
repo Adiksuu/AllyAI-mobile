@@ -1,28 +1,28 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ChatScreen = () => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>AI Chat</Text>
-                <Text style={styles.subtitle}>Start a conversation</Text>
+                <Text style={styles.title}>{t("navigation.chat")}</Text>
+                <Text style={styles.subtitle}>{t("chat.subtitle")}</Text>
             </View>
 
             <ScrollView style={styles.chatContainer}>
                 <View style={styles.message}>
                     <Text style={styles.messageText}>
-                        Hello! I'm AllyAI, your personal assistant. How can I
-                        help you today?
+                        {t("chat.welcomeMessage")}
                     </Text>
                 </View>
             </ScrollView>
 
             <View style={styles.inputArea}>
-                <Text style={styles.placeholder}>
-                    Type your message here...
-                </Text>
+                <Text style={styles.placeholder}>{t("chat.placeholder")}</Text>
             </View>
         </View>
     );

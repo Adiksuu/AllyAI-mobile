@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 import {
     EmailDisplay,
     ChangePassword,
@@ -16,6 +17,8 @@ import {
 } from "../components";
 
 const AccountManagementScreen = ({ navigation }) => {
+    const { t } = useTranslation();
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.content}>
@@ -30,25 +33,33 @@ const AccountManagementScreen = ({ navigation }) => {
                             color={colors.text.primary}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.title}>Account</Text>
+                    <Text style={styles.title}>
+                        {t("accountManagement.title")}
+                    </Text>
                 </View>
 
                 <Text style={styles.subtitle}>
-                    Manage your account settings
+                    {t("accountManagement.subtitle")}
                 </Text>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account Information</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("accountManagement.accountInfo")}
+                    </Text>
                     <EmailDisplay />
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Security</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("accountManagement.security")}
+                    </Text>
                     <ChangePassword />
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account Actions</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("accountManagement.accountActions")}
+                    </Text>
                     <LogoutButton />
                     <DeleteAccount />
                 </View>

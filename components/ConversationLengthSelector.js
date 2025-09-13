@@ -2,27 +2,29 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const ConversationLengthSelector = () => {
+    const { t } = useTranslation();
     const [selectedLength, setSelectedLength] = useState("medium");
 
     const conversationLengths = [
         {
             id: "short",
-            name: "Short",
-            description: "5-10 messages",
+            name: t("conversationLength.short.name"),
+            description: t("conversationLength.short.description"),
             icon: "time-outline",
         },
         {
             id: "medium",
-            name: "Medium",
-            description: "10-25 messages",
+            name: t("conversationLength.medium.name"),
+            description: t("conversationLength.medium.description"),
             icon: "hourglass-outline",
         },
         {
             id: "long",
-            name: "Long",
-            description: "25+ messages",
+            name: t("conversationLength.long.name"),
+            description: t("conversationLength.long.description"),
             icon: "timer-outline",
         },
     ];
@@ -44,10 +46,8 @@ const ConversationLengthSelector = () => {
                     />
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Conversation Length</Text>
-                    <Text style={styles.subtitle}>
-                        Set preferred conversation duration
-                    </Text>
+                    <Text style={styles.title}>{t("conversationLength.title")}</Text>
+                    <Text style={styles.subtitle}>{t("conversationLength.subtitle")} </Text>
                 </View>
             </View>
 
@@ -69,8 +69,8 @@ const ConversationLengthSelector = () => {
                                     size={20}
                                     color={
                                         selectedLength === length.id
-                                        ? colors.accent.lightBlue
-                                        : colors.text.primary
+                                            ? colors.accent.lightBlue
+                                            : colors.text.primary
                                     }
                                 />
                             </View>

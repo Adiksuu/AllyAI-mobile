@@ -2,8 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const DeleteAccount = () => {
+    const { t } = useTranslation();
+
     return (
         <TouchableOpacity style={styles.container}>
             <View style={styles.iconContainer}>
@@ -14,9 +17,11 @@ const DeleteAccount = () => {
                 />
             </View>
             <View style={styles.content}>
-                <Text style={styles.title}>Delete Account</Text>
+                <Text style={styles.title}>
+                    {t("accountManagement.deleteAccount.title")}
+                </Text>
                 <Text style={styles.subtitle}>
-                    Permanently delete your account
+                    {t("accountManagement.deleteAccount.subtitle")}
                 </Text>
             </View>
             <Ionicons
