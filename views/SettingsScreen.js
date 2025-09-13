@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -9,8 +9,24 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
 import Constants from "expo-constants";
+import { NotificationsModal } from "../components";
 
 const SettingsScreen = ({ navigation }) => {
+    const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+
+    const handleNotificationsPress = () => {
+        setShowNotificationsModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowNotificationsModal(false);
+    };
+
+    const handleEnableNotifications = () => {
+        // TODO: Implement notification enabling logic
+        console.log("Notifications enabled");
+    };
+
     const settingsItems = [
         {
             icon: "person-outline",
@@ -58,6 +74,8 @@ const SettingsScreen = ({ navigation }) => {
                             onPress={() => {
                                 if (item.title === "Account") {
                                     navigation.navigate("AccountManagement");
+                                } else if (item.title === "Notifications") {
+                                    handleNotificationsPress();
                                 }
                             }}
                         >
@@ -95,6 +113,12 @@ const SettingsScreen = ({ navigation }) => {
                     </Text>
                 </View>
             </View>
+
+            <NotificationsModal
+                visible={showNotificationsModal}
+                onClose={handleCloseModal}
+                onEnable={handleEnableNotifications}
+            />
         </ScrollView>
     );
 };

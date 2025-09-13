@@ -1,4 +1,4 @@
-Aimport React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
 import { colors } from "../api/theme/colors";
 import NavigationBar from "./NavigationBar";

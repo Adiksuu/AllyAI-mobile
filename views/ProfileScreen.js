@@ -94,15 +94,6 @@ const ProfileScreen = () => {
                         </TouchableOpacity>
                     ))}
                 </View>
-
-                <TouchableOpacity style={styles.logoutButton}>
-                    <Ionicons
-                        name="log-out-outline"
-                        size={24}
-                        color={colors.status.error}
-                    />
-                    <Text style={styles.logoutText}>Sign Out</Text>
-                </TouchableOpacity>
             </View>
         </ScrollView>
     );
@@ -203,22 +194,6 @@ const styles = StyleSheet.create({
     menuSubtitle: {
         fontSize: 14,
         color: colors.text.secondary,
-    },
-    logoutButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        backgroundColor: colors.background.card,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border.primary,
-    },
-    logoutText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.status.error,
-        marginLeft: 8,
     },
 });
 

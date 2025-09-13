@@ -6,3 +6,4 @@ export { default as EmailDisplay } from "./EmailDisplay";
 export { default as ChangePassword } from "./ChangePassword";
 export { default as LogoutButton } from "./LogoutButton";
 export { default as DeleteAccount } from "./DeleteAccount";
+export { default as NotificationsModal } from "./NotificationsModal";
