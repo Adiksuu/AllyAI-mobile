@@ -40,13 +40,13 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.border.primary,
     },
     title: {
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: "bold",
         color: colors.text.primary,
-        marginBottom: 4,
+        marginBottom: 8,
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 18,
         color: colors.text.secondary,
     },
     chatContainer: {

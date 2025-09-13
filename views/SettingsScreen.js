@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../api/theme/colors";
+import Constants from "expo-constants";
 
 const SettingsScreen = () => {
     const settingsItems = [
@@ -81,10 +82,8 @@ const SettingsScreen = () => {
 
                 <View style={styles.infoCard}>
                     <Text style={styles.infoTitle}>About AllyAI</Text>
-                    <Text style={styles.infoText}>Version 1.0.0</Text>
-                    <Text style={styles.infoText}>
-                        Built with React Native & Expo
-                    </Text>
+                    <Text style={styles.infoText}>Version {Constants.expoConfig?.version}</Text>
+                    <Text style={styles.infoText}>Updated on {Constants.expoConfig?.extra?.updateDate}</Text>
                 </View>
             </View>
         </ScrollView>
