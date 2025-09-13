@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, StyleSheet, StatusBar } from "react-native";
+Aimport React, { useState, useEffect } from "react";
+import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
 import { colors } from "../api/theme/colors";
 import NavigationBar from "./NavigationBar";
 import HomeScreen from "./HomeScreen";
@@ -30,6 +30,27 @@ const AppContainer = () => {
             setNavigationStack((prev) => prev.slice(0, -1));
         },
     };
+
+    // Handle Android back button
+    useEffect(() => {
+        const backAction = () => {
+            if (navigationStack.length > 0) {
+                // If we're in a nested screen, go back to previous screen
+                navigation.goBack();
+                return true; // Prevent default behavior
+            } else {
+                // If we're on a main tab, let the default behavior happen (exit app)
+                return false;
+            }
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, [navigationStack]);
 
     const renderScreen = () => {
         // Check if we're in a nested screen
