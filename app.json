@@ -1,32 +1,39 @@
 {
-    "expo": {
-        "name": "AllyAI-mobile",
-        "slug": "AllyAI-mobile",
-        "version": "0.0.5",
-        "orientation": "portrait",
-        "icon": "./assets/images/logo.png",
-        "userInterfaceStyle": "dark",
-        "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/images/logo.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#0f0f0f"
-        },
-        "ios": {
-            "supportsTablet": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/logo.png",
-                "backgroundColor": "#0f0f0f"
-            },
-            "edgeToEdgeEnabled": true
-        },
-        "web": {
-            "favicon": "./assets/images/logo.png"
-        },
-        "extra": {
-            "updateDate": "September 13, 2025"
-        }
-    }
+  "expo": {
+    "name": "AllyAI",
+    "slug": "ally-mobile",
+    "version": "0.0.5",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f0f"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#0f0f0f"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.adiksuu.allymobile"
+    },
+    "web": {
+      "favicon": "./assets/images/logo.png"
+    },
+    "extra": {
+      "updateDate": "September 13, 2025",
+      "eas": {
+        "projectId": "e0dcadec-20e5-4853-9d35-dcbf93ea5a2d"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
 }
