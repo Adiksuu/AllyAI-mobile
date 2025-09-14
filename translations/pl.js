@@ -204,13 +204,16 @@ export const pl = {
         },
         deleteAccount: {
             title: "Usuń Konto",
-            message: "Czy na pewno chcesz trwale usunąć swoje konto? Tej akcji nie można cofnąć i wszystkie dane zostaną utracone.",
-            warning: "Spowoduje to usunięcie wszystkich rozmów, ustawień i informacji o koncie.",
+            message:
+                "Czy na pewno chcesz trwale usunąć swoje konto? Tej akcji nie można cofnąć i wszystkie dane zostaną utracone.",
+            warning:
+                "Spowoduje to usunięcie wszystkich rozmów, ustawień i informacji o koncie.",
             confirmButton: "Usuń Konto",
         },
         clearChatHistory: {
             title: "Wyczyść Historię Rozmów",
-            message: "Czy na pewno chcesz usunąć całą historię rozmów? Tej akcji nie można cofnąć.",
+            message:
+                "Czy na pewno chcesz usunąć całą historię rozmów? Tej akcji nie można cofnąć.",
             warning: "Wszystkie rozmowy zostaną trwale usunięte.",
             confirmButton: "Wyczyść Wszystko",
         },
@@ -237,30 +240,7 @@ export const pl = {
         changing: "Zmienianie...",
     },
 
-    // Auth Errors
-    auth: {
-        errors: {
-            userNotFound: "Nie znaleziono konta z tym adresem email",
-            wrongPassword: "Nieprawidłowe hasło",
-            invalidEmail: "Nieprawidłowy adres email",
-            userDisabled: "To konto zostało wyłączone",
-            tooManyRequests: "Zbyt wiele nieudanych prób. Spróbuj ponownie później",
-            emailAlreadyInUse: "Konto z tym adresem email już istnieje",
-            weakPassword: "Hasło powinno mieć co najmniej 6 znaków",
-            operationNotAllowed: "Konta email/hasło nie są włączone",
-            requiresRecentLogin: "Zaloguj się ponownie przed usunięciem konta",
-            userNotFoundDelete: "Nie znaleziono konta użytkownika",
-            generic: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
-            passwordsDontMatch: "Hasła nie są identyczne",
-            passwordResetSent: "Email z resetowaniem hasła został wysłany! Sprawdź swoją skrzynkę odbiorczą.",
-            authPopupClosed: "Okno logowania zostało zamknięte przed ukończeniem",
-            authCancelled: "Logowanie zostało anulowane",
-            authPopupBlocked: "Okno logowania zostało zablokowane przez przeglądarkę",
-            accountExistsDifferentCredential: "Konto już istnieje z tym samym emailem, ale innymi danymi logowania",
-        },
-    },
-
-    // Login/Register Screen
+    // Auth
     auth: {
         title: "Witaj Spowrotem",
         subtitle: "Zaloguj się, aby kontynuować",
@@ -279,7 +259,8 @@ export const pl = {
         hasAccount: "Masz już konto?",
         signUp: "Zarejestruj Się",
         signIn: "Zaloguj Się",
-        termsAndPrivacy: "Rejestrując się, zgadzasz się z naszymi Warunkami Usługi i Polityką Prywatności",
+        termsAndPrivacy:
+            "Rejestrując się, zgadzasz się z naszymi Warunkami Usługi i Polityką Prywatności",
         loginSuccess: "Logowanie udane!",
         registerSuccess: "Konto utworzone pomyślnie!",
         invalidCredentials: "Nieprawidłowy email lub hasło",
@@ -288,6 +269,55 @@ export const pl = {
         invalidEmail: "Wprowadź prawidłowy adres email",
         passwordsDontMatch: "Hasła nie są identyczne",
         signingIn: "Logowanie...",
+        errors: {
+            userNotFound: "Nie znaleziono konta z tym adresem email",
+            wrongPassword: "Nieprawidłowe hasło",
+            invalidEmail: "Nieprawidłowy adres email",
+            userDisabled: "To konto zostało wyłączone",
+            tooManyRequests:
+                "Zbyt wiele nieudanych prób. Spróbuj ponownie później",
+            emailAlreadyInUse: "Konto z tym adresem email już istnieje",
+            weakPassword: "Hasło powinno mieć co najmniej 6 znaków",
+            operationNotAllowed: "Konta email/hasło nie są włączone",
+            requiresRecentLogin: "Zaloguj się ponownie przed usunięciem konta",
+            userNotFoundDelete: "Nie znaleziono konta użytkownika",
+            generic: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+            passwordsDontMatch: "Hasła nie są identyczne",
+            passwordResetSent:
+                "Email z resetowaniem hasła został wysłany! Sprawdź swoją skrzynkę odbiorczą.",
+            authPopupClosed:
+                "Okno logowania zostało zamknięte przed ukończeniem",
+            authCancelled: "Logowanie zostało anulowane",
+            authPopupBlocked:
+                "Okno logowania zostało zablokowane przez przeglądarkę",
+            accountExistsDifferentCredential:
+                "Konto już istnieje z tym samym emailem, ale innymi danymi logowania",
+            networkError:
+                "Błąd sieci. Sprawdź połączenie internetowe i spróbuj ponownie.",
+            invalidCredential:
+                "Podane dane uwierzytelniające są nieprawidłowe lub wygasły.",
+            invalidVerificationCode:
+                "Wprowadzony kod weryfikacyjny jest nieprawidłowy.",
+            invalidVerificationId:
+                "Identyfikator weryfikacji jest nieprawidłowy.",
+            missingVerificationCode: "Kod weryfikacyjny jest wymagany.",
+            missingVerificationId: "Identyfikator weryfikacji jest wymagany.",
+            codeExpired: "Kod weryfikacyjny wygasł. Poproś o nowy.",
+            credentialAlreadyInUse:
+                "Te dane uwierzytelniające są już powiązane z innym kontem.",
+            invalidPhoneNumber: "Podany numer telefonu jest nieprawidłowy.",
+            missingPhoneNumber: "Numer telefonu jest wymagany.",
+            quotaExceeded:
+                "Przekroczono limit usługi. Spróbuj ponownie później.",
+            appDeleted:
+                "Ta aplikacja została usunięta i nie jest już dostępna.",
+            appNotAuthorized:
+                "Ta aplikacja nie ma autoryzacji do korzystania z Firebase Authentication.",
+            argumentError:
+                "Nieprawidłowy argument przekazany do metody uwierzytelniania.",
+            invalidApiKey:
+                "Nieprawidłowy klucz API. Skontaktuj się z pomocą techniczną.",
+        },
     },
 
     // AI Chatbot Settings Screen
@@ -340,7 +370,6 @@ export const pl = {
             subtitle: "Trwale usuń swoje konto",
         },
     },
-
 
     // AI Personality
     aiPersonality: {
@@ -432,7 +461,7 @@ export const pl = {
         alertTitle: "Resetuj Ustawienia AI",
         alertMessage:
             "Czy na pewno chcesz zresetować wszystkie ustawienia AI do wartości domyślnych? Ta akcja nie może zostać cofnięta.",
-        resetButton: "Resetuj do domyślnych",
+        resetButton: "Resetuj",
         resetingButton: "Resetowanie...",
     },
 
@@ -467,12 +496,14 @@ export const pl = {
         slide1: {
             title: "Witaj w AllyAI",
             subtitle: "Twój asystent AI jest gotowy do pomocy",
-            description: "Doświadcz inteligentnych rozmów i uzyskaj spersonalizowaną pomoc w codziennych zadaniach.",
+            description:
+                "Doświadcz inteligentnych rozmów i uzyskaj spersonalizowaną pomoc w codziennych zadaniach.",
         },
         slide2: {
             title: "Dostosuj",
             subtitle: "Zrób to po swojemu",
-            description: "Wybierz preferowany motyw i język, aby spersonalizować swoje doświadczenie z AllyAI.",
+            description:
+                "Wybierz preferowany motyw i język, aby spersonalizować swoje doświadczenie z AllyAI.",
             themeButton: "Wybierz Motyw",
             languageButton: "Wybierz Język",
         },

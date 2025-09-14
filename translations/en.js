@@ -203,13 +203,16 @@ export const en = {
         },
         deleteAccount: {
             title: "Delete Account",
-            message: "Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.",
-            warning: "This will delete all your conversations, settings, and account information.",
+            message:
+                "Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.",
+            warning:
+                "This will delete all your conversations, settings, and account information.",
             confirmButton: "Delete Account",
         },
         clearChatHistory: {
             title: "Clear Chat History",
-            message: "Are you sure you want to delete all your chat history? This action cannot be undone.",
+            message:
+                "Are you sure you want to delete all your chat history? This action cannot be undone.",
             warning: "All your conversations will be permanently deleted.",
             confirmButton: "Clear All",
         },
@@ -226,40 +229,19 @@ export const en = {
             emptyCurrentPassword: "Please enter your current password",
             emptyNewPassword: "Please enter a new password",
             passwordTooShort: "New password should be at least 6 characters",
-            samePassword: "New password should be different from current password",
+            samePassword:
+                "New password should be different from current password",
             wrongCurrentPassword: "Current password is incorrect",
             weakPassword: "New password should be at least 6 characters",
-            requiresRecentLogin: "Please sign in again before changing your password",
+            requiresRecentLogin:
+                "Please sign in again before changing your password",
             generic: "Failed to change password. Please try again.",
         },
         success: "Password changed successfully!",
         changing: "Changing...",
     },
 
-    // Auth Errors
-    auth: {
-        errors: {
-            userNotFound: "No account found with this email address",
-            wrongPassword: "Incorrect password",
-            invalidEmail: "Invalid email address",
-            userDisabled: "This account has been disabled",
-            tooManyRequests: "Too many failed attempts. Please try again later",
-            emailAlreadyInUse: "An account with this email already exists",
-            weakPassword: "Password should be at least 6 characters",
-            operationNotAllowed: "Email/password accounts are not enabled",
-            requiresRecentLogin: "Please sign in again before deleting your account",
-            userNotFoundDelete: "User account not found",
-            generic: "An unexpected error occurred. Please try again.",
-            passwordsDontMatch: "Passwords don't match",
-            passwordResetSent: "Password reset email sent! Check your inbox.",
-            authPopupClosed: "Sign-in popup was closed before completion",
-            authCancelled: "Sign-in was cancelled",
-            authPopupBlocked: "Sign-in popup was blocked by browser",
-            accountExistsDifferentCredential: "An account already exists with the same email but different sign-in credentials",
-        },
-    },
-
-    // Login/Register Screen
+    // Auth
     auth: {
         title: "Welcome Back",
         subtitle: "Sign in to continue",
@@ -278,7 +260,8 @@ export const en = {
         hasAccount: "Already have an account?",
         signUp: "Sign Up",
         signIn: "Sign In",
-        termsAndPrivacy: "By signing up, you agree to our Terms of Service and Privacy Policy",
+        termsAndPrivacy:
+            "By signing up, you agree to our Terms of Service and Privacy Policy",
         loginSuccess: "Login successful!",
         registerSuccess: "Account created successfully!",
         invalidCredentials: "Invalid email or password",
@@ -287,6 +270,49 @@ export const en = {
         invalidEmail: "Please enter a valid email address",
         passwordsDontMatch: "Passwords don't match",
         signingIn: "Signing in...",
+        errors: {
+            userNotFound: "No account found with this email address",
+            wrongPassword: "Incorrect password",
+            invalidEmail: "Invalid email address",
+            userDisabled: "This account has been disabled",
+            tooManyRequests: "Too many failed attempts. Please try again later",
+            emailAlreadyInUse: "An account with this email already exists",
+            weakPassword: "Password should be at least 6 characters",
+            operationNotAllowed: "Email/password accounts are not enabled",
+            requiresRecentLogin:
+                "Please sign in again before deleting your account",
+            userNotFoundDelete: "User account not found",
+            generic: "An unexpected error occurred. Please try again.",
+            passwordsDontMatch: "Passwords don't match",
+            passwordResetSent: "Password reset email sent! Check your inbox.",
+            authPopupClosed: "Sign-in popup was closed before completion",
+            authCancelled: "Sign-in was cancelled",
+            authPopupBlocked: "Sign-in popup was blocked by browser",
+            accountExistsDifferentCredential:
+                "An account already exists with the same email but different sign-in credentials",
+            networkError:
+                "Network error. Please check your internet connection and try again.",
+            invalidCredential:
+                "The credentials provided are invalid or expired.",
+            invalidVerificationCode:
+                "The verification code entered is invalid.",
+            invalidVerificationId: "The verification ID is invalid.",
+            missingVerificationCode: "Verification code is required.",
+            missingVerificationId: "Verification ID is required.",
+            codeExpired:
+                "The verification code has expired. Please request a new one.",
+            credentialAlreadyInUse:
+                "This credential is already associated with a different account.",
+            invalidPhoneNumber: "The phone number provided is invalid.",
+            missingPhoneNumber: "Phone number is required.",
+            quotaExceeded: "Service quota exceeded. Please try again later.",
+            appDeleted: "This app has been deleted and is no longer available.",
+            appNotAuthorized:
+                "This app is not authorized to use Firebase Authentication.",
+            argumentError:
+                "Invalid argument provided to the authentication method.",
+            invalidApiKey: "Invalid API key. Please contact support.",
+        },
     },
 
     // AI Chatbot Settings Screen
@@ -339,7 +365,6 @@ export const en = {
             subtitle: "Permanently delete your account",
         },
     },
-
 
     // AI Personality
     aiPersonality: {
@@ -430,7 +455,7 @@ export const en = {
         alertTitle: "Reset AI Settings",
         alertMessage:
             "Are you sure you want to reset all AI settings to their default values? This action cannot be undone.",
-        resetButton: "Reset to Defaults",
+        resetButton: "Reset",
         resetingButton: "Resetting...",
     },
 
@@ -465,19 +490,22 @@ export const en = {
         slide1: {
             title: "Welcome to AllyAI",
             subtitle: "Your AI assistant is ready to help",
-            description: "Experience intelligent conversations and get personalized assistance for your daily tasks.",
+            description:
+                "Experience intelligent conversations and get personalized assistance for your daily tasks.",
         },
         slide2: {
             title: "Customize Your Experience",
             subtitle: "Make it yours",
-            description: "Choose your preferred theme and language to personalize your AllyAI experience.",
+            description:
+                "Choose your preferred theme and language to personalize your AllyAI experience.",
             themeButton: "Select Theme",
             languageButton: "Select Language",
         },
         slide3: {
             title: "Get Started",
             subtitle: "Let's begin your journey",
-            description: "Start chatting with AllyAI and discover the power of AI assistance.",
+            description:
+                "Start chatting with AllyAI and discover the power of AI assistance.",
             startButton: "Start Using AllyAI",
         },
         skip: "Skip",

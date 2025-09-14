@@ -1,43 +1,42 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import ResetModal from "./ResetModal";
 
 const ResetAISettings = ({ onReset, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [isResetting, setIsResetting] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const performReset = async () => {
+        if (disabled) return;
+
+        setIsResetting(true);
+        try {
+            if (onReset) {
+                await onReset();
+            }
+        } catch (error) {
+            console.error('Error resetting settings:', error);
+        } finally {
+            setIsResetting(false);
+        }
+    };
 
     const handleResetSettings = () => {
-        Alert.alert(
-            t("resetSettings.alertTitle"),
-            t("resetSettings.alertMessage"),
-            [
-                {
-                    text: t("common.cancel"),
-                    style: "cancel",
-                },
-                {
-                    text: t("resetSettings.resetButton"),
-                    style: "destructive",
-                    onPress: async () => {
-                        if (disabled) return;
+        setIsModalVisible(true);
+    };
 
-                        setIsResetting(true);
-                        try {
-                            if (onReset) {
-                                await onReset();
-                            }
-                        } catch (error) {
-                            console.error('Error resetting settings:', error);
-                        } finally {
-                            setIsResetting(false);
-                        }
-                    },
-                },
-            ]
-        );
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleModalConfirm = () => {
+        performReset();
+        setIsModalVisible(false);
     };
 
     const styles = getStyles(colors);
@@ -88,6 +87,12 @@ const ResetAISettings = ({ onReset, disabled = false }) => {
                         : t("resetSettings.resetButton")}
                 </Text>
             </TouchableOpacity>
+
+            <ResetModal
+                visible={isModalVisible}
+                onClose={handleModalClose}
+                onConfirm={handleModalConfirm}
+            />
         </View>
     );
 };

@@ -34,7 +34,7 @@ const LoginForm = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
         if (result.success) {
             onLogin(result.user);
         } else {
-            setError(result.error);
+            setError(t(`auth.errors.${result.error}`));
         }
 
         setIsLoading(false);
@@ -42,7 +42,7 @@ const LoginForm = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
 
     const handleForgotPassword = async () => {
         if (!email.trim()) {
-            setError(t("auth.errors.invalidEmail"));
+            setError(t("auth.invalidEmail"));
             return;
         }
 

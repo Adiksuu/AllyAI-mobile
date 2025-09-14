@@ -10,7 +10,7 @@ import { getCurrentUser, getUserSettings, canAffordTokens, deductTokens } from "
 import ModelSelectionModal from "../components/ModelSelectionModal";
 import PremiumModal from "../components/PremiumModal";
 
-const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
+const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3" }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [messages, setMessages] = useState([]);
@@ -126,6 +126,7 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
         const user = getCurrentUser();
         if (!user) {
             setError("User not authenticated");
+            navigation.navigate('LoginRegister')
             return;
         }
 

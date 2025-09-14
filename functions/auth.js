@@ -1,4 +1,4 @@
-import { auth, database } from '../api/firebase/config';
+import { auth, database } from "../api/firebase/config";
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -8,9 +8,9 @@ import {
     deleteUser,
     updatePassword,
     reauthenticateWithCredential,
-    EmailAuthProvider
-} from 'firebase/auth';
-import { ref, set, get, update, remove } from 'firebase/database';
+    EmailAuthProvider,
+} from "firebase/auth";
+import { ref, set, get, update, remove } from "firebase/database";
 
 /**
  * Sign in with email and password
@@ -20,7 +20,11 @@ import { ref, set, get, update, remove } from 'firebase/database';
  */
 export const signInWithEmail = async (email, password) => {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
         const user = userCredential.user;
 
         // Update last login time
@@ -37,36 +41,90 @@ export const signInWithEmail = async (email, password) => {
                 // emailVerified: user.emailVerified,
                 // displayName: user.displayName,
                 // photoURL: user.photoURL,
-                ...userData
-            }
+                ...userData,
+            },
         };
     } catch (error) {
-        let errorMessage = '';
-        console.log(error)
+        let errorMessage = "";
+        console.log(error);
 
         switch (error.code) {
-            case 'auth/user-not-found':
-                errorMessage = 'userNotFound';
+            case "auth/user-not-found":
+                errorMessage = "userNotFound";
                 break;
-            case 'auth/wrong-password':
-                errorMessage = 'wrongPassword';
+            case "auth/wrong-password":
+                errorMessage = "wrongPassword";
                 break;
-            case 'auth/invalid-email':
-                errorMessage = 'invalidEmail';
+            case "auth/invalid-email":
+                errorMessage = "invalidEmail";
                 break;
-            case 'auth/user-disabled':
-                errorMessage = 'userDisabled';
+            case "auth/user-disabled":
+                errorMessage = "userDisabled";
                 break;
-            case 'auth/too-many-requests':
-                errorMessage = 'tooManyRequests';
+            case "auth/too-many-requests":
+                errorMessage = "tooManyRequests";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "invalidCredential";
+                break;
+            case "auth/account-exists-with-different-credential":
+                errorMessage = "accountExistsDifferentCredential";
+                break;
+            case "auth/invalid-verification-code":
+                errorMessage = "invalidVerificationCode";
+                break;
+            case "auth/invalid-verification-id":
+                errorMessage = "invalidVerificationId";
+                break;
+            case "auth/missing-verification-code":
+                errorMessage = "missingVerificationCode";
+                break;
+            case "auth/missing-verification-id":
+                errorMessage = "missingVerificationId";
+                break;
+            case "auth/code-expired":
+                errorMessage = "codeExpired";
+                break;
+            case "auth/credential-already-in-use":
+                errorMessage = "credentialAlreadyInUse";
+                break;
+            case "auth/invalid-phone-number":
+                errorMessage = "invalidPhoneNumber";
+                break;
+            case "auth/missing-phone-number":
+                errorMessage = "missingPhoneNumber";
+                break;
+            case "auth/quota-exceeded":
+                errorMessage = "quotaExceeded";
+                break;
+            case "auth/app-deleted":
+                errorMessage = "appDeleted";
+                break;
+            case "auth/app-not-authorized":
+                errorMessage = "appNotAuthorized";
+                break;
+            case "auth/argument-error":
+                errorMessage = "argumentError";
+                break;
+            case "auth/invalid-api-key":
+                errorMessage = "invalidApiKey";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/requires-recent-login":
+                errorMessage = "requiresRecentLogin";
                 break;
             default:
-                errorMessage = 'generic';
+                errorMessage = "generic";
         }
 
         return {
             success: false,
-            error: errorMessage
+            error: errorMessage,
         };
     }
 };
@@ -79,50 +137,118 @@ export const signInWithEmail = async (email, password) => {
  */
 export const signUpWithEmail = async (email, password) => {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
         const user = userCredential.user;
 
-        const date = new Date()
+        const date = new Date();
 
         // Create user data in database
         await createUserData(user.uid, {
             email: user.email,
             createdAt: date.toISOString(),
             lastLoginAt: date.toISOString(),
-            models: { tokens: 0, resetAt: date.getTime() + 24 * 60 * 60 * 1000 },
+            models: {
+                tokens: 0,
+                resetAt: date.getTime() + 24 * 60 * 60 * 1000,
+            },
             premium: { isPremium: false, expireAt: null },
-            settings: { personality: "Friendly", responseStyle: "Balanced", length: "Medium", tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis'] }
+            settings: {
+                personality: "Friendly",
+                responseStyle: "Balanced",
+                length: "Medium",
+                tools: [
+                    "Web Search",
+                    "Image Generation",
+                    "Memory & Context",
+                    "File Analysis",
+                ],
+            },
         });
 
         return {
             success: true,
             user: {
                 email: user.email,
-            }
+            },
         };
     } catch (error) {
-        let errorMessage = '';
+        let errorMessage = "";
 
         switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage = 'emailAlreadyInUse';
+            case "auth/email-already-in-use":
+                errorMessage = "emailAlreadyInUse";
                 break;
-            case 'auth/invalid-email':
-                errorMessage = 'invalidEmail';
+            case "auth/invalid-email":
+                errorMessage = "invalidEmail";
                 break;
-            case 'auth/weak-password':
-                errorMessage = 'weakPassword';
+            case "auth/weak-password":
+                errorMessage = "weakPassword";
                 break;
-            case 'auth/operation-not-allowed':
-                errorMessage = 'operationNotAllowed';
+            case "auth/operation-not-allowed":
+                errorMessage = "operationNotAllowed";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "invalidCredential";
+                break;
+            case "auth/account-exists-with-different-credential":
+                errorMessage = "accountExistsDifferentCredential";
+                break;
+            case "auth/invalid-verification-code":
+                errorMessage = "invalidVerificationCode";
+                break;
+            case "auth/invalid-verification-id":
+                errorMessage = "invalidVerificationId";
+                break;
+            case "auth/missing-verification-code":
+                errorMessage = "missingVerificationCode";
+                break;
+            case "auth/missing-verification-id":
+                errorMessage = "missingVerificationId";
+                break;
+            case "auth/code-expired":
+                errorMessage = "codeExpired";
+                break;
+            case "auth/credential-already-in-use":
+                errorMessage = "credentialAlreadyInUse";
+                break;
+            case "auth/invalid-phone-number":
+                errorMessage = "invalidPhoneNumber";
+                break;
+            case "auth/missing-phone-number":
+                errorMessage = "missingPhoneNumber";
+                break;
+            case "auth/quota-exceeded":
+                errorMessage = "quotaExceeded";
+                break;
+            case "auth/app-deleted":
+                errorMessage = "appDeleted";
+                break;
+            case "auth/app-not-authorized":
+                errorMessage = "appNotAuthorized";
+                break;
+            case "auth/argument-error":
+                errorMessage = "argumentError";
+                break;
+            case "auth/invalid-api-key":
+                errorMessage = "invalidApiKey";
+                break;
+            case "auth/requires-recent-login":
+                errorMessage = "requiresRecentLogin";
                 break;
             default:
-                errorMessage = 'generic';
+                errorMessage = "generic";
         }
 
         return {
             success: false,
-            error: errorMessage
+            error: errorMessage,
         };
     }
 };
@@ -135,12 +261,12 @@ export const signOut = async () => {
     try {
         await firebaseSignOut(auth);
         return {
-            success: true
+            success: true,
         };
     } catch (error) {
         return {
             success: false,
-            error: 'Sign out failed'
+            error: "Sign out failed",
         };
     }
 };
@@ -155,7 +281,7 @@ export const removeAccount = async () => {
         if (!user) {
             return {
                 success: false,
-                error: 'No user is currently signed in'
+                error: "No user is currently signed in",
             };
         }
 
@@ -167,28 +293,49 @@ export const removeAccount = async () => {
         await deleteUser(user);
 
         return {
-            success: true
+            success: true,
         };
     } catch (error) {
-        let errorMessage = '';
+        let errorMessage = "";
 
         switch (error.code) {
-            case 'auth/requires-recent-login':
-                errorMessage = 'requiresRecentLogin';
+            case "auth/requires-recent-login":
+                errorMessage = "requiresRecentLogin";
                 break;
-            case 'auth/user-not-found':
-                errorMessage = 'userNotFoundDelete';
+            case "auth/user-not-found":
+                errorMessage = "userNotFoundDelete";
                 break;
-            case 'auth/user-disabled':
-                errorMessage = 'userDisabled';
+            case "auth/user-disabled":
+                errorMessage = "userDisabled";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "invalidCredential";
+                break;
+            case "auth/too-many-requests":
+                errorMessage = "tooManyRequests";
+                break;
+            case "auth/app-deleted":
+                errorMessage = "appDeleted";
+                break;
+            case "auth/app-not-authorized":
+                errorMessage = "appNotAuthorized";
+                break;
+            case "auth/argument-error":
+                errorMessage = "argumentError";
+                break;
+            case "auth/invalid-api-key":
+                errorMessage = "invalidApiKey";
                 break;
             default:
-                errorMessage = 'generic';
+                errorMessage = "generic";
         }
 
         return {
             success: false,
-            error: errorMessage
+            error: errorMessage,
         };
     }
 };
@@ -205,48 +352,75 @@ export const changePassword = async (currentPassword, newPassword) => {
         if (!user) {
             return {
                 success: false,
-                error: 'No user is currently signed in'
+                error: "No user is currently signed in",
             };
         }
 
         // Reauthenticate user with current password
-        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        const credential = EmailAuthProvider.credential(
+            user.email,
+            currentPassword
+        );
         await reauthenticateWithCredential(user, credential);
 
         // Update password
         await updatePassword(user, newPassword);
 
         return {
-            success: true
+            success: true,
         };
     } catch (error) {
-        let errorMessage = '';
+        let errorMessage = "";
 
         // Error messages will be handled by the component using translation keys
         // Return the raw error for component-level translation
         switch (error.code) {
-            case 'auth/wrong-password':
-                errorMessage = 'wrongCurrentPassword';
+            case "auth/wrong-password":
+                errorMessage = "wrongCurrentPassword";
                 break;
-            case 'auth/weak-password':
-                errorMessage = 'weakPassword';
+            case "auth/weak-password":
+                errorMessage = "weakPassword";
                 break;
-            case 'auth/requires-recent-login':
-                errorMessage = 'requiresRecentLogin';
+            case "auth/requires-recent-login":
+                errorMessage = "requiresRecentLogin";
                 break;
-            case 'auth/user-disabled':
-                errorMessage = 'userDisabled';
+            case "auth/user-disabled":
+                errorMessage = "userDisabled";
                 break;
-            case 'auth/user-not-found':
-                errorMessage = 'userNotFoundDelete';
+            case "auth/user-not-found":
+                errorMessage = "userNotFoundDelete";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "invalidCredential";
+                break;
+            case "auth/too-many-requests":
+                errorMessage = "tooManyRequests";
+                break;
+            case "auth/invalid-email":
+                errorMessage = "invalidEmail";
+                break;
+            case "auth/app-deleted":
+                errorMessage = "appDeleted";
+                break;
+            case "auth/app-not-authorized":
+                errorMessage = "appNotAuthorized";
+                break;
+            case "auth/argument-error":
+                errorMessage = "argumentError";
+                break;
+            case "auth/invalid-api-key":
+                errorMessage = "invalidApiKey";
                 break;
             default:
-                errorMessage = 'generic';
+                errorMessage = "generic";
         }
 
         return {
             success: false,
-            error: errorMessage
+            error: errorMessage,
         };
     }
 };
@@ -277,28 +451,52 @@ export const sendPasswordResetEmail = async (email) => {
     try {
         await firebaseSendPasswordResetEmail(auth, email);
         return {
-            success: true
+            success: true,
         };
     } catch (error) {
-        let errorMessage = '';
+        let errorMessage = "";
 
         switch (error.code) {
-            case 'auth/user-not-found':
-                errorMessage = 'userNotFound';
+            case "auth/user-not-found":
+                errorMessage = "userNotFound";
                 break;
-            case 'auth/invalid-email':
-                errorMessage = 'invalidEmail';
+            case "auth/invalid-email":
+                errorMessage = "invalidEmail";
                 break;
-            case 'auth/too-many-requests':
-                errorMessage = 'tooManyRequests';
+            case "auth/too-many-requests":
+                errorMessage = "tooManyRequests";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "networkError";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "invalidCredential";
+                break;
+            case "auth/user-disabled":
+                errorMessage = "userDisabled";
+                break;
+            case "auth/app-deleted":
+                errorMessage = "appDeleted";
+                break;
+            case "auth/app-not-authorized":
+                errorMessage = "appNotAuthorized";
+                break;
+            case "auth/argument-error":
+                errorMessage = "argumentError";
+                break;
+            case "auth/invalid-api-key":
+                errorMessage = "invalidApiKey";
+                break;
+            case "auth/quota-exceeded":
+                errorMessage = "quotaExceeded";
                 break;
             default:
-                errorMessage = 'generic';
+                errorMessage = "generic";
         }
 
         return {
             success: false,
-            error: errorMessage
+            error: errorMessage,
         };
     }
 };
@@ -314,7 +512,7 @@ const createUserData = async (uid, userData) => {
         const userRef = ref(database, `users/${uid}`);
         await set(userRef, userData);
     } catch (error) {
-        console.error('Error creating user data:', error);
+        console.error("Error creating user data:", error);
         throw error;
     }
 };
@@ -330,7 +528,7 @@ const getUserData = async (uid) => {
         const snapshot = await get(userRef);
         return snapshot.val() || {};
     } catch (error) {
-        console.error('Error getting user data:', error);
+        console.error("Error getting user data:", error);
         return {};
     }
 };
@@ -346,7 +544,7 @@ export const updateUserData = async (uid, updates) => {
         const userRef = ref(database, `users/${uid}`);
         await update(userRef, updates);
     } catch (error) {
-        console.error('Error updating user data:', error);
+        console.error("Error updating user data:", error);
         throw error;
     }
 };
@@ -360,10 +558,10 @@ const updateLastLoginTime = async (uid) => {
     try {
         const userRef = ref(database, `users/${uid}`);
         await update(userRef, {
-            lastLoginAt: new Date().toISOString()
+            lastLoginAt: new Date().toISOString(),
         });
     } catch (error) {
-        console.error('Error updating last login time:', error);
+        console.error("Error updating last login time:", error);
         // Don't throw error here as it's not critical for login
     }
 };
@@ -386,19 +584,31 @@ export const getUserSettings = async (uid) => {
     try {
         const userRef = ref(database, `users/${uid}/settings`);
         const snapshot = await get(userRef);
-        return snapshot.val() || {
-            personality: "Friendly",
-            responseStyle: "Balanced",
-            length: "Medium",
-            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
-        };
+        return (
+            snapshot.val() || {
+                personality: "Friendly",
+                responseStyle: "Balanced",
+                length: "Medium",
+                tools: [
+                    "Web Search",
+                    "Image Generation",
+                    "Memory & Context",
+                    "File Analysis",
+                ],
+            }
+        );
     } catch (error) {
-        console.error('Error getting user settings:', error);
+        console.error("Error getting user settings:", error);
         return {
             personality: "Friendly",
             responseStyle: "Balanced",
             length: "Medium",
-            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+            tools: [
+                "Web Search",
+                "Image Generation",
+                "Memory & Context",
+                "File Analysis",
+            ],
         };
     }
 };
@@ -414,7 +624,7 @@ export const updateUserSettings = async (uid, settings) => {
         const userRef = ref(database, `users/${uid}/settings`);
         await update(userRef, settings);
     } catch (error) {
-        console.error('Error updating user settings:', error);
+        console.error("Error updating user settings:", error);
         throw error;
     }
 };
@@ -430,12 +640,17 @@ export const resetUserSettings = async (uid) => {
             personality: "Friendly",
             responseStyle: "Balanced",
             length: "Medium",
-            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+            tools: [
+                "Web Search",
+                "Image Generation",
+                "Memory & Context",
+                "File Analysis",
+            ],
         };
         await updateUserSettings(uid, defaultSettings);
         return defaultSettings;
     } catch (error) {
-        console.error('Error resetting user settings:', error);
+        console.error("Error resetting user settings:", error);
         throw error;
     }
 };
@@ -456,7 +671,7 @@ export const getUserTokens = async (uid) => {
             const now = Date.now();
             const defaultTokens = {
                 tokens: 0,
-                resetAt: now + 24 * 60 * 60 * 1000 // 24 hours from now
+                resetAt: now + 24 * 60 * 60 * 1000, // 24 hours from now
             };
             await updateUserTokens(uid, defaultTokens);
             return defaultTokens;
@@ -468,7 +683,7 @@ export const getUserTokens = async (uid) => {
             // Reset tokens
             const resetTokens = {
                 tokens: 0,
-                resetAt: now + 24 * 60 * 60 * 1000
+                resetAt: now + 24 * 60 * 60 * 1000,
             };
             await updateUserTokens(uid, resetTokens);
             return resetTokens;
@@ -476,7 +691,7 @@ export const getUserTokens = async (uid) => {
 
         return data;
     } catch (error) {
-        console.error('Error getting user tokens:', error);
+        console.error("Error getting user tokens:", error);
         return { tokens: 0, resetAt: Date.now() + 24 * 60 * 60 * 1000 };
     }
 };
@@ -492,7 +707,7 @@ export const updateUserTokens = async (uid, tokenData) => {
         const userRef = ref(database, `users/${uid}/models`);
         await update(userRef, tokenData);
     } catch (error) {
-        console.error('Error updating user tokens:', error);
+        console.error("Error updating user tokens:", error);
         throw error;
     }
 };
@@ -508,7 +723,7 @@ export const canAffordTokens = async (uid, cost) => {
         const tokenData = await getUserTokens(uid);
         return tokenData.tokens + cost <= 75; // Daily limit is 75 tokens
     } catch (error) {
-        console.error('Error checking token affordability:', error);
+        console.error("Error checking token affordability:", error);
         return false;
     }
 };
@@ -531,7 +746,7 @@ export const deductTokens = async (uid, cost) => {
         await updateUserTokens(uid, { tokens: newTokens });
         return true;
     } catch (error) {
-        console.error('Error deducting tokens:', error);
+        console.error("Error deducting tokens:", error);
         return false;
     }
 };

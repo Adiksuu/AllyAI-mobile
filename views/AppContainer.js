@@ -144,7 +144,7 @@ const AppContainer = () => {
             case "home":
                 return <HomeScreen onNavigateToChat={handleNavigateToChat} />;
             case "chat":
-                return <ChatScreen chatId={currentChatId} selectedModel={selectedModel} />;
+                return <ChatScreen navigation={navigation} chatId={currentChatId} selectedModel={selectedModel} />;
             case "settings":
                 return <SettingsScreen navigation={navigation} isAuthenticated={isAuthenticated} />;
             case "profile":
