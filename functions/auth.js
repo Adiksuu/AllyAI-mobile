@@ -376,3 +376,66 @@ const updateLastLoginTime = async (uid) => {
 export const updateUserLastLogin = async (uid) => {
     return updateLastLoginTime(uid);
 };
+
+/**
+ * Get user settings from database
+ * @param {string} uid - User ID
+ * @returns {Promise<Object>} User settings
+ */
+export const getUserSettings = async (uid) => {
+    try {
+        const userRef = ref(database, `users/${uid}/settings`);
+        const snapshot = await get(userRef);
+        return snapshot.val() || {
+            personality: "Friendly",
+            responseStyle: "Balanced",
+            length: "Medium",
+            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+        };
+    } catch (error) {
+        console.error('Error getting user settings:', error);
+        return {
+            personality: "Friendly",
+            responseStyle: "Balanced",
+            length: "Medium",
+            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+        };
+    }
+};
+
+/**
+ * Update user settings in database
+ * @param {string} uid - User ID
+ * @param {Object} settings - Settings to update
+ * @returns {Promise<void>}
+ */
+export const updateUserSettings = async (uid, settings) => {
+    try {
+        const userRef = ref(database, `users/${uid}/settings`);
+        await update(userRef, settings);
+    } catch (error) {
+        console.error('Error updating user settings:', error);
+        throw error;
+    }
+};
+
+/**
+ * Reset user settings to default values
+ * @param {string} uid - User ID
+ * @returns {Promise<void>}
+ */
+export const resetUserSettings = async (uid) => {
+    try {
+        const defaultSettings = {
+            personality: "Friendly",
+            responseStyle: "Balanced",
+            length: "Medium",
+            tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+        };
+        await updateUserSettings(uid, defaultSettings);
+        return defaultSettings;
+    } catch (error) {
+        console.error('Error resetting user settings:', error);
+        throw error;
+    }
+};

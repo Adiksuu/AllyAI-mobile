@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const ResetAISettings = () => {
+const ResetAISettings = ({ onReset, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [isResetting, setIsResetting] = useState(false);
@@ -21,13 +21,19 @@ const ResetAISettings = () => {
                 {
                     text: t("resetSettings.resetButton"),
                     style: "destructive",
-                    onPress: () => {
+                    onPress: async () => {
+                        if (disabled) return;
+
                         setIsResetting(true);
-                        // TODO: Implement reset functionality
-                        setTimeout(() => {
+                        try {
+                            if (onReset) {
+                                await onReset();
+                            }
+                        } catch (error) {
+                            console.error('Error resetting settings:', error);
+                        } finally {
                             setIsResetting(false);
-                            console.log("AI settings reset to defaults");
-                        }, 2000);
+                        }
                     },
                 },
             ]
@@ -59,10 +65,10 @@ const ResetAISettings = () => {
             <TouchableOpacity
                 style={[
                     styles.resetButton,
-                    isResetting && styles.resetButtonDisabled,
+                    (isResetting || disabled) && styles.resetButtonDisabled,
                 ]}
                 onPress={handleResetSettings}
-                disabled={isResetting}
+                disabled={isResetting || disabled}
             >
                 <Ionicons
                     name={isResetting ? "hourglass-outline" : "refresh-outline"}

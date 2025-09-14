@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -16,10 +16,65 @@ import {
     AICapabilitiesToggle,
     ResetAISettings,
 } from "../components";
+import { getCurrentUser, getUserSettings, updateUserSettings, resetUserSettings } from "../functions/auth";
 
 const AIChatbotSettingsScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+
+    const [settings, setSettings] = useState({
+        personality: "Friendly",
+        responseStyle: "Balanced",
+        length: "Medium",
+        tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load user settings on component mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const currentUser = getCurrentUser();
+                if (currentUser) {
+                    const userSettings = await getUserSettings(currentUser.uid);
+                    setSettings(userSettings);
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadSettings();
+    }, []);
+
+    // Update individual setting
+    const updateSetting = async (key, value) => {
+        try {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                const updatedSettings = { ...settings, [key]: value };
+                setSettings(updatedSettings);
+                await updateUserSettings(currentUser.uid, { [key]: value });
+            }
+        } catch (error) {
+            console.error('Error updating setting:', error);
+        }
+    };
+
+    // Reset settings to default
+    const handleResetSettings = async () => {
+        try {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                const defaultSettings = await resetUserSettings(currentUser.uid);
+                setSettings(defaultSettings);
+            }
+        } catch (error) {
+            console.error('Error resetting settings:', error);
+        }
+    };
 
     const styles = getStyles(colors);
 
@@ -50,35 +105,54 @@ const AIChatbotSettingsScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>
                         {t("aiChatbotSettings.personality.title")}
                     </Text>
-                    <AIPersonalitySelector />
+                    <AIPersonalitySelector
+                        selectedPersonality={settings.personality}
+                        onPersonalityChange={(value) => updateSetting('personality', value)}
+                        disabled={isLoading}
+                    />
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         {t("aiChatbotSettings.responseStyle.title")}
                     </Text>
-                    <ResponseStyleSelector />
+                    <ResponseStyleSelector
+                        selectedStyle={settings.responseStyle}
+                        onStyleChange={(value) => updateSetting('responseStyle', value)}
+                        disabled={isLoading}
+                    />
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         {t("aiChatbotSettings.conversationLength.title")}
                     </Text>
-                    <ConversationLengthSelector />
+                    <ConversationLengthSelector
+                        selectedLength={settings.length}
+                        onLengthChange={(value) => updateSetting('length', value)}
+                        disabled={isLoading}
+                    />
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         {t("aiChatbotSettings.capabilities.title")}
                     </Text>
-                    <AICapabilitiesToggle />
+                    <AICapabilitiesToggle
+                        selectedTools={settings.tools}
+                        onToolsChange={(value) => updateSetting('tools', value)}
+                        disabled={isLoading}
+                    />
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         {t("aiChatbotSettings.resetSettings.title")}
                     </Text>
-                    <ResetAISettings />
+                    <ResetAISettings
+                        onReset={handleResetSettings}
+                        disabled={isLoading}
+                    />
                 </View>
             </View>
         </ScrollView>

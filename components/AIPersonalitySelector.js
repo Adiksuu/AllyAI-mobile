@@ -4,32 +4,31 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const AIPersonalitySelector = () => {
+const AIPersonalitySelector = ({ selectedPersonality, onPersonalityChange, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
-    const [selectedPersonality, setSelectedPersonality] = useState("friendly");
 
     const personalities = [
         {
-            id: "friendly",
+            id: "Friendly",
             name: t("aiPersonality.friendly.name"),
             description: t("aiPersonality.friendly.description"),
             icon: "happy-outline",
         },
         {
-            id: "professional",
+            id: "Professional",
             name: t("aiPersonality.professional.name"),
             description: t("aiPersonality.professional.description"),
             icon: "briefcase-outline",
         },
         {
-            id: "creative",
+            id: "Creative",
             name: t("aiPersonality.creative.name"),
             description: t("aiPersonality.creative.description"),
             icon: "color-palette-outline",
         },
         {
-            id: "analytical",
+            id: "Analytical",
             name: t("aiPersonality.analytical.name"),
             description: t("aiPersonality.analytical.description"),
             icon: "analytics-outline",
@@ -37,9 +36,9 @@ const AIPersonalitySelector = () => {
     ];
 
     const handlePersonalitySelect = (personalityId) => {
-        setSelectedPersonality(personalityId);
-        // TODO: Save to user preferences
-        console.log("Selected personality:", personalityId);
+        if (!disabled && onPersonalityChange) {
+            onPersonalityChange(personalityId);
+        }
     };
 
     const styles = getStyles(colors);
@@ -70,8 +69,10 @@ const AIPersonalitySelector = () => {
                             styles.option,
                             selectedPersonality === personality.id &&
                                 styles.selectedOption,
+                            disabled && styles.disabledOption,
                         ]}
                         onPress={() => handlePersonalitySelect(personality.id)}
+                        disabled={disabled}
                     >
                         <View style={styles.optionContent}>
                             <View style={styles.optionIcon}>
@@ -176,6 +177,9 @@ const getStyles = (colors) =>
         selectedOption: {
             backgroundColor: colors.accent.lightBlue,
             borderColor: colors.accent.lightBlue,
+        },
+        disabledOption: {
+            opacity: 0.6,
         },
         optionContent: {
             flexDirection: "row",

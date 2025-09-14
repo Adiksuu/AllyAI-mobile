@@ -4,51 +4,55 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const AICapabilitiesToggle = () => {
+const AICapabilitiesToggle = ({ selectedTools, onToolsChange, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
-    const [capabilities, setCapabilities] = useState({
-        webSearch: true,
-        imageGeneration: true,
-        // codeExecution: true,
-        memoryContext: true,
-        voiceResponse: false,
-        fileAnalysis: true,
-    });
+
+    // Convert array format to object format for easier state management
+    const getCapabilitiesFromTools = (tools) => {
+        return {
+            'Web Search': tools.includes('Web Search'),
+            'Image Generation': tools.includes('Image Generation'),
+            'Memory & Context': tools.includes('Memory & Context'),
+            'Voice Response': tools.includes('Voice Response'),
+            'File Analysis': tools.includes('File Analysis'),
+        };
+    };
+
+    const [capabilities, setCapabilities] = useState(getCapabilitiesFromTools(selectedTools || []));
+
+    // Update local state when props change
+    React.useEffect(() => {
+        setCapabilities(getCapabilitiesFromTools(selectedTools || []));
+    }, [selectedTools]);
 
     const capabilityItems = [
         {
-            id: "webSearch",
+            id: "Web Search",
             name: t("aiCapabilities.webSearch.name"),
             description: t("aiCapabilities.webSearch.description"),
             icon: "globe-outline",
         },
         {
-            id: "imageGeneration",
+            id: "Image Generation",
             name: t("aiCapabilities.imageGeneration.name"),
             description: t("aiCapabilities.imageGeneration.description"),
             icon: "image-outline",
         },
-        // {
-        //     id: "codeExecution",
-        //     name: "Code Execution",
-        //     description: "Run and test code snippets",
-        //     icon: "code-slash-outline",
-        // },
         {
-            id: "memoryContext",
+            id: "Memory & Context",
             name: t("aiCapabilities.memoryContext.name"),
             description: t("aiCapabilities.memoryContext.description"),
             icon: "archive-outline",
         },
         {
-            id: "voiceResponse",
+            id: "Voice Response",
             name: t("aiCapabilities.voiceResponse.name"),
             description: t("aiCapabilities.voiceResponse.description"),
             icon: "volume-high-outline",
         },
         {
-            id: "fileAnalysis",
+            id: "File Analysis",
             name: t("aiCapabilities.fileAnalysis.name"),
             description: t("aiCapabilities.fileAnalysis.description"),
             icon: "document-text-outline",
@@ -56,16 +60,21 @@ const AICapabilitiesToggle = () => {
     ];
 
     const handleToggle = (capabilityId) => {
-        setCapabilities((prev) => ({
-            ...prev,
-            [capabilityId]: !prev[capabilityId],
-        }));
-        // TODO: Save to user preferences
-        console.log(
-            "Toggled capability:",
-            capabilityId,
-            !capabilities[capabilityId]
-        );
+        if (disabled) return;
+
+        const newCapabilities = {
+            ...capabilities,
+            [capabilityId]: !capabilities[capabilityId],
+        };
+
+        setCapabilities(newCapabilities);
+
+        // Convert back to array format for database
+        const toolsArray = Object.keys(newCapabilities).filter(key => newCapabilities[key]);
+
+        if (onToolsChange) {
+            onToolsChange(toolsArray);
+        }
     };
 
     const styles = getStyles(colors);
@@ -113,6 +122,7 @@ const AICapabilitiesToggle = () => {
                         <Switch
                             value={capabilities[capability.id]}
                             onValueChange={() => handleToggle(capability.id)}
+                            disabled={disabled}
                             trackColor={{
                                 false: colors.background.tertiary,
                                 true: colors.accent.brightBlue,

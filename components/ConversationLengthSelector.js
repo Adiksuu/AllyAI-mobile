@@ -4,26 +4,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const ConversationLengthSelector = () => {
+const ConversationLengthSelector = ({ selectedLength, onLengthChange, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
-    const [selectedLength, setSelectedLength] = useState("medium");
 
     const conversationLengths = [
         {
-            id: "short",
+            id: "Short",
             name: t("conversationLength.short.name"),
             description: t("conversationLength.short.description"),
             icon: "time-outline",
         },
         {
-            id: "medium",
+            id: "Medium",
             name: t("conversationLength.medium.name"),
             description: t("conversationLength.medium.description"),
             icon: "hourglass-outline",
         },
         {
-            id: "long",
+            id: "Long",
             name: t("conversationLength.long.name"),
             description: t("conversationLength.long.description"),
             icon: "timer-outline",
@@ -31,9 +30,9 @@ const ConversationLengthSelector = () => {
     ];
 
     const handleLengthSelect = (lengthId) => {
-        setSelectedLength(lengthId);
-        // TODO: Save to user preferences
-        console.log("Selected conversation length:", lengthId);
+        if (!disabled && onLengthChange) {
+            onLengthChange(lengthId);
+        }
     };
 
     const styles = getStyles(colors);
@@ -66,8 +65,10 @@ const ConversationLengthSelector = () => {
                             styles.option,
                             selectedLength === length.id &&
                                 styles.selectedOption,
+                            disabled && styles.disabledOption,
                         ]}
                         onPress={() => handleLengthSelect(length.id)}
+                        disabled={disabled}
                     >
                         <View style={styles.optionContent}>
                             <View style={styles.optionIcon}>
@@ -170,6 +171,9 @@ const getStyles = (colors) =>
         selectedOption: {
             backgroundColor: colors.accent.lightBlue,
             borderColor: colors.accent.lightBlue,
+        },
+        disabledOption: {
+            opacity: 0.6,
         },
         optionContent: {
             flexDirection: "row",

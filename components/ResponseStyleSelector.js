@@ -4,26 +4,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const ResponseStyleSelector = () => {
+const ResponseStyleSelector = ({ selectedStyle, onStyleChange, disabled = false }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
-    const [selectedStyle, setSelectedStyle] = useState("balanced");
 
     const responseStyles = [
         {
-            id: "concise",
+            id: "Concise",
             name: t("responseStyle.concise.name"),
             description: t("responseStyle.concise.description"),
             icon: "arrow-up-outline",
         },
         {
-            id: "balanced",
+            id: "Balanced",
             name: t("responseStyle.balanced.name"),
             description: t("responseStyle.balanced.description"),
             icon: "remove-outline",
         },
         {
-            id: "detailed",
+            id: "Detailed",
             name: t("responseStyle.detailed.name"),
             description: t("responseStyle.detailed.description"),
             icon: "arrow-down-outline",
@@ -31,9 +30,9 @@ const ResponseStyleSelector = () => {
     ];
 
     const handleStyleSelect = (styleId) => {
-        setSelectedStyle(styleId);
-        // TODO: Save to user preferences
-        console.log("Selected response style:", styleId);
+        if (!disabled && onStyleChange) {
+            onStyleChange(styleId);
+        }
     };
 
     const styles = getStyles(colors);
@@ -63,8 +62,10 @@ const ResponseStyleSelector = () => {
                         style={[
                             styles.option,
                             selectedStyle === style.id && styles.selectedOption,
+                            disabled && styles.disabledOption,
                         ]}
                         onPress={() => handleStyleSelect(style.id)}
+                        disabled={disabled}
                     >
                         <View style={styles.optionContent}>
                             <View style={styles.optionIcon}>
@@ -167,6 +168,9 @@ const getStyles = (colors) =>
         selectedOption: {
             backgroundColor: colors.accent.lightBlue,
             borderColor: colors.accent.lightBlue,
+        },
+        disabledOption: {
+            opacity: 0.6,
         },
         optionContent: {
             flexDirection: "row",
