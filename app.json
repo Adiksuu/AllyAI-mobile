@@ -2,7 +2,7 @@
   "expo": {
     "name": "AllyAI",
     "slug": "ally-mobile",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "userInterfaceStyle": "dark",
@@ -30,7 +30,8 @@
       "updateDate": "September 14, 2025",
       "eas": {
         "projectId": "e0dcadec-20e5-4853-9d35-dcbf93ea5a2d"
-      }
+      },
+      "GEMINI_API_KEY": "AIzaSyApClqszUTiruooucL-l1UUQEsEeRi6zuk"
     },
     "plugins": [
       "expo-font",

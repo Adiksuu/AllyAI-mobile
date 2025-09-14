@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { getChatMessages } from "../functions/chat";
+import { getChatMessages, sendMessage, generateAIResponse } from "../functions/chat";
 import { getCurrentUser } from "../functions/auth";
 
 const ChatScreen = ({ chatId }) => {
@@ -14,11 +14,12 @@ const ChatScreen = ({ chatId }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [inputText, setInputText] = useState("");
+    const [localChatId, setLocalChatId] = useState(chatId);
 
     useEffect(() => {
         const loadMessages = async () => {
-            console.log(chatId)
-            if (!chatId) {
+            console.log(localChatId)
+            if (!localChatId) {
                 setMessages([]);
                 return;
             }
@@ -32,7 +33,7 @@ const ChatScreen = ({ chatId }) => {
             try {
                 setLoading(true);
                 setError(null);
-                const chatMessages = await getChatMessages(user.uid, chatId);
+                const chatMessages = await getChatMessages(user.uid, localChatId);
                 setMessages(chatMessages);
             } catch (err) {
                 setError(err.message);
@@ -42,7 +43,42 @@ const ChatScreen = ({ chatId }) => {
         };
 
         loadMessages();
-    }, [chatId]);
+    }, [localChatId]);
+
+    const handleSend = async () => {
+        if (!inputText.trim()) return;
+
+        const user = getCurrentUser();
+        if (!user) {
+            setError("User not authenticated");
+            return;
+        }
+
+        try {
+            let currentChatId = localChatId;
+            if (!currentChatId) {
+                currentChatId = await sendMessage(user.uid, null, inputText, "ALLY-3", "user");
+                setLocalChatId(currentChatId);
+            } else {
+                await sendMessage(user.uid, currentChatId, inputText, "ALLY-3", "user");
+            }
+
+            // Get updated messages for AI context
+            const updatedMessages = await getChatMessages(user.uid, currentChatId);
+
+            // Generate AI response
+            const aiMessage = await generateAIResponse(user.uid, inputText, updatedMessages);
+            await sendMessage(user.uid, currentChatId, aiMessage, "ALLY-3", "AI");
+
+            setInputText("");
+
+            // reload messages
+            const finalMessages = await getChatMessages(user.uid, currentChatId);
+            setMessages(finalMessages);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
     const styles = getStyles(colors);
 
@@ -65,7 +101,7 @@ const ChatScreen = ({ chatId }) => {
                 ) : messages.length === 0 ? (
                     <View style={styles.centerMessage}>
                         <Text style={styles.centerText}>
-                            {chatId ? "No messages in this chat." : t("chat.welcomeMessage")}
+                            {localChatId ? "No messages in this chat." : t("chat.welcomeMessage")}
                         </Text>
                     </View>
                 ) : (
@@ -104,7 +140,7 @@ const ChatScreen = ({ chatId }) => {
                         multiline
                         maxLength={1000}
                     />
-                    <TouchableOpacity style={styles.sendButton}>
+                    <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
                         <Ionicons name="send" size={24} color={colors.text.primary} />
                     </TouchableOpacity>
                 </View>
