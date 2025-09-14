@@ -7,3 +7,4 @@ export { default as SettingsScreen } from "./SettingsScreen";
 export { default as ProfileScreen } from "./ProfileScreen";
 export { default as AccountManagementScreen } from "./AccountManagementScreen";
 export { default as AIChatbotSettingsScreen } from "./AIChatbotSettingsScreen";
+export { default as OnboardingScreen } from "./OnboardingScreen";

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../contexts/ThemeContext";
 import NavigationBar from "./NavigationBar";
 import HomeScreen from "./HomeScreen";
@@ -8,10 +9,15 @@ import SettingsScreen from "./SettingsScreen";
 import ProfileScreen from "./ProfileScreen";
 import AccountManagementScreen from "./AccountManagementScreen";
 import AIChatbotSettingsScreen from "./AIChatbotSettingsScreen";
+import OnboardingScreen from "./OnboardingScreen";
+
+const ONBOARDING_COMPLETED_KEY = "@allyai_onboarding_completed";
 
 const AppContainer = () => {
     const [activeTab, setActiveTab] = useState("home");
     const [navigationStack, setNavigationStack] = useState([]);
+    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const { colors, getEffectiveTheme } = useTheme();
 
     const handleNavigateToChat = (chatId = null) => {
@@ -19,6 +25,16 @@ const AppContainer = () => {
         // You can add logic here to handle specific chat loading
         if (chatId) {
             console.log("Loading chat:", chatId);
+        }
+    };
+
+    const handleOnboardingComplete = async () => {
+        try {
+            await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+            setHasCompletedOnboarding(true);
+        } catch (error) {
+            console.error("Error saving onboarding completion:", error);
+            setHasCompletedOnboarding(true); // Still proceed
         }
     };
 
@@ -34,6 +50,23 @@ const AppContainer = () => {
             setNavigationStack((prev) => prev.slice(0, -1));
         },
     };
+
+    // Check onboarding status on app start
+    useEffect(() => {
+        const checkOnboardingStatus = async () => {
+            try {
+                const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+                setHasCompletedOnboarding(completed === "true");
+            } catch (error) {
+                console.error("Error checking onboarding status:", error);
+                setHasCompletedOnboarding(false);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkOnboardingStatus();
+    }, []);
 
     // Handle Android back button
     useEffect(() => {
@@ -91,6 +124,39 @@ const AppContainer = () => {
     const statusBarStyle =
         effectiveTheme === "light" ? "dark-content" : "light-content";
 
+    // Show loading screen while checking onboarding status
+    if (isLoading) {
+        return (
+            <View
+                style={[
+                    styles.container,
+                    { backgroundColor: colors.background.primary, justifyContent: "center", alignItems: "center" },
+                ]}
+            >
+                <StatusBar
+                    barStyle={statusBarStyle}
+                    backgroundColor={colors.background.primary}
+                    translucent={false}
+                />
+            </View>
+        );
+    }
+
+    // Show onboarding if not completed
+    if (!hasCompletedOnboarding) {
+        return (
+            <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+                <StatusBar
+                    barStyle={statusBarStyle}
+                    backgroundColor={colors.background.primary}
+                    translucent={false}
+                />
+                <OnboardingScreen onComplete={handleOnboardingComplete} />
+            </View>
+        );
+    }
+
+    // Main app
     return (
         <View
             style={[

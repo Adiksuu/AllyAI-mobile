@@ -358,4 +358,29 @@ export const pl = {
             },
         },
     },
+
+    // Onboarding
+    onboarding: {
+        slide1: {
+            title: "Witaj w AllyAI",
+            subtitle: "Twój asystent AI jest gotowy do pomocy",
+            description: "Doświadcz inteligentnych rozmów i uzyskaj spersonalizowaną pomoc w codziennych zadaniach.",
+        },
+        slide2: {
+            title: "Dostosuj",
+            subtitle: "Zrób to po swojemu",
+            description: "Wybierz preferowany motyw i język, aby spersonalizować swoje doświadczenie z AllyAI.",
+            themeButton: "Wybierz Motyw",
+            languageButton: "Wybierz Język",
+        },
+        slide3: {
+            title: "Rozpocznij",
+            subtitle: "Zacznijmy Twoją podróż",
+            description: "Zacznij rozmawiać z AllyAI i odkryj moc pomocy AI.",
+            startButton: "Zacznij Korzystać z AllyAI",
+        },
+        skip: "Pomiń",
+        next: "Dalej",
+        done: "Rozpocznij",
+    },
 };
