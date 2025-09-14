@@ -154,6 +154,7 @@ export const en = {
         newChat: "New Chat",
         clearChat: "Clear Chat",
         subtitle: "Start a conversation",
+        thinking: "AI is thinking...",
         welcomeMessage:
             "Hello! I'm AllyAI, your personal assistant. How can I help you today?",
     },

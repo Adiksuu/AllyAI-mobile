@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
 import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -15,6 +16,8 @@ const ChatScreen = ({ chatId }) => {
     const [error, setError] = useState(null);
     const [inputText, setInputText] = useState("");
     const [localChatId, setLocalChatId] = useState(chatId);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -45,6 +48,39 @@ const ChatScreen = ({ chatId }) => {
         loadMessages();
     }, [localChatId]);
 
+    // Request permissions for image picker
+    useEffect(() => {
+        (async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission needed', 'Camera roll permissions are needed to select images.');
+            }
+        })();
+    }, []);
+
+    // Pick image from gallery
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.8,
+            });
+
+            if (!result.canceled) {
+                setSelectedImage(result.assets[0]);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert('Error', 'Failed to pick image');
+        }
+    };
+
+    // Remove selected image
+    const removeImage = () => {
+        setSelectedImage(null);
+    };
+
     const handleSend = async () => {
         if (!inputText.trim()) return;
 
@@ -57,18 +93,28 @@ const ChatScreen = ({ chatId }) => {
         try {
             let currentChatId = localChatId;
             if (!currentChatId) {
-                currentChatId = await sendMessage(user.uid, null, inputText, "ALLY-3", "user");
+                currentChatId = await sendMessage(user.uid, null, inputText, "ALLY-3", "user", selectedImage);
                 setLocalChatId(currentChatId);
             } else {
-                await sendMessage(user.uid, currentChatId, inputText, "ALLY-3", "user");
+                await sendMessage(user.uid, currentChatId, inputText, "ALLY-3", "user", selectedImage);
             }
+
+            // Clear selected image after sending
+            setSelectedImage(null);
 
             // Get updated messages for AI context
             const updatedMessages = await getChatMessages(user.uid, currentChatId);
 
-            // Generate AI response
-            const aiMessage = await generateAIResponse(user.uid, inputText, updatedMessages);
-            await sendMessage(user.uid, currentChatId, aiMessage, "ALLY-3", "AI");
+            setIsGenerating(true);
+            try {
+                // Generate AI response (pass image URL if available)
+                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                const imageUrl = lastMessage?.imageUrl || null;
+                const aiMessage = await generateAIResponse(user.uid, inputText, updatedMessages, imageUrl);
+                await sendMessage(user.uid, currentChatId, aiMessage, "ALLY-3", "AI");
+            } finally {
+                setIsGenerating(false);
+            }
 
             setInputText("");
 
@@ -105,31 +151,58 @@ const ChatScreen = ({ chatId }) => {
                         </Text>
                     </View>
                 ) : (
-                    messages.map((msg) => (
-                        <View key={msg.id} style={[
-                            styles.messageContainer,
-                            msg.author === 'user' ? styles.userMessageContainer : styles.aiMessageContainer
-                        ]}>
-                            {msg.author === 'user' ? (
-                                <Text style={styles.userMessageText}>
-                                    {msg.message}
-                                </Text>
-                            ) : (
-                                <View style={styles.aiMessage}>
-                                    <Markdown style={markdownStyles(colors)}>
-                                        {msg.message}
-                                    </Markdown>
-                                </View>
-                            )}
-                        </View>
-                    ))
+                    <View>
+                        {messages.map((msg) => (
+                            <View key={msg.id} style={[
+                                styles.messageContainer,
+                                msg.author === 'user' ? styles.userMessageContainer : styles.aiMessageContainer
+                            ]}>
+                                {msg.author === 'user' ? (
+                                    <View>
+                                        {msg.imageUrl && (
+                                            <Image
+                                                source={{ uri: msg.imageUrl }}
+                                                style={styles.messageImage}
+                                                resizeMode="cover"
+                                            />
+                                        )}
+                                        <Text style={styles.userMessageText}>
+                                            {msg.message}
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.aiMessage}>
+                                        <Markdown style={markdownStyles(colors)}>
+                                            {msg.message}
+                                        </Markdown>
+                                    </View>
+                                )}
+                            </View>
+                        ))}
+                        {isGenerating && (
+                            <View style={styles.generatingContainer}>
+                                <ActivityIndicator size="small" color={colors.accent.primary} />
+                                <Text style={styles.generatingText}>{t("chat.thinking")}</Text>
+                            </View>
+                        )}
+                    </View>
                 )}
             </ScrollView>
 
             <View style={styles.inputArea}>
+                {/* Image Preview */}
+                {selectedImage && (
+                    <View style={styles.imagePreviewContainer}>
+                        <Image source={{ uri: selectedImage.uri }} style={styles.imagePreview} />
+                        <TouchableOpacity style={styles.removeImageButton} onPress={removeImage}>
+                            <Ionicons name="close-circle" size={24} color={colors.error} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 <View style={styles.inputContainer}>
-                    <TouchableOpacity style={styles.uploadButton}>
-                        <Ionicons name="attach" size={24} color={colors.text.muted} />
+                    <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating}>
+                        <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
                     </TouchableOpacity>
                     <TextInput
                         style={styles.textInput}
@@ -139,9 +212,14 @@ const ChatScreen = ({ chatId }) => {
                         onChangeText={setInputText}
                         multiline
                         maxLength={1000}
+                        editable={!isGenerating}
                     />
-                    <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                        <Ionicons name="send" size={24} color={colors.text.primary} />
+                    <TouchableOpacity
+                        style={styles.sendButton}
+                        onPress={handleSend}
+                        disabled={isGenerating || !inputText.trim()}
+                    >
+                        <Ionicons name="send" size={24} color={isGenerating || !inputText.trim() ? colors.text.muted : colors.text.primary} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -190,6 +268,13 @@ const getStyles = (colors) =>
             lineHeight: 24,
             textAlign: 'right',
         },
+        messageImage: {
+            width: 200,
+            height: 200,
+            borderRadius: 12,
+            marginBottom: 8,
+            alignSelf: 'flex-end',
+        },
         aiMessage: {
             backgroundColor: colors.background.card,
             padding: 16,
@@ -235,6 +320,29 @@ const getStyles = (colors) =>
             justifyContent: 'center',
             alignItems: 'center',
         },
+        imagePreviewContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            padding: 10,
+            backgroundColor: colors.background.secondary,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        imagePreview: {
+            width: 60,
+            height: 60,
+            borderRadius: 8,
+            marginRight: 10,
+        },
+        removeImageButton: {
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            backgroundColor: colors.background.primary,
+            borderRadius: 12,
+        },
         centerMessage: {
             flex: 1,
             justifyContent: "center",
@@ -245,6 +353,22 @@ const getStyles = (colors) =>
             fontSize: 16,
             color: colors.text.secondary,
             textAlign: "center",
+        },
+        generatingContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            marginBottom: 16,
+            backgroundColor: colors.background.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            alignSelf: 'flex-start',
+        },
+        generatingText: {
+            fontSize: 16,
+            color: colors.text.secondary,
+            marginLeft: 8,
         },
     });
 

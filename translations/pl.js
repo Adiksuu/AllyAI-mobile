@@ -155,6 +155,7 @@ export const pl = {
         newChat: "Nowa Rozmowa",
         clearChat: "Wyczyść Rozmowę",
         subtitle: "Rozpocznij rozmowę",
+        thinking: "AI myśli...",
         welcomeMessage:
             "Cześć! Jestem AllyAI, Twoim osobistym asystentem. Jak mogę Ci dzisiaj pomóc?",
     },

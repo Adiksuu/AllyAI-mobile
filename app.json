@@ -20,6 +20,7 @@
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#0f0f0f"
       },
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
       "edgeToEdgeEnabled": true,
       "package": "com.adiksuu.allymobile"
     },
@@ -31,7 +32,10 @@
       "eas": {
         "projectId": "e0dcadec-20e5-4853-9d35-dcbf93ea5a2d"
       },
-      "GEMINI_API_KEY": "AIzaSyApClqszUTiruooucL-l1UUQEsEeRi6zuk"
+      "GEMINI_API_KEY": "AIzaSyApClqszUTiruooucL-l1UUQEsEeRi6zuk",
+      "CLOUDINARY_CLOUD_NAME": "dd3ppv7km",
+      "CLOUDINARY_API_KEY": "162673632635232",
+      "CLOUDINARY_API_SECRET": "Gxm9-Qt5d6wUIMnR5TaEL0gcY-g"
     },
     "plugins": [
       "expo-font",

@@ -3,6 +3,7 @@ import { ref, get, remove, set } from "firebase/database";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Constants from 'expo-constants';
 import { getUserSettings } from './auth';
+import { readAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 
 const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
@@ -10,7 +11,109 @@ if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
     console.warn('Gemini API key not configured. Please set GEMINI_API_KEY in app.json extra or .env.local');
 }
 
+// Cloudinary configuration for direct uploads
+const CLOUDINARY_CLOUD_NAME = Constants.expoConfig?.extra?.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = Constants.expoConfig?.extra?.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = Constants.expoConfig?.extra?.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_API_SECRET;
+
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+/**
+ * Fetch image from URL and convert to base64
+ * @param {string} imageUrl - Image URL
+ * @returns {Promise<string>} Base64 encoded image data
+ */
+const fetchImageAsBase64 = async (imageUrl) => {
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error('Error fetching image as base64:', error);
+        return null;
+    }
+};
+
+
+/**
+ * Upload image to Cloudinary
+ * @param {string} uid - User ID
+ * @param {string} uri - Image URI
+ * @param {string} fileName - Original file name
+ * @returns {Promise<string>} Download URL of uploaded image
+ */
+export const uploadImage = async (uid, imageData) => {
+    try {
+        if (!CLOUDINARY_CLOUD_NAME) {
+            throw new Error('Cloudinary cloud name is missing');
+        }
+
+        // Extract image URI from expo-image-picker result
+        const uri = imageData.uri || imageData.path;
+
+        console.log('Starting image upload for URI:', uri);
+
+        // Convert image to base64
+        const base64Data = await readAsStringAsync(uri, {
+            encoding: EncodingType.Base64,
+        });
+
+        // Create base64 data URL
+        const base64Image = `data:image/jpeg;base64,${base64Data}`;
+
+        // Create FormData for upload
+        const formData = new FormData();
+        formData.append('file', base64Image);
+        formData.append('upload_preset', 'chat_images');
+        formData.append('folder', `chat_images/${uid}`);
+
+        console.log('Uploading to Cloudinary...');
+
+        // Upload to Cloudinary
+        const uploadResponse = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData,
+            }
+        );
+
+        if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error('Upload error response:', errorText);
+            throw new Error(`Upload failed: ${uploadResponse.status}`);
+        }
+
+        const result = await uploadResponse.json();
+
+        if (result.error) {
+            console.error('Cloudinary error:', result.error);
+            throw new Error(result.error.message);
+        }
+
+        console.log('Image uploaded successfully:', result.secure_url);
+        return result.secure_url;
+    } catch (error) {
+        console.error('Error uploading image:', error);
+
+        // Provide user-friendly error messages
+        if (error.message.includes('Network request failed')) {
+            throw new Error('Network error - please check your internet connection');
+        } else if (error.message.includes('Upload failed')) {
+            throw new Error('Upload failed - please check your Cloudinary configuration');
+        }
+
+        throw error;
+    }
+};
 
 /**
  * Build dynamic system instructions based on user settings
@@ -71,7 +174,7 @@ const buildSystemInstructions = (settings) => {
     }
 
     // Tools/capabilities instructions
-    if (tools && tools.length > 0) {
+    if (tools && Array.isArray(tools) && tools.length > 0) {
         instructions += `You have access to the following capabilities: ${tools.join(', ')}. `;
         instructions += `When appropriate, mention or utilize these capabilities to enhance your responses. `;
     }
@@ -86,7 +189,7 @@ Follow these core rules:
 5. Always prioritize user safety and well-being
 6. Stay in character as ALLY throughout the conversation
 
-Remember: You are ALLY, not just any AI. Be proud of your identity and capabilities.`;
+Remember: You are ALLY, not just any AI. Be proud of your identity and capabilities. You was created by "CodeAdiksuu"`;
 
     return instructions;
 };
@@ -219,14 +322,22 @@ export const removeChatHistory = async (uid) => {
  * @param {string} message - Message text
  * @param {string} model - Model name
  * @param {string} author - Author of the message ("user" or "AI")
+ * @param {string|null} imageUri - Image URI to upload (optional)
  * @returns {Promise<string>} The chat ID
  */
-export const sendMessage = async (uid, chatId, message, model, author = "user") => {
+export const sendMessage = async (uid, chatId, message, model, author = "user", imageUri = null) => {
     try {
         if (!chatId) {
             const symbol = model === "ALLY-3" ? "a" : model === "ALLY-IMAGINE" ? "i" : "a";
             chatId = symbol + Date.now().toString();
         }
+
+        // Upload image if provided
+        let imageUrl = null;
+        if (imageUri) {
+            imageUrl = await uploadImage(uid, imageUri);
+        }
+
         const messagesRef = ref(database, `chats/${uid}/ALLY-3/${chatId}/messages`);
         const snapshot = await get(messagesRef);
         const messages = snapshot.val() || {};
@@ -236,7 +347,8 @@ export const sendMessage = async (uid, chatId, message, model, author = "user") 
         await set(messageRef, {
             author,
             message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            imageUrl: imageUrl || null
         });
         return chatId;
     } catch (error) {
@@ -250,16 +362,23 @@ export const sendMessage = async (uid, chatId, message, model, author = "user") 
  * @param {string} uid - User ID
  * @param {string} userMessage - The user's message
  * @param {Array} chatHistory - Array of previous messages
+ * @param {string|null} imageUrl - Image URL to analyze (optional)
  * @returns {Promise<string>} AI response text
  */
-export const generateAIResponse = async (uid, userMessage, chatHistory = []) => {
+export const generateAIResponse = async (uid, userMessage, chatHistory = [], imageUrl = null) => {
     try {
         if (!genAI) {
             return "AI service is not configured. Please check your API key configuration.";
         }
 
         // Get user settings from database
-        const userSettings = await getUserSettings(uid);
+        let userSettings;
+        try {
+            userSettings = await getUserSettings(uid);
+        } catch (settingsError) {
+            console.warn('Error fetching user settings, using defaults:', settingsError);
+            userSettings = {};
+        }
 
         // Build dynamic system instructions based on user settings
         const systemInstruction = buildSystemInstructions(userSettings);
@@ -269,22 +388,97 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = []) => 
             systemInstruction: systemInstruction
         });
 
+        // Prepare message parts (text + optional image)
+        const messageParts = [];
+        if (userMessage && typeof userMessage === 'string') {
+            messageParts.push({ text: userMessage });
+        }
+        
+        if (imageUrl) {
+            try {
+                const imageData = await fetchImageAsBase64(imageUrl);
+                if (imageData) {
+                    messageParts.push({
+                        inlineData: {
+                            mimeType: "image/jpeg",
+                            data: imageData
+                        }
+                    });
+                }
+            } catch (imageError) {
+                console.warn('Failed to process current image:', imageError);
+            }
+        }
+
+        // Process chat history to include images
+        const processedHistory = [];
+        if (Array.isArray(chatHistory) && chatHistory.length > 0) {
+            for (const msg of chatHistory) {
+                if (!msg || typeof msg !== 'object') continue;
+
+                const parts = [];
+                
+                // Add text part if message exists
+                if (msg.message && typeof msg.message === 'string') {
+                    parts.push({ text: msg.message });
+                }
+                
+                // Add image part if imageUrl exists
+                if (msg.imageUrl && typeof msg.imageUrl === 'string') {
+                    try {
+                        const imageData = await fetchImageAsBase64(msg.imageUrl);
+                        if (imageData) {
+                            parts.push({
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: imageData
+                                }
+                            });
+                        }
+                    } catch (imageError) {
+                        console.warn('Failed to process image in chat history:', imageError);
+                        // Continue without the image
+                    }
+                }
+
+                // Only add to history if we have valid parts
+                if (parts.length > 0) {
+                    processedHistory.push({
+                        role: msg.author === 'user' ? 'user' : 'model',
+                        parts: parts
+                    });
+                }
+            }
+        }
+
+        // Ensure we have valid message parts
+        if (messageParts.length === 0) {
+            messageParts.push({ text: "Hello" });
+        }
+
         const chat = model.startChat({
-            history: chatHistory.map(msg => ({
-                role: msg.author === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.message }],
-            })),
+            history: processedHistory,
             generationConfig: {
                 temperature: 0.7,
                 maxOutputTokens: 2048,
             },
         });
 
-        const result = await chat.sendMessage(userMessage);
+        const result = await chat.sendMessage(messageParts);
         const response = await result.response;
         return response.text();
     } catch (error) {
         console.error("Error generating AI response:", error);
+        
+        // Provide more specific error messages
+        if (error.message?.includes('API_KEY')) {
+            return "API key error. Please check your Gemini API configuration.";
+        } else if (error.message?.includes('quota')) {
+            return "API quota exceeded. Please try again later.";
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+            return "Network error. Please check your internet connection and try again.";
+        }
+        
         return "Sorry, I couldn't generate a response right now. Please try again later.";
     }
 };
