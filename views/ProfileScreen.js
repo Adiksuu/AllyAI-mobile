@@ -11,23 +11,20 @@ import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import PremiumModal from "../components/PremiumModal";
 import { onAuthStateChanged, getCurrentUser } from "../functions/auth";
+import { getUserStats } from "../functions/stats";
 
 const ProfileScreen = ({ navigation, isAuthenticated }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [showPremiumModal, setShowPremiumModal] = React.useState(false);
     const [userEmail, setUserEmail] = React.useState('');
+    const [stats, setStats] = React.useState({ conversations: 0, tokens: 0, tokenLimit: 75, resetAt: null });
 
     const profileItems = [
         {
             icon: "card-outline",
             title: t("profile.subscription"),
             subtitle: t("profile.subscriptionSubtitle"),
-        },
-        {
-            icon: "analytics-outline",
-            title: t("profile.usageStats"),
-            subtitle: t("profile.usageStatsSubtitle"),
         },
         {
             icon: "download-outline",
@@ -57,8 +54,32 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
         }
     }, []);
 
+    React.useEffect(() => {
+        const fetchStats = async () => {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.uid) {
+                const userStats = await getUserStats(currentUser.uid);
+                setStats(userStats);
+            }
+        };
+        if (isAuthenticated) {
+            fetchStats();
+        }
+    }, [isAuthenticated]);
+
     const handleSubscriptionPress = () => {
         setShowPremiumModal(true);
+    };
+
+    const formatResetTime = (resetAt) => {
+        if (!resetAt) return 'Unknown';
+        const now = new Date();
+        const reset = new Date(resetAt);
+        const diff = reset - now;
+        if (diff <= 0) return 'Now';
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `in ${hours}h ${minutes}m`;
     };
 
     return (
@@ -80,21 +101,21 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
 
                 {isAuthenticated && <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>42</Text>
+                        <Text style={styles.statNumber}>{stats.conversations}</Text>
                         <Text style={styles.statLabel}>
                             {t("profile.conversations")}
                         </Text>
                     </View>
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>1.2K</Text>
+                        <Text style={styles.statNumber}>{stats.tokens}/{stats.tokenLimit}</Text>
                         <Text style={styles.statLabel}>
-                            {t("profile.messages")}
+                            {t("profile.tokens")}
                         </Text>
                     </View>
                     <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>7</Text>
+                        <Text style={styles.statNumber}>{formatResetTime(stats.resetAt)}</Text>
                         <Text style={styles.statLabel}>
-                            {t("profile.daysActive")}
+                            {t("profile.tokenRefresh")}
                         </Text>
                     </View>
                 </View>}
