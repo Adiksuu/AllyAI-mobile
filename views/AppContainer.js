@@ -22,10 +22,12 @@ const AppContainer = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [hasUpdatedLastLogin, setHasUpdatedLastLogin] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentChatId, setCurrentChatId] = useState(null);
     const { colors, getEffectiveTheme } = useTheme();
 
     const handleNavigateToChat = (chatId = null) => {
         setActiveTab("chat");
+        setCurrentChatId(chatId);
         // You can add logic here to handle specific chat loading
         if (chatId) {
             console.log("Loading chat:", chatId);
@@ -139,7 +141,7 @@ const AppContainer = () => {
             case "home":
                 return <HomeScreen onNavigateToChat={handleNavigateToChat} />;
             case "chat":
-                return <ChatScreen />;
+                return <ChatScreen chatId={currentChatId} />;
             case "settings":
                 return <SettingsScreen navigation={navigation} isAuthenticated={isAuthenticated} />;
             case "profile":

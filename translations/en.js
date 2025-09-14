@@ -200,6 +200,12 @@ export const en = {
             warning: "This will delete all your conversations, settings, and account information.",
             confirmButton: "Delete Account",
         },
+        clearChatHistory: {
+            title: "Clear Chat History",
+            message: "Are you sure you want to delete all your chat history? This action cannot be undone.",
+            warning: "All your conversations will be permanently deleted.",
+            confirmButton: "Clear All",
+        },
     },
 
     // Change Password
@@ -439,6 +445,12 @@ export const en = {
                 desc: "Unlimited conversations, priority support, and access to all premium features.",
             },
         },
+    },
+
+    // Model Selection Modal
+    modelSelectionModal: {
+        title: "AI Model",
+        selectModel: "SELECT YOUR",
     },
 
     // Onboarding

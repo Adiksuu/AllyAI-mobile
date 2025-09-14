@@ -1,18 +1,31 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { NewChatButton, PremiumUpgrade, ChatHistoryList } from "../components";
 import PremiumModal from "../components/PremiumModal";
+import ClearChatHistoryModal from "../components/ClearChatHistoryModal";
+import ModelSelectionModal from "../components/ModelSelectionModal";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { removeChatHistory } from "../functions/chat";
+import { getCurrentUser } from "../functions/auth";
 
 const HomeScreen = ({ onNavigateToChat }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [showPremiumModal, setShowPremiumModal] = React.useState(false);
+    const [showClearHistoryModal, setShowClearHistoryModal] = React.useState(false);
+    const [showModelSelectionModal, setShowModelSelectionModal] = React.useState(false);
+    const [selectedModel, setSelectedModel] = React.useState("ALLY-3");
+    const [refreshKey, setRefreshKey] = React.useState(0);
 
     const handleNewChat = () => {
+        setShowModelSelectionModal(true);
+    };
+
+    const handleModelSelect = (model) => {
+        setSelectedModel(model);
         if (onNavigateToChat) {
-            onNavigateToChat();
+            onNavigateToChat(null, model); // Pass null for chatId and the selected model
         }
     };
 
@@ -27,8 +40,30 @@ const HomeScreen = ({ onNavigateToChat }) => {
     };
 
     const handleClearHistory = () => {
-        // Handle clear history logic
-        console.log("Clear history pressed");
+        setShowClearHistoryModal(true);
+    };
+
+    const handleConfirmClearHistory = async () => {
+        try {
+            const user = getCurrentUser();
+            if (user) {
+                await removeChatHistory(user.uid);
+                // Trigger refresh of chat history list
+                setRefreshKey((prev) => prev + 1);
+                console.log(
+                    "Chat history cleared successfully"
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Error clearing chat history:",
+                error
+            );
+            Alert.alert(
+                "Error",
+                "Failed to clear chat history. Please try again."
+            );
+        }
     };
 
     const styles = getStyles(colors);
@@ -42,6 +77,7 @@ const HomeScreen = ({ onNavigateToChat }) => {
                 <PremiumUpgrade onPress={handlePremiumUpgrade} />
                 <NewChatButton onPress={handleNewChat} />
                 <ChatHistoryList
+                    key={refreshKey}
                     onChatPress={handleChatPress}
                     onClearHistory={handleClearHistory}
                 />
@@ -49,6 +85,17 @@ const HomeScreen = ({ onNavigateToChat }) => {
             <PremiumModal
                 visible={showPremiumModal}
                 onClose={() => setShowPremiumModal(false)}
+            />
+            <ClearChatHistoryModal
+                visible={showClearHistoryModal}
+                onClose={() => setShowClearHistoryModal(false)}
+                onConfirm={handleConfirmClearHistory}
+            />
+            <ModelSelectionModal
+                visible={showModelSelectionModal}
+                onClose={() => setShowModelSelectionModal(false)}
+                onModelSelect={handleModelSelect}
+                currentModel={selectedModel}
             />
         </ScrollView>
     );

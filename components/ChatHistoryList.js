@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getChatHistory } from "../functions/chat";
-import { getCurrentUser } from "../functions/auth";
+import { getCurrentUser, onAuthStateChanged } from "../functions/auth";
 
 const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     const { t } = useTranslation();
@@ -19,33 +19,40 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     const [chatHistory, setChatHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
-        const fetchChats = async () => {
-            const user = getCurrentUser();
+        const unsubscribe = onAuthStateChanged(async (user) => {
             if (!user) {
+                setChatHistory([]);
                 setLoading(false);
                 return;
             }
+
             try {
+                setLoading(true);
                 const chats = await getChatHistory(user.uid, t);
+                console.log("ChatHistoryList received chats:", chats.length);
+                // console.log("ChatHistoryList chats data:", chats);
                 setChatHistory(chats);
             } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
-        };
-        fetchChats();
-    }, []);
+        });
+
+        // Cleanup subscription on unmount
+        return unsubscribe;
+    }, [t]);
 
     const formatTime = (timestamp) => {
-        if (!timestamp) return '';
+        if (!timestamp) return "";
         const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
         const minutes = Math.floor(diff / 60000);
-        if (minutes < 1) return 'Just now';
+        if (minutes < 1) return "Just now";
         if (minutes < 60) return `${minutes}m ago`;
         const hours = Math.floor(minutes / 60);
         if (hours < 24) return `${hours}h ago`;
@@ -99,51 +106,75 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                     style={styles.list}
                     showsVerticalScrollIndicator={false}
                 >
-                    {chatHistory.map((chat) => (
-                        <TouchableOpacity
-                            key={chat.id}
-                            style={styles.chatItem}
-                            onPress={() => onChatPress(chat.id)}
-                            activeOpacity={0.7}
-                        >
-                            <View style={styles.chatIcon}>
-                                <Ionicons
-                                    name="chatbubble"
-                                    size={20}
-                                    color={colors.accent.lightBlue}
-                                />
-                            </View>
-                            <View style={styles.chatContent}>
-                                <Text
-                                    style={styles.chatTitle}
-                                    numberOfLines={1}
-                                >
-                                    {chat.title}
-                                </Text>
-                                <Text
-                                    style={styles.chatLastMessage}
-                                    numberOfLines={1}
-                                >
-                                    {chat.lastMessage}
-                                </Text>
-                                <View style={styles.chatMeta}>
-                                    <Text style={styles.chatTimestamp}>
-                                        {formatTime(chat.timestamp)}
+                    {(showAll ? chatHistory : chatHistory.slice(0, 3)).map(
+                        (chat) => (
+                            <TouchableOpacity
+                                key={chat.id}
+                                style={styles.chatItem}
+                                onPress={() => onChatPress(chat.id)}
+                                activeOpacity={0.7}
+                            >
+                                <View style={styles.chatIcon}>
+                                    <Ionicons
+                                        name="chatbubble"
+                                        size={20}
+                                        color={colors.accent.lightBlue}
+                                    />
+                                </View>
+                                <View style={styles.chatContent}>
+                                    <Text
+                                        style={styles.chatTitle}
+                                        numberOfLines={1}
+                                    >
+                                        {chat.title}
                                     </Text>
-                                    <View style={styles.messageCount}>
-                                        <Text style={styles.messageCountText}>
-                                            {chat.messageCount}
+                                    <Text
+                                        style={styles.chatLastMessage}
+                                        numberOfLines={1}
+                                    >
+                                        {chat.lastMessage}
+                                    </Text>
+                                    <View style={styles.chatMeta}>
+                                        <Text style={styles.chatTimestamp}>
+                                            {formatTime(chat.timestamp)}
                                         </Text>
+                                        <View style={styles.messageCount}>
+                                            <Text
+                                                style={styles.messageCountText}
+                                            >
+                                                {chat.messageCount}
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                            <Ionicons
-                                name="chevron-forward"
-                                size={16}
-                                color={colors.text.muted}
-                            />
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={16}
+                                    color={colors.text.muted}
+                                />
+                            </TouchableOpacity>
+                        )
+                    )}
+                    {chatHistory.length > 3 && !showAll && (
+                        <TouchableOpacity
+                            style={styles.showAllButton}
+                            onPress={() => setShowAll(true)}
+                        >
+                            <Text style={styles.showAllText}>
+                                Show All Chats
+                            </Text>
                         </TouchableOpacity>
-                    ))}
+                    )}
+                    {chatHistory.length > 3 && showAll && (
+                        <TouchableOpacity
+                            style={styles.showAllButton}
+                            onPress={() => setShowAll(false)}
+                        >
+                            <Text style={styles.showAllText}>
+                                Show Less
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </ScrollView>
             )}
         </View>
@@ -185,7 +216,7 @@ const getStyles = (colors) =>
             fontWeight: "500",
         },
         list: {
-            maxHeight: 300,
+            // Remove height constraint to show all chats
         },
         chatItem: {
             flexDirection: "row",
@@ -254,6 +285,20 @@ const getStyles = (colors) =>
             fontSize: 14,
             color: colors.text.secondary,
             textAlign: "center",
+        },
+        showAllButton: {
+            alignSelf: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            backgroundColor: colors.accent.lightBlue,
+            borderRadius: 8,
+            marginTop: 16,
+            marginBottom: 16,
+        },
+        showAllText: {
+            fontSize: 14,
+            color: colors.background.primary,
+            fontWeight: "600",
         },
     });
 

@@ -201,6 +201,12 @@ export const pl = {
             warning: "Spowoduje to usunięcie wszystkich rozmów, ustawień i informacji o koncie.",
             confirmButton: "Usuń Konto",
         },
+        clearChatHistory: {
+            title: "Wyczyść Historię Rozmów",
+            message: "Czy na pewno chcesz usunąć całą historię rozmów? Tej akcji nie można cofnąć.",
+            warning: "Wszystkie rozmowy zostaną trwale usunięte.",
+            confirmButton: "Wyczyść Wszystko",
+        },
     },
 
     // Change Password
@@ -441,6 +447,12 @@ export const pl = {
                 desc: "Nieograniczone rozmowy, priorytetowe wsparcie i dostęp do wszystkich funkcji premium.",
             },
         },
+    },
+
+    // Model Selection Modal
+    modelSelectionModal: {
+        title: "Model AI",
+        selectModel: "WYBIERZ SWÓJ",
     },
 
     // Onboarding
