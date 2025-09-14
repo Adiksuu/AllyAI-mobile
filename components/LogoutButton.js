@@ -4,14 +4,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const LogoutButton = () => {
+const LogoutButton = ({ onPress }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
 
     const styles = getStyles(colors);
 
     return (
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={onPress}>
             <View style={styles.iconContainer}>
                 <Ionicons
                     name="log-out-outline"

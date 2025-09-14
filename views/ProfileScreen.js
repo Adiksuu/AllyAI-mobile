@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     View,
     Text,
@@ -10,11 +10,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import PremiumModal from "../components/PremiumModal";
+import { onAuthStateChanged, getCurrentUser } from "../functions/auth";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation, isAuthenticated }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [showPremiumModal, setShowPremiumModal] = React.useState(false);
+    const [userEmail, setUserEmail] = React.useState('');
 
     const profileItems = [
         {
@@ -34,7 +36,26 @@ const ProfileScreen = () => {
         },
     ];
 
+    const loggedOutItems = [
+        {
+            icon: "log-in-outline",
+            title: t("profile.login"),
+            subtitle: t("profile.loginSubtitle"),
+            action: "navigateToLogin",
+        }
+    ]
+
     const styles = getStyles(colors);
+
+    // Note: Authentication state is now handled globally in AppContainer
+    // This screen will receive the authentication state through props or context
+
+    React.useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser.email) {
+            setUserEmail(currentUser.email);
+        }
+    }, []);
 
     const handleSubscriptionPress = () => {
         setShowPremiumModal(true);
@@ -53,11 +74,11 @@ const ProfileScreen = () => {
                     </View>
                     <Text style={styles.userName}>{t("profile.userName")}</Text>
                     <Text style={styles.userEmail}>
-                        {t("profile.userEmail")}
+                        {isAuthenticated && userEmail ? userEmail : t("profile.userEmail")}
                     </Text>
                 </View>
 
-                <View style={styles.statsContainer}>
+                {isAuthenticated && <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>42</Text>
                         <Text style={styles.statLabel}>
@@ -76,42 +97,75 @@ const ProfileScreen = () => {
                             {t("profile.daysActive")}
                         </Text>
                     </View>
-                </View>
+                </View>}
 
-                <View style={styles.menuList}>
-                    {profileItems.map((item, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={styles.menuItem}
-                            onPress={
-                                index === 0
-                                    ? handleSubscriptionPress
-                                    : undefined
-                            }
-                        >
-                            <View style={styles.menuIcon}>
-                                <Ionicons
-                                    name={item.icon}
-                                    size={24}
-                                    color={colors.accent.lightBlue}
-                                />
-                            </View>
-                            <View style={styles.menuContent}>
-                                <Text style={styles.menuTitle}>
-                                    {item.title}
-                                </Text>
-                                <Text style={styles.menuSubtitle}>
-                                    {item.subtitle}
-                                </Text>
-                            </View>
-                            <Ionicons
-                                name="chevron-forward"
-                                size={20}
-                                color={colors.text.muted}
-                            />
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                {isAuthenticated ? <View style={styles.menuList}>
+                     {profileItems.map((item, index) => (
+                         <TouchableOpacity
+                             key={index}
+                             style={styles.menuItem}
+                             onPress={
+                                 index === 0
+                                     ? handleSubscriptionPress
+                                     : undefined
+                             }
+                         >
+                             <View style={styles.menuIcon}>
+                                 <Ionicons
+                                     name={item.icon}
+                                     size={24}
+                                     color={colors.accent.lightBlue}
+                                 />
+                             </View>
+                             <View style={styles.menuContent}>
+                                 <Text style={styles.menuTitle}>
+                                     {item.title}
+                                 </Text>
+                                 <Text style={styles.menuSubtitle}>
+                                     {item.subtitle}
+                                 </Text>
+                             </View>
+                             <Ionicons
+                                 name="chevron-forward"
+                                 size={20}
+                                 color={colors.text.muted}
+                             />
+                         </TouchableOpacity>
+                     ))}
+                 </View> : <View style={styles.menuList}>
+                     {loggedOutItems.map((item, index) => (
+                         <TouchableOpacity
+                             key={index}
+                             style={styles.menuItem}
+                             onPress={() => {
+                                 if (item.action === "navigateToLogin") {
+                                     navigation.navigate("LoginRegister");
+                                 }
+                             }}
+                         >
+                             <View style={styles.menuIcon}>
+                                 <Ionicons
+                                     name={item.icon}
+                                     size={24}
+                                     color={colors.accent.lightBlue}
+                                 />
+                             </View>
+                             <View style={styles.menuContent}>
+                                 <Text style={styles.menuTitle}>
+                                     {item.title}
+                                 </Text>
+                                 <Text style={styles.menuSubtitle}>
+                                     {item.subtitle}
+                                 </Text>
+                             </View>
+                             <Ionicons
+                                 name="chevron-forward"
+                                 size={20}
+                                 color={colors.text.muted}
+                             />
+                         </TouchableOpacity>
+                     ))}
+                 </View>}
             </View>
             <PremiumModal
                 visible={showPremiumModal}

@@ -15,7 +15,7 @@ import { NotificationsModal, LanguageModal, ThemeModal } from "../components";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const SettingsScreen = ({ navigation }) => {
+const SettingsScreen = ({ navigation, isAuthenticated }) => {
     const [showNotificationsModal, setShowNotificationsModal] = useState(false);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -66,38 +66,49 @@ const SettingsScreen = ({ navigation }) => {
         console.log("Theme changed to:", theme.name);
     };
 
-    const settingsItems = [
+    const allSettingsItems = [
         {
             icon: "person-outline",
             title: t("settings.account.title"),
             subtitle: t("settings.account.subtitle"),
+            requiresAuth: true,
         },
         {
             icon: "chatbox-outline",
             title: t("settings.aiChatbot.title"),
             subtitle: t("settings.aiChatbot.subtitle"),
+            requiresAuth: true,
         },
         {
             icon: "notifications-outline",
             title: t("settings.notifications.title"),
             subtitle: t("settings.notifications.subtitle"),
+            requiresAuth: false,
         },
         {
             icon: "language-outline",
             title: t("settings.language.title"),
             subtitle: t("settings.language.subtitle"),
+            requiresAuth: false,
         },
         {
             icon: "moon-outline",
             title: t("settings.theme.title"),
             subtitle: t("settings.theme.subtitle"),
+            requiresAuth: false,
         },
         {
             icon: "help-circle-outline",
             title: t("settings.help.title"),
             subtitle: t("settings.help.subtitle"),
+            requiresAuth: false,
         },
     ];
+
+    // Filter settings items based on authentication status
+    const settingsItems = allSettingsItems.filter(item =>
+        !item.requiresAuth || isAuthenticated
+    );
 
     const styles = getStyles(colors);
 

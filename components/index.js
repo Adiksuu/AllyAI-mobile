@@ -18,3 +18,6 @@ export { default as LanguageModal } from "./LanguageModal";
 export { default as LanguageModalContent } from "./LanguageModalContent";
 export { default as ThemeModal } from "./ThemeModal";
 export { default as ThemeModalContent } from "./ThemeModalContent";
+export { default as LoginForm } from "./LoginForm";
+export { default as RegisterForm } from "./RegisterForm";
+export { default as SocialLoginButtons } from "./SocialLoginButtons";

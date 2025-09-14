@@ -5,6 +5,7 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
+    Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
@@ -15,10 +16,72 @@ import {
     LogoutButton,
     DeleteAccount,
 } from "../components";
+import { signOut, removeAccount, getCurrentUser } from "../functions/auth";
 
 const AccountManagementScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+    const [userEmail, setUserEmail] = React.useState('');
+
+    React.useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser.email) {
+            setUserEmail(currentUser.email);
+        }
+    }, []);
+
+    const handleLogout = async () => {
+        Alert.alert(
+            t("accountManagement.logout.title"),
+            "Are you sure you want to sign out?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Sign Out",
+                    style: "destructive",
+                    onPress: async () => {
+                        const result = await signOut();
+                        if (result.success) {
+                            // Navigate back to the main app - authentication state will be handled by AppContainer
+                            navigation.goBack();
+                        } else {
+                            Alert.alert("Error", result.error);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const handleDeleteAccount = async () => {
+        Alert.alert(
+            t("accountManagement.deleteAccount.title"),
+            "Are you sure you want to permanently delete your account? This action cannot be undone.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete Account",
+                    style: "destructive",
+                    onPress: async () => {
+                        const result = await removeAccount();
+                        if (result.success) {
+                            Alert.alert("Success", "Your account has been deleted.");
+                            // Navigate back to the main app - authentication state will be handled by AppContainer
+                            navigation.goBack();
+                        } else {
+                            Alert.alert("Error", result.error);
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     const styles = getStyles(colors);
 
@@ -49,7 +112,7 @@ const AccountManagementScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>
                         {t("accountManagement.accountInfo")}
                     </Text>
-                    <EmailDisplay />
+                    <EmailDisplay userEmail={userEmail} />
                 </View>
 
                 <View style={styles.section}>
@@ -63,8 +126,8 @@ const AccountManagementScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>
                         {t("accountManagement.accountActions")}
                     </Text>
-                    <LogoutButton />
-                    <DeleteAccount />
+                    <LogoutButton onPress={handleLogout} />
+                    <DeleteAccount onPress={handleDeleteAccount} />
                 </View>
             </View>
         </ScrollView>

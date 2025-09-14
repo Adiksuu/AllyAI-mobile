@@ -4,11 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const EmailDisplay = () => {
+const EmailDisplay = ({ userEmail }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
-    // Mock email - in real app this would come from user state/context
-    const userEmail = "user@example.com";
 
     const styles = getStyles(colors);
 

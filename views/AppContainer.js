@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../contexts/ThemeContext";
+import { onAuthStateChanged, updateUserLastLogin } from "../functions/auth";
 import NavigationBar from "./NavigationBar";
 import HomeScreen from "./HomeScreen";
 import ChatScreen from "./ChatScreen";
@@ -9,6 +10,7 @@ import SettingsScreen from "./SettingsScreen";
 import ProfileScreen from "./ProfileScreen";
 import AccountManagementScreen from "./AccountManagementScreen";
 import AIChatbotSettingsScreen from "./AIChatbotSettingsScreen";
+import LoginRegisterScreen from "./LoginRegisterScreen";
 import OnboardingScreen from "./OnboardingScreen";
 
 const ONBOARDING_COMPLETED_KEY = "@allyai_onboarding_completed";
@@ -18,6 +20,8 @@ const AppContainer = () => {
     const [navigationStack, setNavigationStack] = useState([]);
     const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasUpdatedLastLogin, setHasUpdatedLastLogin] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const { colors, getEffectiveTheme } = useTheme();
 
     const handleNavigateToChat = (chatId = null) => {
@@ -44,6 +48,8 @@ const AppContainer = () => {
                 setNavigationStack((prev) => [...prev, "AccountManagement"]);
             } else if (screenName === "AIChatbotSettings") {
                 setNavigationStack((prev) => [...prev, "AIChatbotSettings"]);
+            } else if (screenName === "LoginRegister") {
+                setNavigationStack((prev) => [...prev, "LoginRegister"]);
             }
         },
         goBack: () => {
@@ -67,6 +73,27 @@ const AppContainer = () => {
 
         checkOnboardingStatus();
     }, []);
+
+    // Listen to authentication state changes and update last login time once per session
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(async (user) => {
+            if (user) {
+                setIsAuthenticated(true);
+                if (!hasUpdatedLastLogin) {
+                    // User is logged in and we haven't updated last login time yet
+                    await updateUserLastLogin(user.uid);
+                    setHasUpdatedLastLogin(true);
+                }
+            } else {
+                // User is not logged in
+                setIsAuthenticated(false);
+                setHasUpdatedLastLogin(false);
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return unsubscribe;
+    }, [hasUpdatedLastLogin]);
 
     // Handle Android back button
     useEffect(() => {
@@ -98,6 +125,8 @@ const AppContainer = () => {
                     return <AccountManagementScreen navigation={navigation} />;
                 case "AIChatbotSettings":
                     return <AIChatbotSettingsScreen navigation={navigation} />;
+                case "LoginRegister":
+                    return <LoginRegisterScreen navigation={navigation} />;
                 default:
                     return (
                         <HomeScreen onNavigateToChat={handleNavigateToChat} />
@@ -112,9 +141,9 @@ const AppContainer = () => {
             case "chat":
                 return <ChatScreen />;
             case "settings":
-                return <SettingsScreen navigation={navigation} />;
+                return <SettingsScreen navigation={navigation} isAuthenticated={isAuthenticated} />;
             case "profile":
-                return <ProfileScreen />;
+                return <ProfileScreen navigation={navigation} isAuthenticated={isAuthenticated} />;
             default:
                 return <HomeScreen onNavigateToChat={handleNavigateToChat} />;
         }
