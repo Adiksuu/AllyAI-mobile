@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -12,6 +13,7 @@ const ChatScreen = ({ chatId }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [inputText, setInputText] = useState("");
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -89,7 +91,23 @@ const ChatScreen = ({ chatId }) => {
             </ScrollView>
 
             <View style={styles.inputArea}>
-                <Text style={styles.placeholder}>{t("chat.placeholder")}</Text>
+                <View style={styles.inputContainer}>
+                    <TouchableOpacity style={styles.uploadButton}>
+                        <Ionicons name="attach" size={24} color={colors.text.muted} />
+                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder={t("chat.placeholder")}
+                        placeholderTextColor={colors.text.muted}
+                        value={inputText}
+                        onChangeText={setInputText}
+                        multiline
+                        maxLength={1000}
+                    />
+                    <TouchableOpacity style={styles.sendButton}>
+                        <Ionicons name="send" size={24} color={colors.text.primary} />
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -150,15 +168,36 @@ const getStyles = (colors) =>
             borderTopWidth: 1,
             borderTopColor: colors.border.primary,
         },
-        placeholder: {
-            fontSize: 16,
-            color: colors.text.muted,
-            textAlign: "center",
-            paddingVertical: 16,
+        inputContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
             backgroundColor: colors.background.secondary,
-            borderRadius: 8,
+            borderRadius: 24,
             borderWidth: 1,
             borderColor: colors.border.primary,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+        },
+        uploadButton: {
+            marginRight: 8,
+            padding: 4,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        textInput: {
+            flex: 1,
+            fontSize: 16,
+            color: colors.text.primary,
+            maxHeight: 100,
+            minHeight: 40,
+            paddingVertical: 8,
+            textAlignVertical: 'center',
+        },
+        sendButton: {
+            marginLeft: 8,
+            padding: 4,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         centerMessage: {
             flex: 1,
