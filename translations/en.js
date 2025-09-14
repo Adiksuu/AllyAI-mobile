@@ -123,6 +123,14 @@ export const en = {
         emptyTitle: "No conversations yet",
         emptySubtitle: "Start your first chat with AllyAI",
         untitledChat: "Untitled Chat",
+        time: {
+            justNow: "Just now",
+            minutesSuffix: "m ago",
+            hoursSuffix: "h ago",
+            daysSuffix: "d ago",
+        },
+        showAllChats: "Show All Chats",
+        showLess: "Show Less",
         recentChats: {
             1: {
                 title: "React Native Navigation Help",

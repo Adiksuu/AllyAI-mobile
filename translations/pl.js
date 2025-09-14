@@ -124,6 +124,14 @@ export const pl = {
         emptyTitle: "Brak rozmów",
         emptySubtitle: "Rozpocznij swoją pierwszą rozmowę z AllyAI",
         untitledChat: "Rozmowa bez tytułu",
+        time: {
+            justNow: "Przed chwilą",
+            minutesSuffix: "min temu",
+            hoursSuffix: "godz temu",
+            daysSuffix: "d temu",
+        },
+        showAllChats: "Pokaż Wszystkie Rozmowy",
+        showLess: "Pokaż Mniej",
         recentChats: {
             1: {
                 title: "React Native Navigation Help",

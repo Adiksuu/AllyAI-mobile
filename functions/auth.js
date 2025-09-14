@@ -439,3 +439,99 @@ export const resetUserSettings = async (uid) => {
         throw error;
     }
 };
+
+/**
+ * Get user token data
+ * @param {string} uid - User ID
+ * @returns {Promise<Object>} Token data { tokens: number, resetAt: timestamp }
+ */
+export const getUserTokens = async (uid) => {
+    try {
+        const userRef = ref(database, `users/${uid}/models`);
+        const snapshot = await get(userRef);
+        const data = snapshot.val();
+
+        if (!data) {
+            // Initialize with default values
+            const now = Date.now();
+            const defaultTokens = {
+                tokens: 0,
+                resetAt: now + 24 * 60 * 60 * 1000 // 24 hours from now
+            };
+            await updateUserTokens(uid, defaultTokens);
+            return defaultTokens;
+        }
+
+        // Check if reset time has passed
+        const now = Date.now();
+        if (data.resetAt && now > data.resetAt) {
+            // Reset tokens
+            const resetTokens = {
+                tokens: 0,
+                resetAt: now + 24 * 60 * 60 * 1000
+            };
+            await updateUserTokens(uid, resetTokens);
+            return resetTokens;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error getting user tokens:', error);
+        return { tokens: 0, resetAt: Date.now() + 24 * 60 * 60 * 1000 };
+    }
+};
+
+/**
+ * Update user token data
+ * @param {string} uid - User ID
+ * @param {Object} tokenData - Token data to update
+ * @returns {Promise<void>}
+ */
+export const updateUserTokens = async (uid, tokenData) => {
+    try {
+        const userRef = ref(database, `users/${uid}/models`);
+        await update(userRef, tokenData);
+    } catch (error) {
+        console.error('Error updating user tokens:', error);
+        throw error;
+    }
+};
+
+/**
+ * Check if user can afford token cost
+ * @param {string} uid - User ID
+ * @param {number} cost - Token cost
+ * @returns {Promise<boolean>} Whether user can afford the cost
+ */
+export const canAffordTokens = async (uid, cost) => {
+    try {
+        const tokenData = await getUserTokens(uid);
+        return tokenData.tokens + cost <= 75; // Daily limit is 75 tokens
+    } catch (error) {
+        console.error('Error checking token affordability:', error);
+        return false;
+    }
+};
+
+/**
+ * Deduct tokens from user
+ * @param {string} uid - User ID
+ * @param {number} cost - Token cost to deduct
+ * @returns {Promise<boolean>} Success status
+ */
+export const deductTokens = async (uid, cost) => {
+    try {
+        const tokenData = await getUserTokens(uid);
+        const newTokens = tokenData.tokens + cost;
+
+        if (newTokens > 75) {
+            return false; // Would exceed limit
+        }
+
+        await updateUserTokens(uid, { tokens: newTokens });
+        return true;
+    } catch (error) {
+        console.error('Error deducting tokens:', error);
+        return false;
+    }
+};

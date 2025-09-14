@@ -52,12 +52,12 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
         const now = new Date();
         const diff = now - date;
         const minutes = Math.floor(diff / 60000);
-        if (minutes < 1) return "Just now";
-        if (minutes < 60) return `${minutes}m ago`;
+        if (minutes < 1) return t("chatHistory.time.justNow");
+        if (minutes < 60) return `${minutes}${t("chatHistory.time.minutesSuffix")}`;
         const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
+        if (hours < 24) return `${hours}${t("chatHistory.time.hoursSuffix")}`;
         const days = Math.floor(hours / 24);
-        return `${days}d ago`;
+        return `${days}${t("chatHistory.time.daysSuffix")}`;
     };
 
     const styles = getStyles(colors);
@@ -161,7 +161,7 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                             onPress={() => setShowAll(true)}
                         >
                             <Text style={styles.showAllText}>
-                                Show All Chats
+                                {t("chatHistory.showAllChats")}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -171,7 +171,7 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                             onPress={() => setShowAll(false)}
                         >
                             <Text style={styles.showAllText}>
-                                Show Less
+                                {t("chatHistory.showLess")}
                             </Text>
                         </TouchableOpacity>
                     )}

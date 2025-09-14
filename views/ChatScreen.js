@@ -5,9 +5,10 @@ import * as ImagePicker from 'expo-image-picker';
 import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { getChatMessages, sendMessage, generateAIResponse } from "../functions/chat";
-import { getCurrentUser, getUserSettings } from "../functions/auth";
+import { getChatMessages, sendMessage, generateAIResponse, uploadImage } from "../functions/chat";
+import { getCurrentUser, getUserSettings, canAffordTokens, deductTokens } from "../functions/auth";
 import ModelSelectionModal from "../components/ModelSelectionModal";
+import PremiumModal from "../components/PremiumModal";
 
 const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
     const { t } = useTranslation();
@@ -19,9 +20,11 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
     const [localChatId, setLocalChatId] = useState(chatId);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isSending, setIsSending] = useState(false);
     const [userSettings, setUserSettings] = useState(null);
     const [selectedModel, setSelectedModel] = useState(initialModel);
     const [modelModalVisible, setModelModalVisible] = useState(false);
+    const [premiumModalVisible, setPremiumModalVisible] = useState(false);
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -102,8 +105,23 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
         setSelectedImage(null);
     };
 
+    // Calculate token cost for a message
+    const calculateTokenCost = (model, hasImage = false, imageCount = 1) => {
+        let cost = 1; // Base cost for text message
+
+        if (hasImage) {
+            cost += 5 * imageCount; // Additional cost for images
+        }
+
+        if (model === 'ALLY-IMAGINE') {
+            cost += 5; // Additional cost for image generation
+        }
+
+        return cost;
+    };
+
     const handleSend = async () => {
-        if (!inputText.trim()) return;
+        if (!inputText.trim() || isSending) return;
 
         const user = getCurrentUser();
         if (!user) {
@@ -111,17 +129,62 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
             return;
         }
 
+        // Calculate token cost
+        const hasImage = !!selectedImage;
+        const tokenCost = calculateTokenCost(selectedModel, hasImage, hasImage ? 1 : 0);
+
+        // Check if user can afford the tokens
+        const canAfford = await canAffordTokens(user.uid, tokenCost);
+        if (!canAfford) {
+            setPremiumModalVisible(true);
+            return;
+        }
+
+        // Immediately disable input and show user message
+        setIsSending(true);
+        const userMessageText = inputText.trim();
+        const userImage = selectedImage;
+
+        // Clear input and image immediately
+        setInputText("");
+        setSelectedImage(null);
+
+        // Add user message to UI immediately
+        const tempUserMessage = {
+            id: `temp-${Date.now()}`,
+            author: 'user',
+            message: userMessageText,
+            timestamp: new Date().toISOString(),
+            imageUrl: null // Will be set after upload
+        };
+
+        // If there's an image, we need to upload it first
+        if (userImage) {
+            try {
+                const imageUrl = await uploadImage(user.uid, userImage);
+                tempUserMessage.imageUrl = imageUrl;
+            } catch (uploadError) {
+                console.error('Error uploading image:', uploadError);
+                setError('Failed to upload image');
+                setIsSending(false);
+                return;
+            }
+        }
+
+        // Update messages state immediately
+        setMessages(prevMessages => [...prevMessages, tempUserMessage]);
+
         try {
             let currentChatId = localChatId;
             if (!currentChatId) {
-                currentChatId = await sendMessage(user.uid, null, inputText, selectedModel, "user", selectedImage);
+                currentChatId = await sendMessage(user.uid, null, userMessageText, selectedModel, "user", userImage);
                 setLocalChatId(currentChatId);
             } else {
-                await sendMessage(user.uid, currentChatId, inputText, selectedModel, "user", selectedImage);
+                await sendMessage(user.uid, currentChatId, userMessageText, selectedModel, "user", userImage);
             }
 
-            // Clear selected image after sending
-            setSelectedImage(null);
+            // Deduct tokens for user message
+            await deductTokens(user.uid, tokenCost);
 
             // Get updated messages for AI context
             const updatedMessages = await getChatMessages(user.uid, currentChatId);
@@ -131,7 +194,7 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
                 // Generate AI response (pass image URL if available)
                 const lastMessage = updatedMessages[updatedMessages.length - 1];
                 const imageUrl = lastMessage?.imageUrl || null;
-                const aiResponse = await generateAIResponse(user.uid, inputText, updatedMessages, imageUrl, selectedModel);
+                const aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel);
 
                 if (selectedModel === 'ALLY-IMAGINE') {
                     // For image generation, aiResponse is the image URL
@@ -144,13 +207,15 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
                 setIsGenerating(false);
             }
 
-            setInputText("");
-
-            // reload messages
+            // Reload messages to get the complete conversation
             const finalMessages = await getChatMessages(user.uid, currentChatId);
             setMessages(finalMessages);
         } catch (err) {
             setError(err.message);
+            // Remove the temporary message on error
+            setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempUserMessage.id));
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -246,8 +311,8 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
                 )}
 
                 <View style={styles.inputContainer}>
-                    {userSettings && userSettings.tools && userSettings.tools.includes('Image Generation') && (
-                        <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating}>
+                    {userSettings && userSettings.tools && userSettings.tools.includes('Image Generation') && selectedModel !== 'ALLY-IMAGINE' && (
+                        <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating || isSending}>
                             <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
                         </TouchableOpacity>
                     )}
@@ -259,12 +324,12 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
                         onChangeText={setInputText}
                         multiline
                         maxLength={1000}
-                        editable={!isGenerating}
+                        editable={!isGenerating && !isSending}
                     />
                     <TouchableOpacity
                         style={styles.sendButton}
                         onPress={handleSend}
-                        disabled={isGenerating || !inputText.trim()}
+                        disabled={isGenerating || isSending || !inputText.trim()}
                     >
                         <Ionicons name="send" size={24} color={isGenerating || !inputText.trim() ? colors.text.muted : colors.text.primary} />
                     </TouchableOpacity>
@@ -276,6 +341,11 @@ const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
                 onClose={() => setModelModalVisible(false)}
                 onModelSelect={setSelectedModel}
                 currentModel={selectedModel}
+            />
+            <PremiumModal
+                visible={premiumModalVisible}
+                onClose={() => setPremiumModalVisible(false)}
+                currentPlan="Free"
             />
         </View>
     );
