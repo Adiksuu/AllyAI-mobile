@@ -14,6 +14,9 @@ import Constants from "expo-constants";
 import { NotificationsModal, LanguageModal, ThemeModal } from "../components";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { requestNotificationPermissions, areNotificationsEnabled, scheduleTokenResetNotification, setNotificationsEnabled } from "../functions/notifications";
+import { getCurrentUser, getUserTokens } from "../functions/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SettingsScreen = ({ navigation, isAuthenticated }) => {
     const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -35,9 +38,56 @@ const SettingsScreen = ({ navigation, isAuthenticated }) => {
         setShowNotificationsModal(false);
     };
 
-    const handleEnableNotifications = () => {
-        // TODO: Implement notification enabling logic
-        console.log("Notifications enabled");
+    const handleEnableNotifications = async () => {
+        try {
+            // Request notification permissions
+            const granted = await requestNotificationPermissions();
+            if (!granted) {
+                console.log("Notification permissions not granted");
+                return;
+            }
+
+            // Enable notifications in settings
+            const settingsUpdated = await setNotificationsEnabled(true);
+            if (!settingsUpdated) {
+                console.log("Failed to update notification settings");
+                return;
+            }
+
+            // Get current user
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("No user logged in");
+                return;
+            }
+
+            // Get user's token data
+            const tokenData = await getUserTokens(user.uid);
+            if (!tokenData || !tokenData.resetAt) {
+                console.log("No token data available");
+                return;
+            }
+
+            // Get user's language preference
+            const languageKey = `@allyai_language_${user.uid}`;
+            const savedLanguage = await AsyncStorage.getItem(languageKey);
+            const userLanguage = savedLanguage || "en";
+
+            // Schedule token reset notification
+            const notificationId = await scheduleTokenResetNotification(
+                tokenData.resetAt,
+                userLanguage,
+                user.uid
+            );
+
+            if (notificationId) {
+                console.log("Token reset notification scheduled successfully:", notificationId);
+            } else {
+                console.log("Failed to schedule token reset notification");
+            }
+        } catch (error) {
+            console.error("Error enabling notifications:", error);
+        }
     };
 
     const handleLanguagePress = () => {
@@ -208,7 +258,7 @@ const SettingsScreen = ({ navigation, isAuthenticated }) => {
             <NotificationsModal
                 visible={showNotificationsModal}
                 onClose={handleCloseModal}
-                onEnable={handleEnableNotifications}
+                onEnable={() => {}} // Empty function since modal handles toggling internally
             />
 
             <LanguageModal

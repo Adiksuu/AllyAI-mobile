@@ -1,15 +1,62 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import {
+    areNotificationsEnabledInSettings,
+    setNotificationsEnabled,
+    requestNotificationPermissions,
+    canSendNotifications
+} from "../functions/notifications";
 
 const NotificationsModalContent = ({ onEnable, onNotNow }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
+    const [isEnabled, setIsEnabled] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleEnable = () => {
-        onEnable();
+    useEffect(() => {
+        checkNotificationStatus();
+    }, []);
+
+    const checkNotificationStatus = async () => {
+        try {
+            const enabled = await areNotificationsEnabledInSettings();
+            setIsEnabled(enabled);
+        } catch (error) {
+            console.error("Error checking notification status:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleToggleNotifications = async (value) => {
+        try {
+            setIsLoading(true);
+
+            if (value) {
+                // Enabling notifications - request permissions first
+                const permissionsGranted = await requestNotificationPermissions();
+                if (!permissionsGranted) {
+                    console.log("Notification permissions not granted");
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            // Update the setting
+            const success = await setNotificationsEnabled(value);
+            if (success) {
+                setIsEnabled(value);
+                // Don't call onEnable() here - the toggle only updates the setting
+                // The actual notification scheduling happens when tokens are reset
+            }
+        } catch (error) {
+            console.error("Error toggling notifications:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleNotNow = () => {
@@ -69,27 +116,46 @@ const NotificationsModalContent = ({ onEnable, onNotNow }) => {
                 </View>
             </View>
 
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                    style={styles.enableButton}
-                    onPress={handleEnable}
-                >
-                    <Ionicons
-                        name="notifications"
-                        size={20}
-                        color={colors.primary.black}
+            <View style={styles.toggleContainer}>
+                <View style={styles.toggleRow}>
+                    <View style={styles.toggleContent}>
+                        <Ionicons
+                            name="notifications"
+                            size={24}
+                            color={colors.accent.lightBlue}
+                        />
+                        <View style={styles.toggleTextContainer}>
+                            <Text style={styles.toggleTitle}>
+                                {t("notificationsModal.enableNotifications")}
+                            </Text>
+                            <Text style={styles.toggleDescription}>
+                                {isEnabled
+                                    ? t("notificationsModal.notificationsEnabled")
+                                    : t("notificationsModal.notificationsDisabled")
+                                }
+                            </Text>
+                        </View>
+                    </View>
+                    <Switch
+                        value={isEnabled}
+                        onValueChange={handleToggleNotifications}
+                        disabled={isLoading}
+                        trackColor={{
+                            false: colors.background.secondary,
+                            true: colors.accent.lightBlue
+                        }}
+                        thumbColor={isEnabled ? colors.primary.white : colors.text.secondary}
                     />
-                    <Text style={styles.enableButtonText}>
-                        {t("common.enable")}
-                    </Text>
-                </TouchableOpacity>
+                </View>
+            </View>
 
+            <View style={styles.closeButtonContainer}>
                 <TouchableOpacity
-                    style={styles.notNowButton}
+                    style={styles.closeButton}
                     onPress={handleNotNow}
                 >
-                    <Text style={styles.notNowButtonText}>
-                        {t("notificationsModal.notNow")}
+                    <Text style={styles.closeButtonText}>
+                        {t("common.close")}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -148,29 +214,45 @@ const getStyles = (colors) =>
             color: colors.text.secondary,
             lineHeight: 20,
         },
-        buttonsContainer: {
-            gap: 12,
+        toggleContainer: {
+            marginBottom: 24,
         },
-        enableButton: {
-            backgroundColor: colors.text.primary,
+        toggleRow: {
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "space-between",
             paddingVertical: 16,
-            paddingHorizontal: 24,
+            paddingHorizontal: 20,
+            backgroundColor: colors.background.secondary,
             borderRadius: 12,
-            gap: 8,
         },
-        enableButtonText: {
+        toggleContent: {
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+        },
+        toggleTextContainer: {
+            marginLeft: 16,
+            flex: 1,
+        },
+        toggleTitle: {
             fontSize: 16,
             fontWeight: "600",
-            color: colors.primary.black,
+            color: colors.text.primary,
+            marginBottom: 2,
         },
-        notNowButton: {
+        toggleDescription: {
+            fontSize: 14,
+            color: colors.text.secondary,
+        },
+        closeButtonContainer: {
             alignItems: "center",
-            paddingVertical: 12,
         },
-        notNowButtonText: {
+        closeButton: {
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+        },
+        closeButtonText: {
             fontSize: 16,
             fontWeight: "500",
             color: colors.text.secondary,

@@ -86,6 +86,9 @@ export const pl = {
     notificationsModal: {
         title: "Powiadomienia",
         manageNotifications: "ZARZĄDZAJ",
+        enableNotifications: "Włącz Powiadomienia",
+        notificationsEnabled: "Powiadomienia są włączone",
+        notificationsDisabled: "Powiadomienia są wyłączone",
         features: {
             stayTuned: {
                 title: "Bądź na Bieżąco",
@@ -489,6 +492,14 @@ export const pl = {
     modelSelectionModal: {
         title: "Model AI",
         selectModel: "WYBIERZ SWÓJ",
+    },
+
+    // Notifications
+    notifications: {
+        tokenReset: {
+            title: "Tokeny Odświeżone! 🎉",
+            body: "Twój dzienny limit tokenów został zresetowany. Masz teraz dostępnych 75 tokenów do rozmów z AI.",
+        },
     },
 
     // Onboarding

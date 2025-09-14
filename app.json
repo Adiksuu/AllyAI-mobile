@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#0f0f0f"
       },
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "android.permission.POST_NOTIFICATIONS"],
       "edgeToEdgeEnabled": true,
       "package": "com.adiksuu.allymobile"
     },
@@ -39,6 +39,7 @@
     },
     "plugins": [
       "expo-font",
+      "expo-notifications",
       [
         "@sentry/react-native/expo",
         {

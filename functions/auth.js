@@ -11,6 +11,8 @@ import {
     EmailAuthProvider,
 } from "firebase/auth";
 import { ref, set, get, update, remove } from "firebase/database";
+import { sendTokenResetNotification, scheduleTokenResetNotification, areNotificationsEnabledInSettings } from "./notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Sign in with email and password
@@ -145,6 +147,7 @@ export const signUpWithEmail = async (email, password) => {
         const user = userCredential.user;
 
         const date = new Date();
+        const resetAt = date.getTime() + 24 * 60 * 60 * 1000;
 
         // Create user data in database
         await createUserData(user.uid, {
@@ -153,7 +156,7 @@ export const signUpWithEmail = async (email, password) => {
             lastLoginAt: date.toISOString(),
             models: {
                 tokens: 0,
-                resetAt: date.getTime() + 24 * 60 * 60 * 1000,
+                resetAt: resetAt,
             },
             premium: { isPremium: false, expireAt: null },
             settings: {
@@ -168,6 +171,21 @@ export const signUpWithEmail = async (email, password) => {
                 ],
             },
         });
+
+        // Schedule initial token reset notification if notifications are enabled
+        try {
+            const notificationsEnabled = await areNotificationsEnabledInSettings();
+            if (notificationsEnabled) {
+                await scheduleTokenResetNotification(resetAt, "en", user.uid);
+                console.log("Initial token reset notification scheduled for user:", user.uid);
+            }
+        } catch (notificationError) {
+            console.error(
+                "Error scheduling initial token reset notification:",
+                notificationError
+            );
+            // Don't throw error here as notification failure shouldn't break signup
+        }
 
         return {
             success: true,
@@ -674,6 +692,27 @@ export const getUserTokens = async (uid) => {
                 resetAt: now + 24 * 60 * 60 * 1000, // 24 hours from now
             };
             await updateUserTokens(uid, defaultTokens);
+
+            // Schedule notification for the reset time if notifications are enabled
+            try {
+                const notificationsEnabled = await areNotificationsEnabledInSettings();
+                if (notificationsEnabled) {
+                    // Get user's language preference
+                    const languageKey = `@allyai_language_${uid}`;
+                    const savedLanguage = await AsyncStorage.getItem(languageKey);
+                    const userLanguage = savedLanguage || "en"; // Default to English
+
+                    await scheduleTokenResetNotification(defaultTokens.resetAt, userLanguage, uid);
+                    console.log("Token reset notification scheduled for initialized user:", uid);
+                }
+            } catch (notificationError) {
+                console.error(
+                    "Error scheduling token reset notification for initialized user:",
+                    notificationError
+                );
+                // Don't throw error here as notification failure shouldn't break token initialization
+            }
+
             return defaultTokens;
         }
 
@@ -686,6 +725,28 @@ export const getUserTokens = async (uid) => {
                 resetAt: now + 24 * 60 * 60 * 1000,
             };
             await updateUserTokens(uid, resetTokens);
+
+            // Schedule notification for next reset if notifications are enabled
+            try {
+                const notificationsEnabled = await areNotificationsEnabledInSettings();
+                if (notificationsEnabled) {
+                    // Get user's language preference
+                    const languageKey = `@allyai_language_${uid}`;
+                    const savedLanguage = await AsyncStorage.getItem(languageKey);
+                    const userLanguage = savedLanguage || "en"; // Default to English
+
+                    // Schedule token reset notification for next reset time
+                    await scheduleTokenResetNotification(resetTokens.resetAt, userLanguage, uid);
+                    console.log("Token reset notification scheduled for user:", uid);
+                }
+            } catch (notificationError) {
+                console.error(
+                    "Error scheduling token reset notification:",
+                    notificationError
+                );
+                // Don't throw error here as notification failure shouldn't break token reset
+            }
+
             return resetTokens;
         }
 
@@ -748,5 +809,54 @@ export const deductTokens = async (uid, cost) => {
     } catch (error) {
         console.error("Error deducting tokens:", error);
         return false;
+    }
+};
+
+/**
+ * Manually reset user tokens and send notification
+ * @param {string} uid - User ID
+ * @returns {Promise<Object>} Success status and reset data
+ */
+export const manuallyResetUserTokens = async (uid) => {
+    try {
+        const now = Date.now();
+        const resetTokens = {
+            tokens: 0,
+            resetAt: now + 24 * 60 * 60 * 1000,
+        };
+
+        await updateUserTokens(uid, resetTokens);
+
+        // Schedule notification for next reset if notifications are enabled
+        try {
+            const notificationsEnabled = await areNotificationsEnabledInSettings();
+            if (notificationsEnabled) {
+                // Get user's language preference
+                const languageKey = `@allyai_language_${uid}`;
+                const savedLanguage = await AsyncStorage.getItem(languageKey);
+                const userLanguage = savedLanguage || "en"; // Default to English
+
+                // Schedule token reset notification for next reset time
+                await scheduleTokenResetNotification(resetTokens.resetAt, userLanguage, uid);
+                console.log("Manual token reset notification scheduled for user:", uid);
+            }
+        } catch (notificationError) {
+            console.error(
+                "Error scheduling manual token reset notification:",
+                notificationError
+            );
+            // Don't throw error here as notification failure shouldn't break token reset
+        }
+
+        return {
+            success: true,
+            data: resetTokens,
+        };
+    } catch (error) {
+        console.error("Error manually resetting user tokens:", error);
+        return {
+            success: false,
+            error: error.message,
+        };
     }
 };

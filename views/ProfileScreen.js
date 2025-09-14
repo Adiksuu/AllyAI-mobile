@@ -10,15 +10,30 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import PremiumModal from "../components/PremiumModal";
-import { onAuthStateChanged, getCurrentUser } from "../functions/auth";
+import {
+    onAuthStateChanged,
+    getCurrentUser,
+    manuallyResetUserTokens,
+} from "../functions/auth";
 import { getUserStats } from "../functions/stats";
+import {
+    sendTokenResetNotification,
+    areNotificationsEnabled,
+} from "../functions/notifications";
 
 const ProfileScreen = ({ navigation, isAuthenticated }) => {
-    const { t } = useTranslation();
+    const { t, currentLanguage } = useTranslation();
     const { colors } = useTheme();
     const [showPremiumModal, setShowPremiumModal] = React.useState(false);
-    const [userEmail, setUserEmail] = React.useState('');
-    const [stats, setStats] = React.useState({ conversations: 0, tokens: 0, tokenLimit: 75, resetAt: null });
+    const [userEmail, setUserEmail] = React.useState("");
+    const [stats, setStats] = React.useState({
+        conversations: 0,
+        tokens: 0,
+        tokenLimit: 75,
+        resetAt: null,
+    });
+    const [notificationsEnabled, setNotificationsEnabled] =
+        React.useState(false);
 
     const profileItems = [
         {
@@ -39,8 +54,8 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
             title: t("profile.login"),
             subtitle: t("profile.loginSubtitle"),
             action: "navigateToLogin",
-        }
-    ]
+        },
+    ];
 
     const styles = getStyles(colors);
 
@@ -67,16 +82,67 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
         }
     }, [isAuthenticated]);
 
+    React.useEffect(() => {
+        // Check notification permissions
+        const checkNotificationStatus = async () => {
+            try {
+                const enabled = await areNotificationsEnabled();
+                setNotificationsEnabled(enabled);
+            } catch (error) {
+                console.error("Error checking notification status:", error);
+            }
+        };
+        checkNotificationStatus();
+    }, []);
+
     const handleSubscriptionPress = () => {
         setShowPremiumModal(true);
     };
 
+    // Test functions for notifications (development only)
+    const testTokenResetNotification = async () => {
+        try {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                console.log("No user logged in");
+                return;
+            }
+
+            await sendTokenResetNotification(currentLanguage);
+            console.log("Test notification sent!");
+        } catch (error) {
+            console.error("Error sending test notification:", error);
+        }
+    };
+
+    const testManualTokenReset = async () => {
+        try {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                console.log("No user logged in");
+                return;
+            }
+
+            const result = await manuallyResetUserTokens(currentUser.uid);
+            if (result.success) {
+                console.log("Manual token reset successful!");
+                // Refresh stats
+                const userStats = await getUserStats(currentUser.uid);
+                setStats(userStats);
+            } else {
+                console.log("Manual token reset failed:", result.error);
+            }
+        } catch (error) {
+            console.error("Error with manual token reset:", error);
+        }
+    };
+
     const formatResetTime = (resetAt) => {
-        if (!resetAt) return 'Unknown';
+        if (!resetAt) return "Unknown";
         const now = new Date();
         const reset = new Date(resetAt);
         const diff = reset - now;
-        if (diff <= 0) return 'Now';
+        if (diff <= 0) return "Now";
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         return `in ${hours}h ${minutes}m`;
@@ -95,98 +161,152 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
                     </View>
                     <Text style={styles.userName}>{t("profile.userName")}</Text>
                     <Text style={styles.userEmail}>
-                        {isAuthenticated && userEmail ? userEmail : t("profile.userEmail")}
+                        {isAuthenticated && userEmail
+                            ? userEmail
+                            : t("profile.userEmail")}
                     </Text>
                 </View>
 
-                {isAuthenticated && <View style={styles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{stats.conversations}</Text>
-                        <Text style={styles.statLabel}>
-                            {t("profile.conversations")}
-                        </Text>
+                {isAuthenticated && (
+                    <View style={styles.statsContainer}>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statNumber}>
+                                {stats.conversations}
+                            </Text>
+                            <Text style={styles.statLabel}>
+                                {t("profile.conversations")}
+                            </Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statNumber}>
+                                {stats.tokens}/{stats.tokenLimit}
+                            </Text>
+                            <Text style={styles.statLabel}>
+                                {t("profile.tokens")}
+                            </Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statNumber}>
+                                {formatResetTime(stats.resetAt)}
+                            </Text>
+                            <Text style={styles.statLabel}>
+                                {t("profile.tokenRefresh")}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{stats.tokens}/{stats.tokenLimit}</Text>
-                        <Text style={styles.statLabel}>
-                            {t("profile.tokens")}
-                        </Text>
-                    </View>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>{formatResetTime(stats.resetAt)}</Text>
-                        <Text style={styles.statLabel}>
-                            {t("profile.tokenRefresh")}
-                        </Text>
-                    </View>
-                </View>}
+                )}
 
-                {isAuthenticated ? <View style={styles.menuList}>
-                     {profileItems.map((item, index) => (
-                         <TouchableOpacity
-                             key={index}
-                             style={styles.menuItem}
-                             onPress={
-                                 index === 0
-                                     ? handleSubscriptionPress
-                                     : undefined
-                             }
-                         >
-                             <View style={styles.menuIcon}>
-                                 <Ionicons
-                                     name={item.icon}
-                                     size={24}
-                                     color={colors.accent.lightBlue}
-                                 />
-                             </View>
-                             <View style={styles.menuContent}>
-                                 <Text style={styles.menuTitle}>
-                                     {item.title}
-                                 </Text>
-                                 <Text style={styles.menuSubtitle}>
-                                     {item.subtitle}
-                                 </Text>
-                             </View>
-                             <Ionicons
-                                 name="chevron-forward"
-                                 size={20}
-                                 color={colors.text.muted}
-                             />
-                         </TouchableOpacity>
-                     ))}
-                 </View> : <View style={styles.menuList}>
-                     {loggedOutItems.map((item, index) => (
-                         <TouchableOpacity
-                             key={index}
-                             style={styles.menuItem}
-                             onPress={() => {
-                                 if (item.action === "navigateToLogin") {
-                                     navigation.navigate("LoginRegister");
-                                 }
-                             }}
-                         >
-                             <View style={styles.menuIcon}>
-                                 <Ionicons
-                                     name={item.icon}
-                                     size={24}
-                                     color={colors.accent.lightBlue}
-                                 />
-                             </View>
-                             <View style={styles.menuContent}>
-                                 <Text style={styles.menuTitle}>
-                                     {item.title}
-                                 </Text>
-                                 <Text style={styles.menuSubtitle}>
-                                     {item.subtitle}
-                                 </Text>
-                             </View>
-                             <Ionicons
-                                 name="chevron-forward"
-                                 size={20}
-                                 color={colors.text.muted}
-                             />
-                         </TouchableOpacity>
-                     ))}
-                 </View>}
+                {/* Development/Test buttons - Remove in production */}
+                {__DEV__ && isAuthenticated && (
+                    <View style={styles.testContainer}>
+                        <Text style={styles.testTitle}>Development Tools</Text>
+                        <Text style={styles.testSubtitle}>
+                            Notifications:{" "}
+                            {notificationsEnabled
+                                ? "✅ Enabled"
+                                : "❌ Disabled"}
+                        </Text>
+                        <View style={styles.testButtons}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.testButton,
+                                    {
+                                        backgroundColor:
+                                            colors.accent.lightBlue,
+                                    },
+                                ]}
+                                onPress={testTokenResetNotification}
+                            >
+                                <Text style={styles.testButtonText}>
+                                    Test Notification
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.testButton,
+                                    { backgroundColor: colors.accent.green },
+                                ]}
+                                onPress={testManualTokenReset}
+                            >
+                                <Text style={styles.testButtonText}>
+                                    Reset Tokens
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+
+                {isAuthenticated ? (
+                    <View style={styles.menuList}>
+                        {profileItems.map((item, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.menuItem}
+                                onPress={
+                                    index === 0
+                                        ? handleSubscriptionPress
+                                        : undefined
+                                }
+                            >
+                                <View style={styles.menuIcon}>
+                                    <Ionicons
+                                        name={item.icon}
+                                        size={24}
+                                        color={colors.accent.lightBlue}
+                                    />
+                                </View>
+                                <View style={styles.menuContent}>
+                                    <Text style={styles.menuTitle}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style={styles.menuSubtitle}>
+                                        {item.subtitle}
+                                    </Text>
+                                </View>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={colors.text.muted}
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                ) : (
+                    <View style={styles.menuList}>
+                        {loggedOutItems.map((item, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    if (item.action === "navigateToLogin") {
+                                        navigation.navigate("LoginRegister");
+                                    }
+                                }}
+                            >
+                                <View style={styles.menuIcon}>
+                                    <Ionicons
+                                        name={item.icon}
+                                        size={24}
+                                        color={colors.accent.lightBlue}
+                                    />
+                                </View>
+                                <View style={styles.menuContent}>
+                                    <Text style={styles.menuTitle}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style={styles.menuSubtitle}>
+                                        {item.subtitle}
+                                    </Text>
+                                </View>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={colors.text.muted}
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
             </View>
             <PremiumModal
                 visible={showPremiumModal}
@@ -292,6 +412,42 @@ const getStyles = (colors) =>
         menuSubtitle: {
             fontSize: 14,
             color: colors.text.secondary,
+        },
+        // Test button styles (development only)
+        testContainer: {
+            backgroundColor: colors.background.card,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            marginBottom: 20,
+        },
+        testTitle: {
+            fontSize: 16,
+            fontWeight: "bold",
+            color: colors.text.primary,
+            marginBottom: 8,
+        },
+        testSubtitle: {
+            fontSize: 14,
+            color: colors.text.secondary,
+            marginBottom: 12,
+        },
+        testButtons: {
+            flexDirection: "row",
+            gap: 12,
+        },
+        testButton: {
+            flex: 1,
+            paddingVertical: 10,
+            paddingHorizontal: 16,
+            borderRadius: 8,
+            alignItems: "center",
+        },
+        testButtonText: {
+            color: "#FFFFFF",
+            fontSize: 14,
+            fontWeight: "600",
         },
     });
 
