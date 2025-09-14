@@ -1,4 +1,6 @@
 # AllyAI Mobile
+<img width="1536" height="1024" alt="banner" src="https://github.com/user-attachments/assets/d20bf521-1587-45c5-949c-25c8cbea0fa5" />
+
 
 ## Description
 
