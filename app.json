@@ -33,7 +33,15 @@
       }
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "allyai",
+          "organization": "allyai"
+        }
+      ]
     ]
   }
 }
