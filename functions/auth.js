@@ -5,7 +5,10 @@ import {
     signOut as firebaseSignOut,
     sendPasswordResetEmail as firebaseSendPasswordResetEmail,
     onAuthStateChanged as firebaseOnAuthStateChanged,
-    deleteUser
+    deleteUser,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider
 } from 'firebase/auth';
 import { ref, set, get, update, remove } from 'firebase/database';
 
@@ -181,6 +184,62 @@ export const removeAccount = async () => {
                 break;
             default:
                 errorMessage = 'Failed to delete account. Please try again';
+        }
+
+        return {
+            success: false,
+            error: errorMessage
+        };
+    }
+};
+
+/**
+ * Change user password
+ * @param {string} currentPassword - Current password for reauthentication
+ * @param {string} newPassword - New password
+ * @returns {Promise<Object>} Success or error
+ */
+export const changePassword = async (currentPassword, newPassword) => {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            return {
+                success: false,
+                error: 'No user is currently signed in'
+            };
+        }
+
+        // Reauthenticate user with current password
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+
+        // Update password
+        await updatePassword(user, newPassword);
+
+        return {
+            success: true
+        };
+    } catch (error) {
+        let errorMessage = '';
+
+        switch (error.code) {
+            case 'auth/wrong-password':
+                errorMessage = 'Current password is incorrect';
+                break;
+            case 'auth/weak-password':
+                errorMessage = 'New password should be at least 6 characters';
+                break;
+            case 'auth/requires-recent-login':
+                errorMessage = 'Please sign in again before changing your password';
+                break;
+            case 'auth/user-disabled':
+                errorMessage = 'This account has been disabled';
+                break;
+            case 'auth/user-not-found':
+                errorMessage = 'User account not found';
+                break;
+            default:
+                errorMessage = 'Failed to change password. Please try again';
         }
 
         return {

@@ -15,6 +15,8 @@ import {
     ChangePassword,
     LogoutButton,
     DeleteAccount,
+    LogoutModal,
+    DeleteAccountModal,
 } from "../components";
 import { signOut, removeAccount, getCurrentUser } from "../functions/auth";
 
@@ -22,6 +24,8 @@ const AccountManagementScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [userEmail, setUserEmail] = React.useState('');
+    const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
     React.useEffect(() => {
         const currentUser = getCurrentUser();
@@ -30,57 +34,33 @@ const AccountManagementScreen = ({ navigation }) => {
         }
     }, []);
 
-    const handleLogout = async () => {
-        Alert.alert(
-            t("accountManagement.logout.title"),
-            "Are you sure you want to sign out?",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel",
-                },
-                {
-                    text: "Sign Out",
-                    style: "destructive",
-                    onPress: async () => {
-                        const result = await signOut();
-                        if (result.success) {
-                            // Navigate back to the main app - authentication state will be handled by AppContainer
-                            navigation.goBack();
-                        } else {
-                            Alert.alert("Error", result.error);
-                        }
-                    },
-                },
-            ]
-        );
+    const handleLogout = () => {
+        setShowLogoutModal(true);
     };
 
-    const handleDeleteAccount = async () => {
-        Alert.alert(
-            t("accountManagement.deleteAccount.title"),
-            "Are you sure you want to permanently delete your account? This action cannot be undone.",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel",
-                },
-                {
-                    text: "Delete Account",
-                    style: "destructive",
-                    onPress: async () => {
-                        const result = await removeAccount();
-                        if (result.success) {
-                            Alert.alert("Success", "Your account has been deleted.");
-                            // Navigate back to the main app - authentication state will be handled by AppContainer
-                            navigation.goBack();
-                        } else {
-                            Alert.alert("Error", result.error);
-                        }
-                    },
-                },
-            ]
-        );
+    const handleLogoutConfirm = async () => {
+        const result = await signOut();
+        if (result.success) {
+            // Navigate back to the main app - authentication state will be handled by AppContainer
+            navigation.goBack();
+        } else {
+            Alert.alert("Error", result.error);
+        }
+    };
+
+    const handleDeleteAccount = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteAccountConfirm = async () => {
+        const result = await removeAccount();
+        if (result.success) {
+            Alert.alert("Success", "Your account has been deleted.");
+            // Navigate back to the main app - authentication state will be handled by AppContainer
+            navigation.goBack();
+        } else {
+            Alert.alert("Error", result.error);
+        }
     };
 
     const styles = getStyles(colors);
@@ -130,6 +110,18 @@ const AccountManagementScreen = ({ navigation }) => {
                     <DeleteAccount onPress={handleDeleteAccount} />
                 </View>
             </View>
+
+            <LogoutModal
+                visible={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={handleLogoutConfirm}
+            />
+
+            <DeleteAccountModal
+                visible={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteAccountConfirm}
+            />
         </ScrollView>
     );
 };

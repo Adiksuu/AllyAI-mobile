@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { changePassword } from "../functions/auth";
 
 const ChangePassword = () => {
     const { t } = useTranslation();
@@ -17,10 +18,54 @@ const ChangePassword = () => {
     const [newPassword, setNewPassword] = useState("");
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
-    const handleChangePassword = () => {
-        // TODO: Implement password change functionality
-        console.log("Changing password...");
+    const handleChangePassword = async () => {
+        // Clear previous messages
+        setError("");
+        setSuccess(false);
+
+        // Validation
+        if (!currentPassword.trim()) {
+            setError("Please enter your current password");
+            return;
+        }
+
+        if (!newPassword.trim()) {
+            setError("Please enter a new password");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setError("New password should be at least 6 characters");
+            return;
+        }
+
+        if (currentPassword === newPassword) {
+            setError("New password should be different from current password");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const result = await changePassword(currentPassword, newPassword);
+
+            if (result.success) {
+                setSuccess(true);
+                setCurrentPassword("");
+                setNewPassword("");
+                setError("");
+            } else {
+                setError(result.error);
+            }
+        } catch (error) {
+            setError("An unexpected error occurred. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const styles = getStyles(colors);
@@ -104,12 +149,35 @@ const ChangePassword = () => {
                     </View>
                 </View>
 
+                {error ? (
+                    <View style={styles.messageContainer}>
+                        <Ionicons
+                            name="alert-circle"
+                            size={20}
+                            color={colors.status.error}
+                        />
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : null}
+
+                {success ? (
+                    <View style={styles.messageContainer}>
+                        <Ionicons
+                            name="checkmark-circle"
+                            size={20}
+                            color={colors.status.success}
+                        />
+                        <Text style={styles.successText}>Password changed successfully!</Text>
+                    </View>
+                ) : null}
+
                 <TouchableOpacity
-                    style={styles.confirmButton}
+                    style={[styles.confirmButton, isLoading && styles.confirmButtonDisabled]}
                     onPress={handleChangePassword}
+                    disabled={isLoading}
                 >
                     <Text style={styles.confirmButtonText}>
-                        {t("changePassword.confirmButton")}
+                        {isLoading ? "Changing..." : t("changePassword.confirmButton")}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -198,6 +266,27 @@ const getStyles = (colors) =>
             fontSize: 16,
             fontWeight: "600",
             color: colors.primary.black,
+        },
+        confirmButtonDisabled: {
+            opacity: 0.6,
+        },
+        messageContainer: {
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 12,
+            borderRadius: 8,
+            marginTop: 8,
+            gap: 8,
+        },
+        errorText: {
+            fontSize: 14,
+            color: colors.status.error,
+            flex: 1,
+        },
+        successText: {
+            fontSize: 14,
+            color: colors.status.success,
+            flex: 1,
         },
     });
 

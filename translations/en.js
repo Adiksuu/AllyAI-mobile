@@ -245,7 +245,7 @@ export const en = {
 
     // Account Management Screen
     accountManagement: {
-        title: "Account Management",
+        title: "Account",
         subtitle: "Manage your account and security",
         accountInfo: "Account Information",
         security: "Security",
