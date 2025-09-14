@@ -122,6 +122,7 @@ export const en = {
         clearAll: "Clear All",
         emptyTitle: "No conversations yet",
         emptySubtitle: "Start your first chat with AllyAI",
+        untitledChat: "Untitled Chat",
         recentChats: {
             1: {
                 title: "React Native Navigation Help",
@@ -238,6 +239,10 @@ export const en = {
             generic: "An unexpected error occurred. Please try again.",
             passwordsDontMatch: "Passwords don't match",
             passwordResetSent: "Password reset email sent! Check your inbox.",
+            authPopupClosed: "Sign-in popup was closed before completion",
+            authCancelled: "Sign-in was cancelled",
+            authPopupBlocked: "Sign-in popup was blocked by browser",
+            accountExistsDifferentCredential: "An account already exists with the same email but different sign-in credentials",
         },
     },
 
@@ -260,8 +265,6 @@ export const en = {
         hasAccount: "Already have an account?",
         signUp: "Sign Up",
         signIn: "Sign In",
-        google: "Continue with Google",
-        facebook: "Continue with Facebook",
         termsAndPrivacy: "By signing up, you agree to our Terms of Service and Privacy Policy",
         loginSuccess: "Login successful!",
         registerSuccess: "Account created successfully!",
@@ -270,6 +273,7 @@ export const en = {
         weakPassword: "Password should be at least 6 characters",
         invalidEmail: "Please enter a valid email address",
         passwordsDontMatch: "Passwords don't match",
+        signingIn: "Signing in...",
     },
 
     // AI Chatbot Settings Screen

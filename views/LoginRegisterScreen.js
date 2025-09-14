@@ -11,7 +11,6 @@ import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
-import SocialLoginButtons from "../components/SocialLoginButtons";
 
 const LoginRegisterScreen = ({ navigation }) => {
     const { t } = useTranslation();
@@ -33,15 +32,6 @@ const LoginRegisterScreen = ({ navigation }) => {
         navigation.goBack();
     };
 
-    const handleGoogleLogin = () => {
-        // TODO: Implement Google OAuth
-        console.log("Google login pressed");
-    };
-
-    const handleFacebookLogin = () => {
-        // TODO: Implement Facebook OAuth
-        console.log("Facebook login pressed");
-    };
 
     const styles = getStyles(colors);
 
@@ -84,10 +74,6 @@ const LoginRegisterScreen = ({ navigation }) => {
                     )}
                 </View>
 
-                <SocialLoginButtons
-                    onGooglePress={handleGoogleLogin}
-                    onFacebookPress={handleFacebookLogin}
-                />
             </View>
         </ScrollView>
     );

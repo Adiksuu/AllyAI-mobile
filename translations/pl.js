@@ -123,6 +123,7 @@ export const pl = {
         clearAll: "Wyczyść Wszystko",
         emptyTitle: "Brak rozmów",
         emptySubtitle: "Rozpocznij swoją pierwszą rozmowę z AllyAI",
+        untitledChat: "Rozmowa bez tytułu",
         recentChats: {
             1: {
                 title: "React Native Navigation Help",
@@ -239,6 +240,10 @@ export const pl = {
             generic: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
             passwordsDontMatch: "Hasła nie są identyczne",
             passwordResetSent: "Email z resetowaniem hasła został wysłany! Sprawdź swoją skrzynkę odbiorczą.",
+            authPopupClosed: "Okno logowania zostało zamknięte przed ukończeniem",
+            authCancelled: "Logowanie zostało anulowane",
+            authPopupBlocked: "Okno logowania zostało zablokowane przez przeglądarkę",
+            accountExistsDifferentCredential: "Konto już istnieje z tym samym emailem, ale innymi danymi logowania",
         },
     },
 
@@ -261,8 +266,6 @@ export const pl = {
         hasAccount: "Masz już konto?",
         signUp: "Zarejestruj Się",
         signIn: "Zaloguj Się",
-        google: "Kontynuuj z Google",
-        facebook: "Kontynuuj z Facebook",
         termsAndPrivacy: "Rejestrując się, zgadzasz się z naszymi Warunkami Usługi i Polityką Prywatności",
         loginSuccess: "Logowanie udane!",
         registerSuccess: "Konto utworzone pomyślnie!",
@@ -271,6 +274,7 @@ export const pl = {
         weakPassword: "Hasło powinno mieć co najmniej 6 znaków",
         invalidEmail: "Wprowadź prawidłowy adres email",
         passwordsDontMatch: "Hasła nie są identyczne",
+        signingIn: "Logowanie...",
     },
 
     // AI Chatbot Settings Screen

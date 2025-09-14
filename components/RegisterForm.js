@@ -145,6 +145,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
                 <Text style={styles.errorText}>{error}</Text>
             ) : null}
 
+
             <Text style={styles.termsText}>
                 {t("auth.termsAndPrivacy")}
             </Text>

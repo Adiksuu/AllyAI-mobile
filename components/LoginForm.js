@@ -127,6 +127,7 @@ const LoginForm = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
                 <Text style={styles.errorText}>{error}</Text>
             ) : null}
 
+
             <View style={styles.switchContainer}>
                 <Text style={styles.switchText}>{t("auth.noAccount")}</Text>
                 <TouchableOpacity onPress={onSwitchToRegister}>

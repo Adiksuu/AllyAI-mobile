@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -9,45 +9,48 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { getChatHistory } from "../functions/chat";
+import { getCurrentUser } from "../functions/auth";
 
 const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
 
-    // Mock data - replace with real data from your state/API
-    const chatHistory = [
-        {
-            id: "1",
-            title: t("chatHistory.recentChats.1.title"),
-            lastMessage: t("chatHistory.recentChats.1.lastMessage"),
-            timestamp: t("chatHistory.recentChats.1.timestamp"),
-            messageCount: 5,
-        },
-        {
-            id: "2",
-            title: t("chatHistory.recentChats.2.title"),
-            lastMessage: t("chatHistory.recentChats.2.lastMessage"),
-            timestamp: t("chatHistory.recentChats.2.timestamp"),
-            messageCount: 12,
-        },
-        {
-            id: "3",
-            title: t("chatHistory.recentChats.3.title"),
-            lastMessage: t("chatHistory.recentChats.3.lastMessage"),
-            timestamp: t("chatHistory.recentChats.3.timestamp"),
-            messageCount: 8,
-        },
-        {
-            id: "4",
-            title: t("chatHistory.recentChats.4.title"),
-            lastMessage: t("chatHistory.recentChats.4.lastMessage"),
-            timestamp: t("chatHistory.recentChats.4.timestamp"),
-            messageCount: 15,
-        },
-    ];
+    const [chatHistory, setChatHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            const user = getCurrentUser();
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const chats = await getChatHistory(user.uid, t);
+                setChatHistory(chats);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchChats();
+    }, []);
 
     const formatTime = (timestamp) => {
-        return timestamp;
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
     };
 
     const styles = getStyles(colors);
@@ -56,7 +59,7 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>{t("home.recentChats")}</Text>
-                {chatHistory.length > 0 && (
+                {chatHistory.length > 0 && !loading && (
                     <TouchableOpacity
                         onPress={onClearHistory}
                         style={styles.clearButton}
@@ -68,7 +71,16 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                 )}
             </View>
 
-            {chatHistory.length === 0 ? (
+            {loading ? (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyTitle}>Loading chats...</Text>
+                </View>
+            ) : error ? (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyTitle}>Error loading chats</Text>
+                    <Text style={styles.emptySubtitle}>{error}</Text>
+                </View>
+            ) : chatHistory.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Ionicons
                         name="chatbubbles-outline"

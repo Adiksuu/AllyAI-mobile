@@ -24,4 +24,3 @@ export { default as DeleteAccountModal } from "./DeleteAccountModal";
 export { default as DeleteAccountModalContent } from "./DeleteAccountModalContent";
 export { default as LoginForm } from "./LoginForm";
 export { default as RegisterForm } from "./RegisterForm";
-export { default as SocialLoginButtons } from "./SocialLoginButtons";
