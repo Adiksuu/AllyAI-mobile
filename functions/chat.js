@@ -46,8 +46,7 @@ const fetchImageAsBase64 = async (imageUrl) => {
 /**
  * Upload image to Cloudinary
  * @param {string} uid - User ID
- * @param {string} uri - Image URI
- * @param {string} fileName - Original file name
+ * @param {Object} imageData - Image data object with uri property
  * @returns {Promise<string>} Download URL of uploaded image
  */
 export const uploadImage = async (uid, imageData) => {
@@ -58,6 +57,10 @@ export const uploadImage = async (uid, imageData) => {
 
         // Extract image URI from expo-image-picker result
         const uri = imageData.uri || imageData.path;
+
+        if (!uri) {
+            throw new Error('Image URI is missing from imageData');
+        }
 
         console.log('Starting image upload for URI:', uri);
 
@@ -103,6 +106,64 @@ export const uploadImage = async (uid, imageData) => {
         return result.secure_url;
     } catch (error) {
         console.error('Error uploading image:', error);
+
+        // Provide user-friendly error messages
+        if (error.message.includes('Network request failed')) {
+            throw new Error('Network error - please check your internet connection');
+        } else if (error.message.includes('Upload failed')) {
+            throw new Error('Upload failed - please check your Cloudinary configuration');
+        }
+
+        throw error;
+    }
+};
+
+/**
+ * Upload base64 image to Cloudinary
+ * @param {string} uid - User ID
+ * @param {string} base64Data - Base64 encoded image data
+ * @returns {Promise<string>} Download URL of uploaded image
+ */
+export const uploadBase64Image = async (uid, base64Data) => {
+    try {
+        if (!CLOUDINARY_CLOUD_NAME) {
+            throw new Error('Cloudinary cloud name is missing');
+        }
+
+        // Create FormData for upload
+        const formData = new FormData();
+        formData.append('file', `data:image/jpeg;base64,${base64Data}`);
+        formData.append('upload_preset', 'chat_images');
+        formData.append('folder', `chat_images/${uid}`);
+
+        console.log('Uploading base64 image to Cloudinary...');
+
+        // Upload to Cloudinary
+        const uploadResponse = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData,
+            }
+        );
+
+        if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error('Upload error response:', errorText);
+            throw new Error(`Upload failed: ${uploadResponse.status}`);
+        }
+
+        const result = await uploadResponse.json();
+
+        if (result.error) {
+            console.error('Cloudinary error:', result.error);
+            throw new Error(result.error.message);
+        }
+
+        console.log('Base64 image uploaded successfully:', result.secure_url);
+        return result.secure_url;
+    } catch (error) {
+        console.error('Error uploading base64 image:', error);
 
         // Provide user-friendly error messages
         if (error.message.includes('Network request failed')) {
@@ -322,7 +383,7 @@ export const removeChatHistory = async (uid) => {
  * @param {string} message - Message text
  * @param {string} model - Model name
  * @param {string} author - Author of the message ("user" or "AI")
- * @param {string|null} imageUri - Image URI to upload (optional)
+ * @param {Object|string|null} imageUri - Image data object with uri property, or image URL string, or null
  * @returns {Promise<string>} The chat ID
  */
 export const sendMessage = async (uid, chatId, message, model, author = "user", imageUri = null) => {
@@ -335,7 +396,15 @@ export const sendMessage = async (uid, chatId, message, model, author = "user", 
         // Upload image if provided
         let imageUrl = null;
         if (imageUri) {
-            imageUrl = await uploadImage(uid, imageUri);
+            // If imageUri is already a URL (from AI generation), use it directly
+            if (typeof imageUri === 'string' && imageUri.startsWith('http')) {
+                imageUrl = imageUri;
+            } else if (typeof imageUri === 'object' && (imageUri.uri || imageUri.path)) {
+                // If it's an image data object with uri/path property, upload it
+                imageUrl = await uploadImage(uid, imageUri);
+            } else {
+                console.warn('Invalid imageUri format:', imageUri);
+            }
         }
 
         const messagesRef = ref(database, `chats/${uid}/ALLY-3/${chatId}/messages`);
@@ -358,15 +427,72 @@ export const sendMessage = async (uid, chatId, message, model, author = "user", 
 };
 
 /**
+ * Generate image using Hugging Face API
+ * @param {string} uid - User ID
+ * @param {string} prompt - The image generation prompt
+ * @returns {Promise<string>} Image URL from Cloudinary
+ */
+export const generateImageResponse = async (uid, prompt) => {
+    try {
+        const data = {
+            inputs: prompt,
+            parameters: {
+                num_inference_steps: 4,
+                guidance_scale: 0.0
+            }
+        };
+
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell",
+            {
+                headers: {
+                    Authorization:
+                        "Bearer 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",
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Hugging Face API error: ${response.status}`);
+        }
+
+        const result = await response.arrayBuffer();
+        const uint8Array = new Uint8Array(result);
+        let binary = '';
+        for (let i = 0; i < uint8Array.length; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+        }
+        const base64Data = btoa(binary);
+
+        // Upload base64 image directly to Cloudinary
+        const imageUrl = await uploadBase64Image(uid, base64Data);
+
+        return imageUrl;
+    } catch (error) {
+        console.error("Error generating image:", error);
+        throw new Error("Failed to generate image. Please try again.");
+    }
+};
+
+/**
  * Generate AI response using Gemini API
  * @param {string} uid - User ID
  * @param {string} userMessage - The user's message
  * @param {Array} chatHistory - Array of previous messages
  * @param {string|null} imageUrl - Image URL to analyze (optional)
- * @returns {Promise<string>} AI response text
+ * @param {string} model - The model to use ('ALLY-3' or 'ALLY-IMAGINE')
+ * @returns {Promise<string>} AI response text or image URL
  */
-export const generateAIResponse = async (uid, userMessage, chatHistory = [], imageUrl = null) => {
+export const generateAIResponse = async (uid, userMessage, chatHistory = [], imageUrl = null, model = 'ALLY-3') => {
     try {
+        // Handle image generation model
+        if (model === 'ALLY-IMAGINE') {
+            return await generateImageResponse(uid, userMessage);
+        }
+
         if (!genAI) {
             return "AI service is not configured. Please check your API key configuration.";
         }
@@ -383,8 +509,8 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         // Build dynamic system instructions based on user settings
         const systemInstruction = buildSystemInstructions(userSettings);
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+        const geminiModel = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
             systemInstruction: systemInstruction
         });
 
@@ -423,8 +549,8 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
                     parts.push({ text: msg.message });
                 }
                 
-                // Add image part if imageUrl exists
-                if (msg.imageUrl && typeof msg.imageUrl === 'string') {
+                // Add image part if imageUrl exists (only for user messages)
+                if (msg.author === 'user' && msg.imageUrl && typeof msg.imageUrl === 'string') {
                     try {
                         const imageData = await fetchImageAsBase64(msg.imageUrl);
                         if (imageData) {
@@ -456,7 +582,7 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
             messageParts.push({ text: "Hello" });
         }
 
-        const chat = model.startChat({
+        const chat = geminiModel.startChat({
             history: processedHistory,
             generationConfig: {
                 temperature: 0.7,

@@ -6,9 +6,10 @@ import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getChatMessages, sendMessage, generateAIResponse } from "../functions/chat";
-import { getCurrentUser } from "../functions/auth";
+import { getCurrentUser, getUserSettings } from "../functions/auth";
+import ModelSelectionModal from "../components/ModelSelectionModal";
 
-const ChatScreen = ({ chatId }) => {
+const ChatScreen = ({ chatId, selectedModel: initialModel = "ALLY-3" }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
     const [messages, setMessages] = useState([]);
@@ -18,6 +19,9 @@ const ChatScreen = ({ chatId }) => {
     const [localChatId, setLocalChatId] = useState(chatId);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [userSettings, setUserSettings] = useState(null);
+    const [selectedModel, setSelectedModel] = useState(initialModel);
+    const [modelModalVisible, setModelModalVisible] = useState(false);
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -48,6 +52,23 @@ const ChatScreen = ({ chatId }) => {
         loadMessages();
     }, [localChatId]);
 
+    // Load user settings
+    useEffect(() => {
+        const loadUserSettings = async () => {
+            try {
+                const user = getCurrentUser();
+                if (user) {
+                    const settings = await getUserSettings(user.uid);
+                    setUserSettings(settings);
+                }
+            } catch (error) {
+                console.error('Error loading user settings:', error);
+            }
+        };
+
+        loadUserSettings();
+    }, []);
+
     // Request permissions for image picker
     useEffect(() => {
         (async () => {
@@ -63,7 +84,7 @@ const ChatScreen = ({ chatId }) => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 allowsEditing: true,
-                aspect: [4, 3],
+                // aspect: [4, 3],
                 quality: 0.8,
             });
 
@@ -93,10 +114,10 @@ const ChatScreen = ({ chatId }) => {
         try {
             let currentChatId = localChatId;
             if (!currentChatId) {
-                currentChatId = await sendMessage(user.uid, null, inputText, "ALLY-3", "user", selectedImage);
+                currentChatId = await sendMessage(user.uid, null, inputText, selectedModel, "user", selectedImage);
                 setLocalChatId(currentChatId);
             } else {
-                await sendMessage(user.uid, currentChatId, inputText, "ALLY-3", "user", selectedImage);
+                await sendMessage(user.uid, currentChatId, inputText, selectedModel, "user", selectedImage);
             }
 
             // Clear selected image after sending
@@ -110,8 +131,15 @@ const ChatScreen = ({ chatId }) => {
                 // Generate AI response (pass image URL if available)
                 const lastMessage = updatedMessages[updatedMessages.length - 1];
                 const imageUrl = lastMessage?.imageUrl || null;
-                const aiMessage = await generateAIResponse(user.uid, inputText, updatedMessages, imageUrl);
-                await sendMessage(user.uid, currentChatId, aiMessage, "ALLY-3", "AI");
+                const aiResponse = await generateAIResponse(user.uid, inputText, updatedMessages, imageUrl, selectedModel);
+
+                if (selectedModel === 'ALLY-IMAGINE') {
+                    // For image generation, aiResponse is the image URL
+                    await sendMessage(user.uid, currentChatId, "", selectedModel, "AI", aiResponse);
+                } else {
+                    // For text responses, aiResponse is the text message
+                    await sendMessage(user.uid, currentChatId, aiResponse, selectedModel, "AI");
+                }
             } finally {
                 setIsGenerating(false);
             }
@@ -131,7 +159,16 @@ const ChatScreen = ({ chatId }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>{t("navigation.chat")}</Text>
+                <View style={styles.headerTop}>
+                    <Text style={styles.title}>{t("navigation.chat")}</Text>
+                    <TouchableOpacity
+                        style={styles.modelSelector}
+                        onPress={() => setModelModalVisible(true)}
+                    >
+                        <Text style={styles.modelText}>{selectedModel}</Text>
+                        <Ionicons name="chevron-down" size={16} color={colors.text.secondary} />
+                    </TouchableOpacity>
+                </View>
                 <Text style={styles.subtitle}>{t("chat.subtitle")}</Text>
             </View>
 
@@ -172,9 +209,17 @@ const ChatScreen = ({ chatId }) => {
                                     </View>
                                 ) : (
                                     <View style={styles.aiMessage}>
-                                        <Markdown style={markdownStyles(colors)}>
-                                            {msg.message}
-                                        </Markdown>
+                                        {msg.imageUrl ? (
+                                            <Image
+                                                source={{ uri: msg.imageUrl }}
+                                                style={styles.generatedImage}
+                                                resizeMode="cover"
+                                            />
+                                        ) : (
+                                            <Markdown style={markdownStyles(colors)}>
+                                                {msg.message}
+                                            </Markdown>
+                                        )}
                                     </View>
                                 )}
                             </View>
@@ -201,9 +246,11 @@ const ChatScreen = ({ chatId }) => {
                 )}
 
                 <View style={styles.inputContainer}>
-                    <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating}>
-                        <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
-                    </TouchableOpacity>
+                    {userSettings && userSettings.tools && userSettings.tools.includes('Image Generation') && (
+                        <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating}>
+                            <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
+                        </TouchableOpacity>
+                    )}
                     <TextInput
                         style={styles.textInput}
                         placeholder={t("chat.placeholder")}
@@ -223,6 +270,13 @@ const ChatScreen = ({ chatId }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <ModelSelectionModal
+                visible={modelModalVisible}
+                onClose={() => setModelModalVisible(false)}
+                onModelSelect={setSelectedModel}
+                currentModel={selectedModel}
+            />
         </View>
     );
 };
@@ -239,11 +293,32 @@ const getStyles = (colors) =>
             borderBottomWidth: 1,
             borderBottomColor: colors.border.primary,
         },
+        headerTop: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 8,
+        },
         title: {
             fontSize: 32,
             fontWeight: "bold",
             color: colors.text.primary,
-            marginBottom: 8,
+        },
+        modelSelector: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.background.secondary,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        modelText: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.text.primary,
+            marginRight: 4,
         },
         subtitle: {
             fontSize: 18,
@@ -282,6 +357,11 @@ const getStyles = (colors) =>
             borderWidth: 1,
             borderColor: colors.border.primary,
             width: '100%',
+        },
+        generatedImage: {
+            width: '100%',
+            height: 300,
+            borderRadius: 12,
         },
         inputArea: {
             padding: 20,

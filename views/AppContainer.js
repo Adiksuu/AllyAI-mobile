@@ -23,15 +23,18 @@ const AppContainer = () => {
     const [hasUpdatedLastLogin, setHasUpdatedLastLogin] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentChatId, setCurrentChatId] = useState(null);
+    const [selectedModel, setSelectedModel] = useState("ALLY-3");
     const { colors, getEffectiveTheme } = useTheme();
 
-    const handleNavigateToChat = (chatId = null) => {
+    const handleNavigateToChat = (chatId = null, model = "ALLY-3") => {
         setActiveTab("chat");
         setCurrentChatId(chatId);
+        setSelectedModel(model);
         // You can add logic here to handle specific chat loading
         if (chatId) {
             console.log("Loading chat:", chatId);
         }
+        console.log("Selected model:", model);
     };
 
     const handleOnboardingComplete = async () => {
@@ -141,7 +144,7 @@ const AppContainer = () => {
             case "home":
                 return <HomeScreen onNavigateToChat={handleNavigateToChat} />;
             case "chat":
-                return <ChatScreen chatId={currentChatId} />;
+                return <ChatScreen chatId={currentChatId} selectedModel={selectedModel} />;
             case "settings":
                 return <SettingsScreen navigation={navigation} isAuthenticated={isAuthenticated} />;
             case "profile":
