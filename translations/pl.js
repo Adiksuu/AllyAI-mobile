@@ -187,6 +187,61 @@ export const pl = {
         loginSubtitle: "Zaloguj się do swojego konta",
     },
 
+    // Modals
+    modals: {
+        logout: {
+            title: "Wyloguj",
+            message: "Czy na pewno chcesz się wylogować ze swojego konta?",
+            confirmButton: "Wyloguj",
+        },
+        deleteAccount: {
+            title: "Usuń Konto",
+            message: "Czy na pewno chcesz trwale usunąć swoje konto? Tej akcji nie można cofnąć i wszystkie dane zostaną utracone.",
+            warning: "Spowoduje to usunięcie wszystkich rozmów, ustawień i informacji o koncie.",
+            confirmButton: "Usuń Konto",
+        },
+    },
+
+    // Change Password
+    changePassword: {
+        currentPassword: "Obecne Hasło",
+        currentPasswordPlaceholder: "Wprowadź obecne hasło",
+        newPassword: "Nowe Hasło",
+        newPasswordPlaceholder: "Wprowadź nowe hasło",
+        confirmButton: "Zmień Hasło",
+        errors: {
+            emptyCurrentPassword: "Wprowadź swoje obecne hasło",
+            emptyNewPassword: "Wprowadź nowe hasło",
+            passwordTooShort: "Nowe hasło powinno mieć co najmniej 6 znaków",
+            samePassword: "Nowe hasło powinno być inne od obecnego hasła",
+            wrongCurrentPassword: "Obecne hasło jest nieprawidłowe",
+            weakPassword: "Nowe hasło powinno mieć co najmniej 6 znaków",
+            requiresRecentLogin: "Zaloguj się ponownie przed zmianą hasła",
+            generic: "Nie udało się zmienić hasła. Spróbuj ponownie.",
+        },
+        success: "Hasło zostało pomyślnie zmienione!",
+        changing: "Zmienianie...",
+    },
+
+    // Auth Errors
+    auth: {
+        errors: {
+            userNotFound: "Nie znaleziono konta z tym adresem email",
+            wrongPassword: "Nieprawidłowe hasło",
+            invalidEmail: "Nieprawidłowy adres email",
+            userDisabled: "To konto zostało wyłączone",
+            tooManyRequests: "Zbyt wiele nieudanych prób. Spróbuj ponownie później",
+            emailAlreadyInUse: "Konto z tym adresem email już istnieje",
+            weakPassword: "Hasło powinno mieć co najmniej 6 znaków",
+            operationNotAllowed: "Konta email/hasło nie są włączone",
+            requiresRecentLogin: "Zaloguj się ponownie przed usunięciem konta",
+            userNotFoundDelete: "Nie znaleziono konta użytkownika",
+            generic: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+            passwordsDontMatch: "Hasła nie są identyczne",
+            passwordResetSent: "Email z resetowaniem hasła został wysłany! Sprawdź swoją skrzynkę odbiorczą.",
+        },
+    },
+
     // Login/Register Screen
     auth: {
         title: "Witaj Spowrotem",
@@ -269,14 +324,6 @@ export const pl = {
         },
     },
 
-    // Change Password
-    changePassword: {
-        currentPassword: "Obecne Hasło",
-        currentPasswordPlaceholder: "Wprowadź obecne hasło",
-        newPassword: "Nowe Hasło",
-        newPasswordPlaceholder: "Wprowadź nowe hasło",
-        confirmButton: "Zmień Hasło",
-    },
 
     // AI Personality
     aiPersonality: {

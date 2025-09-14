@@ -42,7 +42,7 @@ const LoginForm = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
 
     const handleForgotPassword = async () => {
         if (!email.trim()) {
-            setError("Please enter your email address first");
+            setError(t("auth.errors.invalidEmail"));
             return;
         }
 
@@ -50,9 +50,11 @@ const LoginForm = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
         const result = await sendPasswordResetEmail(email.trim());
 
         if (result.success) {
-            setError("Password reset email sent! Check your inbox.");
+            setError(t("auth.errors.passwordResetSent"));
         } else {
-            setError(result.error);
+            // Translate error key to actual message
+            const errorKey = result.error;
+            setError(t(`auth.errors.${errorKey}`));
         }
 
         setIsLoading(false);

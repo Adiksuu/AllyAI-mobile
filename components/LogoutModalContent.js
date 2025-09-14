@@ -20,10 +20,10 @@ const LogoutModalContent = ({ onConfirm, onCancel }) => {
                 />
             </View>
 
-            <Text style={styles.title}>{t("accountManagement.logout.title")}</Text>
+            <Text style={styles.title}>{t("modals.logout.title")}</Text>
 
             <Text style={styles.message}>
-                Are you sure you want to sign out of your account?
+                {t("modals.logout.message")}
             </Text>
 
             <View style={styles.buttonsContainer}>
@@ -46,7 +46,7 @@ const LogoutModalContent = ({ onConfirm, onCancel }) => {
                         color={colors.primary.black}
                     />
                     <Text style={styles.confirmButtonText}>
-                        {t("accountManagement.logout.title")}
+                        {t("modals.logout.confirmButton")}
                     </Text>
                 </TouchableOpacity>
             </View>

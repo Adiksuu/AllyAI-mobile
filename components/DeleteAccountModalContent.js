@@ -20,10 +20,10 @@ const DeleteAccountModalContent = ({ onConfirm, onCancel }) => {
                 />
             </View>
 
-            <Text style={styles.title}>{t("accountManagement.deleteAccount.title")}</Text>
+            <Text style={styles.title}>{t("modals.deleteAccount.title")}</Text>
 
             <Text style={styles.message}>
-                Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.
+                {t("modals.deleteAccount.message")}
             </Text>
 
             <View style={styles.warningContainer}>
@@ -33,7 +33,7 @@ const DeleteAccountModalContent = ({ onConfirm, onCancel }) => {
                     color={colors.status.error}
                 />
                 <Text style={styles.warningText}>
-                    This will delete all your conversations, settings, and account information.
+                    {t("modals.deleteAccount.warning")}
                 </Text>
             </View>
 
@@ -57,7 +57,7 @@ const DeleteAccountModalContent = ({ onConfirm, onCancel }) => {
                         color={colors.primary.white}
                     />
                     <Text style={styles.confirmButtonText}>
-                        Delete Account
+                        {t("modals.deleteAccount.confirmButton")}
                     </Text>
                 </TouchableOpacity>
             </View>

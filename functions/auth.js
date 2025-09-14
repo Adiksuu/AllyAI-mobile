@@ -46,22 +46,22 @@ export const signInWithEmail = async (email, password) => {
 
         switch (error.code) {
             case 'auth/user-not-found':
-                errorMessage = 'No account found with this email address';
+                errorMessage = 'userNotFound';
                 break;
             case 'auth/wrong-password':
-                errorMessage = 'Incorrect password';
+                errorMessage = 'wrongPassword';
                 break;
             case 'auth/invalid-email':
-                errorMessage = 'Invalid email address';
+                errorMessage = 'invalidEmail';
                 break;
             case 'auth/user-disabled':
-                errorMessage = 'This account has been disabled';
+                errorMessage = 'userDisabled';
                 break;
             case 'auth/too-many-requests':
-                errorMessage = 'Too many failed login attempts. Please try again later';
+                errorMessage = 'tooManyRequests';
                 break;
             default:
-                errorMessage = 'Login failed. Please try again';
+                errorMessage = 'generic';
         }
 
         return {
@@ -105,19 +105,19 @@ export const signUpWithEmail = async (email, password) => {
 
         switch (error.code) {
             case 'auth/email-already-in-use':
-                errorMessage = 'An account with this email already exists';
+                errorMessage = 'emailAlreadyInUse';
                 break;
             case 'auth/invalid-email':
-                errorMessage = 'Invalid email address';
+                errorMessage = 'invalidEmail';
                 break;
             case 'auth/weak-password':
-                errorMessage = 'Password should be at least 6 characters';
+                errorMessage = 'weakPassword';
                 break;
             case 'auth/operation-not-allowed':
-                errorMessage = 'Email/password accounts are not enabled';
+                errorMessage = 'operationNotAllowed';
                 break;
             default:
-                errorMessage = 'Registration failed. Please try again';
+                errorMessage = 'generic';
         }
 
         return {
@@ -174,16 +174,16 @@ export const removeAccount = async () => {
 
         switch (error.code) {
             case 'auth/requires-recent-login':
-                errorMessage = 'Please sign in again before deleting your account';
+                errorMessage = 'requiresRecentLogin';
                 break;
             case 'auth/user-not-found':
-                errorMessage = 'User account not found';
+                errorMessage = 'userNotFoundDelete';
                 break;
             case 'auth/user-disabled':
-                errorMessage = 'This account has been disabled';
+                errorMessage = 'userDisabled';
                 break;
             default:
-                errorMessage = 'Failed to delete account. Please try again';
+                errorMessage = 'generic';
         }
 
         return {
@@ -222,24 +222,26 @@ export const changePassword = async (currentPassword, newPassword) => {
     } catch (error) {
         let errorMessage = '';
 
+        // Error messages will be handled by the component using translation keys
+        // Return the raw error for component-level translation
         switch (error.code) {
             case 'auth/wrong-password':
-                errorMessage = 'Current password is incorrect';
+                errorMessage = 'wrongCurrentPassword';
                 break;
             case 'auth/weak-password':
-                errorMessage = 'New password should be at least 6 characters';
+                errorMessage = 'weakPassword';
                 break;
             case 'auth/requires-recent-login':
-                errorMessage = 'Please sign in again before changing your password';
+                errorMessage = 'requiresRecentLogin';
                 break;
             case 'auth/user-disabled':
-                errorMessage = 'This account has been disabled';
+                errorMessage = 'userDisabled';
                 break;
             case 'auth/user-not-found':
-                errorMessage = 'User account not found';
+                errorMessage = 'userNotFoundDelete';
                 break;
             default:
-                errorMessage = 'Failed to change password. Please try again';
+                errorMessage = 'generic';
         }
 
         return {
@@ -282,16 +284,16 @@ export const sendPasswordResetEmail = async (email) => {
 
         switch (error.code) {
             case 'auth/user-not-found':
-                errorMessage = 'No account found with this email address';
+                errorMessage = 'userNotFound';
                 break;
             case 'auth/invalid-email':
-                errorMessage = 'Invalid email address';
+                errorMessage = 'invalidEmail';
                 break;
             case 'auth/too-many-requests':
-                errorMessage = 'Too many requests. Please try again later';
+                errorMessage = 'tooManyRequests';
                 break;
             default:
-                errorMessage = 'Failed to send password reset email';
+                errorMessage = 'generic';
         }
 
         return {

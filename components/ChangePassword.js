@@ -29,22 +29,22 @@ const ChangePassword = () => {
 
         // Validation
         if (!currentPassword.trim()) {
-            setError("Please enter your current password");
+            setError(t("changePassword.errors.emptyCurrentPassword"));
             return;
         }
 
         if (!newPassword.trim()) {
-            setError("Please enter a new password");
+            setError(t("changePassword.errors.emptyNewPassword"));
             return;
         }
 
         if (newPassword.length < 6) {
-            setError("New password should be at least 6 characters");
+            setError(t("changePassword.errors.passwordTooShort"));
             return;
         }
 
         if (currentPassword === newPassword) {
-            setError("New password should be different from current password");
+            setError(t("changePassword.errors.samePassword"));
             return;
         }
 
@@ -59,10 +59,12 @@ const ChangePassword = () => {
                 setNewPassword("");
                 setError("");
             } else {
-                setError(result.error);
+                // Translate error key to actual message
+                const errorKey = result.error;
+                setError(t(`changePassword.errors.${errorKey}`));
             }
         } catch (error) {
-            setError("An unexpected error occurred. Please try again.");
+            setError(t("changePassword.errors.generic"));
         } finally {
             setIsLoading(false);
         }
@@ -167,7 +169,7 @@ const ChangePassword = () => {
                             size={20}
                             color={colors.status.success}
                         />
-                        <Text style={styles.successText}>Password changed successfully!</Text>
+                        <Text style={styles.successText}>{t("changePassword.success")}</Text>
                     </View>
                 ) : null}
 
@@ -177,7 +179,7 @@ const ChangePassword = () => {
                     disabled={isLoading}
                 >
                     <Text style={styles.confirmButtonText}>
-                        {isLoading ? "Changing..." : t("changePassword.confirmButton")}
+                        {isLoading ? t("changePassword.changing") : t("changePassword.confirmButton")}
                     </Text>
                 </TouchableOpacity>
             </View>

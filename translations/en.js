@@ -186,6 +186,61 @@ export const en = {
         loginSubtitle: "Login to your account",
     },
 
+    // Modals
+    modals: {
+        logout: {
+            title: "Sign Out",
+            message: "Are you sure you want to sign out of your account?",
+            confirmButton: "Sign Out",
+        },
+        deleteAccount: {
+            title: "Delete Account",
+            message: "Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.",
+            warning: "This will delete all your conversations, settings, and account information.",
+            confirmButton: "Delete Account",
+        },
+    },
+
+    // Change Password
+    changePassword: {
+        currentPassword: "Current Password",
+        currentPasswordPlaceholder: "Enter current password",
+        newPassword: "New Password",
+        newPasswordPlaceholder: "Enter new password",
+        confirmButton: "Change Password",
+        errors: {
+            emptyCurrentPassword: "Please enter your current password",
+            emptyNewPassword: "Please enter a new password",
+            passwordTooShort: "New password should be at least 6 characters",
+            samePassword: "New password should be different from current password",
+            wrongCurrentPassword: "Current password is incorrect",
+            weakPassword: "New password should be at least 6 characters",
+            requiresRecentLogin: "Please sign in again before changing your password",
+            generic: "Failed to change password. Please try again.",
+        },
+        success: "Password changed successfully!",
+        changing: "Changing...",
+    },
+
+    // Auth Errors
+    auth: {
+        errors: {
+            userNotFound: "No account found with this email address",
+            wrongPassword: "Incorrect password",
+            invalidEmail: "Invalid email address",
+            userDisabled: "This account has been disabled",
+            tooManyRequests: "Too many failed attempts. Please try again later",
+            emailAlreadyInUse: "An account with this email already exists",
+            weakPassword: "Password should be at least 6 characters",
+            operationNotAllowed: "Email/password accounts are not enabled",
+            requiresRecentLogin: "Please sign in again before deleting your account",
+            userNotFoundDelete: "User account not found",
+            generic: "An unexpected error occurred. Please try again.",
+            passwordsDontMatch: "Passwords don't match",
+            passwordResetSent: "Password reset email sent! Check your inbox.",
+        },
+    },
+
     // Login/Register Screen
     auth: {
         title: "Welcome Back",
@@ -268,14 +323,6 @@ export const en = {
         },
     },
 
-    // Change Password
-    changePassword: {
-        currentPassword: "Current Password",
-        currentPasswordPlaceholder: "Enter current password",
-        newPassword: "New Password",
-        newPasswordPlaceholder: "Enter new password",
-        confirmButton: "Change Password",
-    },
 
     // AI Personality
     aiPersonality: {

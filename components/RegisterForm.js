@@ -25,17 +25,17 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
     const validateForm = () => {
         if (!email.trim()) {
-            setError(t("auth.invalidEmail"));
+            setError(t("auth.errors.invalidEmail"));
             return false;
         }
 
         if (!password.trim() || password.length < 6) {
-            setError(t("auth.weakPassword"));
+            setError(t("auth.errors.weakPassword"));
             return false;
         }
 
         if (password !== confirmPassword) {
-            setError(t("auth.passwordsDontMatch"));
+            setError(t("auth.errors.passwordsDontMatch"));
             return false;
         }
 
@@ -53,7 +53,9 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         if (result.success) {
             onRegister(result.user);
         } else {
-            setError(result.error);
+            // Translate error key to actual message
+            const errorKey = result.error;
+            setError(t(`auth.errors.${errorKey}`));
         }
 
         setIsLoading(false);
