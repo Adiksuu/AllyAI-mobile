@@ -2,7 +2,7 @@
   "expo": {
     "name": "AllyAI",
     "slug": "ally-mobile",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "userInterfaceStyle": "dark",
@@ -28,7 +28,7 @@
       "favicon": "./assets/images/logo.png"
     },
     "extra": {
-      "updateDate": "September 14, 2025",
+      "updateDate": "September 15, 2025",
       "eas": {
         "projectId": "e0dcadec-20e5-4853-9d35-dcbf93ea5a2d"
       },

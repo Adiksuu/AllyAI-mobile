@@ -197,7 +197,7 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
                 )}
 
                 {/* Development/Test buttons - Remove in production */}
-                {__DEV__ && isAuthenticated && (
+                {/* {__DEV__ && isAuthenticated && (
                     <View style={styles.testContainer}>
                         <Text style={styles.testTitle}>Development Tools</Text>
                         <Text style={styles.testSubtitle}>
@@ -234,7 +234,7 @@ const ProfileScreen = ({ navigation, isAuthenticated }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                )}
+                )} */}
 
                 {isAuthenticated ? (
                     <View style={styles.menuList}>

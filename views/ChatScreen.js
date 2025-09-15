@@ -397,7 +397,9 @@ const getStyles = (colors) =>
         },
         chatContainer: {
             flex: 1,
-            padding: 20,
+            // padding: 20,
+            marginTop: 20,
+            paddingHorizontal: 20,
         },
         messageContainer: {
             marginBottom: 16,
