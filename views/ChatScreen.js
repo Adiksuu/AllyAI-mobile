@@ -128,7 +128,14 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     };
 
     const handleSend = useCallback(async () => {
-        if (!inputText.trim() || isSending) return;
+        // Early return checks BEFORE capturing values
+        if (!inputText?.trim() || isSending) {
+            return;
+        }
+
+        // Capture input values AFTER validation
+        const userMessageText = inputText.trim();
+        const userImage = selectedImage;
 
         const user = getCurrentUser();
         if (!user) {
@@ -136,29 +143,25 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             navigation.navigate('LoginRegister')
             return;
         }
-
+    
         // Calculate token cost
-        const hasImage = !!selectedImage;
+        const hasImage = !!userImage;
         const tokenCost = calculateTokenCost(selectedModel, hasImage, hasImage ? 1 : 0);
-
+    
         // Check if user can afford the tokens
         const canAfford = await canAffordTokens(user.uid, tokenCost);
         if (!canAfford) {
             setPremiumModalVisible(true);
             return;
         }
-
-        // Immediately disable input and show user message
-        const userMessageText = inputText.trim();
-        const userImage = selectedImage;
-
-        // Batch state updates for better performance
+    
+        // Clear input immediately after validation and capture
         React.startTransition(() => {
             setIsSending(true);
-            setInputText("");
+            setInputText("");  // Clear input after capturing the value
             setSelectedImage(null);
         });
-
+    
         // Add user message to UI immediately
         const tempUserMessage = {
             id: `temp-${Date.now()}`,
@@ -167,7 +170,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             timestamp: new Date().toISOString(),
             imageUrl: null // Will be set after upload
         };
-
+    
         // If there's an image, we need to upload it first
         if (userImage) {
             try {
@@ -176,14 +179,16 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             } catch (uploadError) {
                 console.error('Error uploading image:', uploadError);
                 setError('Failed to upload image');
-                setIsSending(false);
+                React.startTransition(() => {
+                    setIsSending(false);
+                });
                 return;
             }
         }
-
+    
         // Update messages state immediately
         setMessages(prevMessages => [...prevMessages, tempUserMessage]);
-
+    
         try {
             let currentChatId = localChatId;
             if (!currentChatId) {
@@ -192,20 +197,20 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             } else {
                 await sendMessage(user.uid, currentChatId, userMessageText, selectedModel, "user", userImage);
             }
-
+    
             // Deduct tokens for user message
             await deductTokens(user.uid, tokenCost);
-
+    
             // Get updated messages for AI context
             const updatedMessages = await getChatMessages(user.uid, currentChatId);
-
+    
             setIsGenerating(true);
             try {
                 // Generate AI response (pass image URL if available)
                 const lastMessage = updatedMessages[updatedMessages.length - 1];
                 const imageUrl = lastMessage?.imageUrl || null;
                 const aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel);
-
+    
                 if (selectedModel === 'ALLY-IMAGINE') {
                     // For image generation, aiResponse is the image URL
                     await sendMessage(user.uid, currentChatId, "", selectedModel, "AI", aiResponse);
@@ -216,24 +221,25 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             } finally {
                 setIsGenerating(false);
             }
-
+    
             // Reload messages to get the complete conversation
             const finalMessages = await getChatMessages(user.uid, currentChatId);
-            startTransition(() => {
+            React.startTransition(() => {
                 setMessages(finalMessages);
             });
         } catch (err) {
+            console.error('Error in handleSend:', err);
             setError(err.message);
             // Remove the temporary message on error
-            startTransition(() => {
+            React.startTransition(() => {
                 setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempUserMessage.id));
             });
         } finally {
-            startTransition(() => {
+            React.startTransition(() => {
                 setIsSending(false);
             });
         }
-    }, [selectedModel, localChatId, userSettings, t]);
+    }, [inputText, selectedImage, selectedModel, localChatId, userSettings, t, isSending]);
 
     const styles = useMemo(() => getStyles(colors), [colors]);
     const memoizedMarkdownStyles = useMemo(() => markdownStyles(colors), [colors]);
@@ -379,9 +385,9 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                     <TouchableOpacity
                         style={styles.sendButton}
                         onPress={handleSend}
-                        disabled={isGenerating || isSending || !inputText.trim()}
+                        disabled={isGenerating || isSending || !inputText?.trim()}
                     >
-                        <Ionicons name="send" size={24} color={isGenerating || !inputText.trim() ? colors.text.muted : colors.text.primary} />
+                        <Ionicons name="send" size={24} color={isGenerating || !inputText?.trim() ? colors.text.muted : colors.text.primary} />
                     </TouchableOpacity>
                 </View>
             </View>

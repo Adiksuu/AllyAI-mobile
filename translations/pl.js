@@ -339,6 +339,10 @@ export const pl = {
             title: "Długość Rozmowy",
             subtitle: "Ustaw długość kontekstu",
         },
+        responseSpeed: {
+            title: "Szybkość Odpowiedzi",
+            subtitle: "Wybierz szybkość odpowiedzi vs jakość",
+        },
         capabilities: {
             title: "Możliwości AI",
             subtitle: "Włącz/wyłącz funkcje",
@@ -429,6 +433,20 @@ export const pl = {
         long: {
             name: "Długa",
             description: "25+ wiadomości",
+        },
+    },
+
+    // Response Speed
+    responseSpeed: {
+        title: "Szybkość Odpowiedzi",
+        subtitle: "Wybierz między szybszymi odpowiedziami lub lepszą jakością",
+        faster: {
+            name: "Szybsza",
+            description: "Szybkie odpowiedzi używając ALLY-3 Turbo",
+        },
+        enhanced: {
+            name: "Ulepszona",
+            description: "Odpowiedzi wysokiej jakości używając ALLY-3",
         },
     },
 

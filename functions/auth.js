@@ -163,6 +163,7 @@ export const signUpWithEmail = async (email, password) => {
                 personality: "Friendly",
                 responseStyle: "Balanced",
                 length: "Medium",
+                responseSpeed: "enhanced",
                 tools: [
                     "Web Search",
                     "Image Generation",
@@ -602,25 +603,31 @@ export const getUserSettings = async (uid) => {
     try {
         const userRef = ref(database, `users/${uid}/settings`);
         const snapshot = await get(userRef);
-        return (
-            snapshot.val() || {
+        const settings = snapshot.val();
+
+        if (!settings || Object.keys(settings).length === 0) {
+            const defaultSettings = {
                 personality: "Friendly",
                 responseStyle: "Balanced",
                 length: "Medium",
+                responseSpeed: "enhanced",
                 tools: [
                     "Web Search",
                     "Image Generation",
                     "Memory & Context",
                     "File Analysis",
                 ],
-            }
-        );
+            };
+            return defaultSettings;
+        }
+        return settings;
     } catch (error) {
         console.error("Error getting user settings:", error);
-        return {
+        const defaultSettings = {
             personality: "Friendly",
             responseStyle: "Balanced",
             length: "Medium",
+            responseSpeed: "enhanced",
             tools: [
                 "Web Search",
                 "Image Generation",
@@ -628,6 +635,7 @@ export const getUserSettings = async (uid) => {
                 "File Analysis",
             ],
         };
+        return defaultSettings;
     }
 };
 
@@ -658,6 +666,7 @@ export const resetUserSettings = async (uid) => {
             personality: "Friendly",
             responseStyle: "Balanced",
             length: "Medium",
+            responseSpeed: "enhanced",
             tools: [
                 "Web Search",
                 "Image Generation",

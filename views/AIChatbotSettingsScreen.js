@@ -15,6 +15,7 @@ import {
     ConversationLengthSelector,
     AICapabilitiesToggle,
     ResetAISettings,
+    ResponseSpeedSelector,
 } from "../components";
 import { getCurrentUser, getUserSettings, updateUserSettings, resetUserSettings } from "../functions/auth";
 
@@ -26,6 +27,7 @@ const AIChatbotSettingsScreen = ({ navigation }) => {
         personality: "Friendly",
         responseStyle: "Balanced",
         length: "Medium",
+        responseSpeed: "enhanced",
         tools: ['Web Search', 'Image Generation', 'Memory & Context', 'File Analysis']
     });
     const [isLoading, setIsLoading] = useState(true);
@@ -130,6 +132,17 @@ const AIChatbotSettingsScreen = ({ navigation }) => {
                     <ConversationLengthSelector
                         selectedLength={settings.length}
                         onLengthChange={(value) => updateSetting('length', value)}
+                        disabled={isLoading}
+                    />
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
+                        {t("aiChatbotSettings.responseSpeed.title")}
+                    </Text>
+                    <ResponseSpeedSelector
+                        selectedSpeed={settings.responseSpeed}
+                        onSpeedChange={(value) => updateSetting('responseSpeed', value)}
                         disabled={isLoading}
                     />
                 </View>

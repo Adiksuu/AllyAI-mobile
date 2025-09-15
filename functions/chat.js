@@ -182,7 +182,7 @@ export const uploadBase64Image = async (uid, base64Data) => {
  * @returns {string} System instruction string
  */
 const buildSystemInstructions = (settings) => {
-    const { personality, responseStyle, length, tools } = settings;
+    const { personality, responseStyle, length, tools } = settings || {};
 
     let instructions = `You are ALLY, an advanced AI assistant created by the ALLY team. `;
 
@@ -504,14 +504,17 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
             userSettings = await getUserSettings(uid);
         } catch (settingsError) {
             console.warn('Error fetching user settings, using defaults:', settingsError);
-            userSettings = {};
+            userSettings = null;
         }
 
         // Build dynamic system instructions based on user settings
         const systemInstruction = buildSystemInstructions(userSettings);
 
+        // Select model based on response speed setting (default to enhanced for backward compatibility)
+        const modelName = (userSettings && userSettings.responseSpeed === "faster") ? "gemini-1.5-flash" : "gemini-2.5-flash";
+
         const geminiModel = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: modelName,
             systemInstruction: systemInstruction
         });
 
@@ -520,7 +523,7 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         if (userMessage && typeof userMessage === 'string') {
             messageParts.push({ text: userMessage });
         }
-        
+
         if (imageUrl) {
             try {
                 const imageData = await fetchImageAsBase64(imageUrl);
@@ -596,7 +599,7 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         return response.text();
     } catch (error) {
         console.error("Error generating AI response:", error);
-        
+
         // Provide more specific error messages
         if (error.message?.includes('API_KEY')) {
             return "API key error. Please check your Gemini API configuration.";
@@ -605,7 +608,7 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
             return "Network error. Please check your internet connection and try again.";
         }
-        
+
         return "Sorry, I couldn't generate a response right now. Please try again later.";
     }
 };

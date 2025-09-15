@@ -334,6 +334,10 @@ export const en = {
             title: "Conversation Length",
             subtitle: "Set context length",
         },
+        responseSpeed: {
+            title: "Response Speed",
+            subtitle: "Choose response speed vs quality",
+        },
         capabilities: {
             title: "AI Capabilities",
             subtitle: "Enable/disable features",
@@ -424,6 +428,20 @@ export const en = {
         long: {
             name: "Long",
             description: "25+ messages",
+        },
+    },
+
+    // Response Speed
+    responseSpeed: {
+        title: "Response Speed",
+        subtitle: "Choose between faster responses or enhanced quality",
+        faster: {
+            name: "Faster",
+            description: "Quick responses using ALLY-3 Turbo",
+        },
+        enhanced: {
+            name: "Enhanced",
+            description: "High-quality responses using ALLY-3",
         },
     },
 
