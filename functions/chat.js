@@ -389,7 +389,8 @@ export const removeChatHistory = async (uid) => {
 export const sendMessage = async (uid, chatId, message, model, author = "user", imageUri = null) => {
     try {
         if (!chatId) {
-            const symbol = model === "ALLY-3" ? "a" : model === "ALLY-IMAGINE" ? "i" : "a";
+            // const symbol = model === "ALLY-3" ? "a" : model === "ALLY-IMAGINE" ? "i" : "a";
+            const symbol = "a";
             chatId = symbol + Date.now().toString();
         }
 
