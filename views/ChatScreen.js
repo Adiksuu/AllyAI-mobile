@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
@@ -25,6 +25,8 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     const [selectedModel, setSelectedModel] = useState(initialModel);
     const [modelModalVisible, setModelModalVisible] = useState(false);
     const [premiumModalVisible, setPremiumModalVisible] = useState(false);
+    const scrollViewRef = useRef(null);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -238,7 +240,16 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 <Text style={styles.subtitle}>{t("chat.subtitle")}</Text>
             </View>
 
-            <ScrollView style={styles.chatContainer}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.chatContainer}
+                onScroll={(event) => {
+                    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+                    const isAtBottom = contentOffset.y >= contentSize.height - layoutMeasurement.height - 10;
+                    setShowScrollToBottom(!isAtBottom);
+                }}
+                scrollEventThrottle={16}
+            >
                 {loading ? (
                     <View style={styles.centerMessage}>
                         <Text style={styles.centerText}>Loading messages...</Text>
@@ -299,6 +310,15 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                     </View>
                 )}
             </ScrollView>
+
+            {showScrollToBottom && (
+                <TouchableOpacity
+                    style={styles.scrollToBottomButton}
+                    onPress={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+                >
+                    <Ionicons name="arrow-down" size={24} color={colors.text.primary} />
+                </TouchableOpacity>
+            )}
 
             <View style={styles.inputArea}>
                 {/* Image Preview */}
@@ -522,6 +542,19 @@ const getStyles = (colors) =>
             fontSize: 16,
             color: colors.text.secondary,
             marginLeft: 8,
+        },
+        scrollToBottomButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.background.secondary,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+            position: 'absolute',
+            bottom: 200,
+            right: 20,
         },
     });
 
