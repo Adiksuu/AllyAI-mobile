@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, startTransition } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
@@ -30,7 +30,6 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
 
     useEffect(() => {
         const loadMessages = async () => {
-            console.log(localChatId)
             if (!localChatId) {
                 setMessages([]);
                 return;
@@ -43,14 +42,20 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             }
 
             try {
-                setLoading(true);
-                setError(null);
+                startTransition(() => {
+                    setLoading(true);
+                    setError(null);
+                });
                 const chatMessages = await getChatMessages(user.uid, localChatId);
-                setMessages(chatMessages);
+                startTransition(() => {
+                    setMessages(chatMessages);
+                });
             } catch (err) {
                 setError(err.message);
             } finally {
-                setLoading(false);
+                startTransition(() => {
+                    setLoading(false);
+                });
             }
         };
 
@@ -85,7 +90,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     }, []);
 
     // Pick image from gallery
-    const pickImage = async () => {
+    const pickImage = useCallback(async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 allowsEditing: true,
@@ -100,12 +105,12 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             console.error('Error picking image:', error);
             Alert.alert('Error', 'Failed to pick image');
         }
-    };
+    }, []);
 
     // Remove selected image
-    const removeImage = () => {
+    const removeImage = useCallback(() => {
         setSelectedImage(null);
-    };
+    }, []);
 
     // Calculate token cost for a message
     const calculateTokenCost = (model, hasImage = false, imageCount = 1) => {
@@ -122,7 +127,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         return cost;
     };
 
-    const handleSend = async () => {
+    const handleSend = useCallback(async () => {
         if (!inputText.trim() || isSending) return;
 
         const user = getCurrentUser();
@@ -144,13 +149,15 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         }
 
         // Immediately disable input and show user message
-        setIsSending(true);
         const userMessageText = inputText.trim();
         const userImage = selectedImage;
 
-        // Clear input and image immediately
-        setInputText("");
-        setSelectedImage(null);
+        // Batch state updates for better performance
+        React.startTransition(() => {
+            setIsSending(true);
+            setInputText("");
+            setSelectedImage(null);
+        });
 
         // Add user message to UI immediately
         const tempUserMessage = {
@@ -212,17 +219,24 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
 
             // Reload messages to get the complete conversation
             const finalMessages = await getChatMessages(user.uid, currentChatId);
-            setMessages(finalMessages);
+            startTransition(() => {
+                setMessages(finalMessages);
+            });
         } catch (err) {
             setError(err.message);
             // Remove the temporary message on error
-            setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempUserMessage.id));
+            startTransition(() => {
+                setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempUserMessage.id));
+            });
         } finally {
-            setIsSending(false);
+            startTransition(() => {
+                setIsSending(false);
+            });
         }
-    };
+    }, [selectedModel, localChatId, userSettings, t]);
 
-    const styles = getStyles(colors);
+    const styles = useMemo(() => getStyles(colors), [colors]);
+    const memoizedMarkdownStyles = useMemo(() => markdownStyles(colors), [colors]);
 
     return (
         <View style={styles.container}>
@@ -243,12 +257,23 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             <ScrollView
                 ref={scrollViewRef}
                 style={styles.chatContainer}
-                onScroll={(event) => {
+                onScroll={useCallback((event) => {
                     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
                     const isAtBottom = contentOffset.y >= contentSize.height - layoutMeasurement.height - 10;
-                    setShowScrollToBottom(!isAtBottom);
-                }}
+                    startTransition(() => {
+                        setShowScrollToBottom(!isAtBottom);
+                    });
+                }, [])}
                 scrollEventThrottle={16}
+                onScrollEndDrag={useCallback(() => {
+                    // Optimize scroll end handling
+                }, [])}
+                showsVerticalScrollIndicator={false}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={10}
+                updateCellsBatchingPeriod={50}
+                initialNumToRender={10}
+                windowSize={10}
             >
                 {loading ? (
                     <View style={styles.centerMessage}>
@@ -278,6 +303,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                                                 source={{ uri: msg.imageUrl }}
                                                 style={styles.messageImage}
                                                 resizeMode="cover"
+                                                fadeDuration={0}
                                             />
                                         )}
                                         <Text style={styles.userMessageText}>
@@ -291,9 +317,10 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                                                 source={{ uri: msg.imageUrl }}
                                                 style={styles.generatedImage}
                                                 resizeMode="cover"
+                                                fadeDuration={0}
                                             />
                                         ) : (
-                                            <Markdown style={markdownStyles(colors)}>
+                                            <Markdown style={memoizedMarkdownStyles}>
                                                 {msg.message}
                                             </Markdown>
                                         )}
@@ -324,7 +351,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 {/* Image Preview */}
                 {selectedImage && (
                     <View style={styles.imagePreviewContainer}>
-                        <Image source={{ uri: selectedImage.uri }} style={styles.imagePreview} />
+                        <Image source={{ uri: selectedImage.uri }} style={styles.imagePreview} fadeDuration={0} />
                         <TouchableOpacity style={styles.removeImageButton} onPress={removeImage}>
                             <Ionicons name="close-circle" size={24} color={colors.error} />
                         </TouchableOpacity>
@@ -346,6 +373,8 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                         multiline
                         maxLength={1000}
                         editable={!isGenerating && !isSending}
+                        scrollEnabled={false}
+                        textAlignVertical="center"
                     />
                     <TouchableOpacity
                         style={styles.sendButton}
