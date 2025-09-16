@@ -1,20 +1,29 @@
 import { database } from "../api/firebase/config";
 import { ref, get, remove, set } from "firebase/database";
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import Constants from 'expo-constants';
-import { getUserSettings } from './auth';
-import { readAsStringAsync, EncodingType } from 'expo-file-system/legacy';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Constants from "expo-constants";
+import { getUserSettings } from "./auth";
+import { readAsStringAsync, EncodingType } from "expo-file-system/legacy";
 
-const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY =
+    Constants.expoConfig?.extra?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
-if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    console.warn('Gemini API key not configured. Please set GEMINI_API_KEY in app.json extra or .env.local');
+if (!GEMINI_API_KEY || GEMINI_API_KEY === "your_gemini_api_key_here") {
+    console.warn(
+        "Gemini API key not configured. Please set GEMINI_API_KEY in app.json extra or .env.local"
+    );
 }
 
 // Cloudinary configuration for direct uploads
-const CLOUDINARY_CLOUD_NAME = Constants.expoConfig?.extra?.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_API_KEY = Constants.expoConfig?.extra?.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY;
-const CLOUDINARY_API_SECRET = Constants.expoConfig?.extra?.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_API_SECRET;
+const CLOUDINARY_CLOUD_NAME =
+    Constants.expoConfig?.extra?.CLOUDINARY_CLOUD_NAME ||
+    process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY =
+    Constants.expoConfig?.extra?.CLOUDINARY_API_KEY ||
+    process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET =
+    Constants.expoConfig?.extra?.CLOUDINARY_API_SECRET ||
+    process.env.CLOUDINARY_API_SECRET;
 
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
@@ -30,18 +39,17 @@ const fetchImageAsBase64 = async (imageUrl) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                const base64 = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+                const base64 = reader.result.split(",")[1]; // Remove data:image/jpeg;base64, prefix
                 resolve(base64);
             };
             reader.onerror = reject;
             reader.readAsDataURL(blob);
         });
     } catch (error) {
-        console.error('Error fetching image as base64:', error);
+        console.error("Error fetching image as base64:", error);
         return null;
     }
 };
-
 
 /**
  * Upload image to Cloudinary
@@ -52,17 +60,17 @@ const fetchImageAsBase64 = async (imageUrl) => {
 export const uploadImage = async (uid, imageData) => {
     try {
         if (!CLOUDINARY_CLOUD_NAME) {
-            throw new Error('Cloudinary cloud name is missing');
+            throw new Error("Cloudinary cloud name is missing");
         }
 
         // Extract image URI from expo-image-picker result
         const uri = imageData.uri || imageData.path;
 
         if (!uri) {
-            throw new Error('Image URI is missing from imageData');
+            throw new Error("Image URI is missing from imageData");
         }
 
-        console.log('Starting image upload for URI:', uri);
+        console.log("Starting image upload for URI:", uri);
 
         // Convert image to base64
         const base64Data = await readAsStringAsync(uri, {
@@ -74,44 +82,48 @@ export const uploadImage = async (uid, imageData) => {
 
         // Create FormData for upload
         const formData = new FormData();
-        formData.append('file', base64Image);
-        formData.append('upload_preset', 'chat_images');
-        formData.append('folder', `chat_images/${uid}`);
+        formData.append("file", base64Image);
+        formData.append("upload_preset", "chat_images");
+        formData.append("folder", `chat_images/${uid}`);
 
-        console.log('Uploading to Cloudinary...');
+        console.log("Uploading to Cloudinary...");
 
         // Upload to Cloudinary
         const uploadResponse = await fetch(
             `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
             {
-                method: 'POST',
+                method: "POST",
                 body: formData,
             }
         );
 
         if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
-            console.error('Upload error response:', errorText);
+            console.error("Upload error response:", errorText);
             throw new Error(`Upload failed: ${uploadResponse.status}`);
         }
 
         const result = await uploadResponse.json();
 
         if (result.error) {
-            console.error('Cloudinary error:', result.error);
+            console.error("Cloudinary error:", result.error);
             throw new Error(result.error.message);
         }
 
-        console.log('Image uploaded successfully:', result.secure_url);
+        console.log("Image uploaded successfully:", result.secure_url);
         return result.secure_url;
     } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error("Error uploading image:", error);
 
         // Provide user-friendly error messages
-        if (error.message.includes('Network request failed')) {
-            throw new Error('Network error - please check your internet connection');
-        } else if (error.message.includes('Upload failed')) {
-            throw new Error('Upload failed - please check your Cloudinary configuration');
+        if (error.message.includes("Network request failed")) {
+            throw new Error(
+                "Network error - please check your internet connection"
+            );
+        } else if (error.message.includes("Upload failed")) {
+            throw new Error(
+                "Upload failed - please check your Cloudinary configuration"
+            );
         }
 
         throw error;
@@ -127,49 +139,53 @@ export const uploadImage = async (uid, imageData) => {
 export const uploadBase64Image = async (uid, base64Data) => {
     try {
         if (!CLOUDINARY_CLOUD_NAME) {
-            throw new Error('Cloudinary cloud name is missing');
+            throw new Error("Cloudinary cloud name is missing");
         }
 
         // Create FormData for upload
         const formData = new FormData();
-        formData.append('file', `data:image/jpeg;base64,${base64Data}`);
-        formData.append('upload_preset', 'chat_images');
-        formData.append('folder', `chat_images/${uid}`);
+        formData.append("file", `data:image/jpeg;base64,${base64Data}`);
+        formData.append("upload_preset", "chat_images");
+        formData.append("folder", `chat_images/${uid}`);
 
-        console.log('Uploading base64 image to Cloudinary...');
+        console.log("Uploading base64 image to Cloudinary...");
 
         // Upload to Cloudinary
         const uploadResponse = await fetch(
             `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
             {
-                method: 'POST',
+                method: "POST",
                 body: formData,
             }
         );
 
         if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
-            console.error('Upload error response:', errorText);
+            console.error("Upload error response:", errorText);
             throw new Error(`Upload failed: ${uploadResponse.status}`);
         }
 
         const result = await uploadResponse.json();
 
         if (result.error) {
-            console.error('Cloudinary error:', result.error);
+            console.error("Cloudinary error:", result.error);
             throw new Error(result.error.message);
         }
 
-        console.log('Base64 image uploaded successfully:', result.secure_url);
+        console.log("Base64 image uploaded successfully:", result.secure_url);
         return result.secure_url;
     } catch (error) {
-        console.error('Error uploading base64 image:', error);
+        console.error("Error uploading base64 image:", error);
 
         // Provide user-friendly error messages
-        if (error.message.includes('Network request failed')) {
-            throw new Error('Network error - please check your internet connection');
-        } else if (error.message.includes('Upload failed')) {
-            throw new Error('Upload failed - please check your Cloudinary configuration');
+        if (error.message.includes("Network request failed")) {
+            throw new Error(
+                "Network error - please check your internet connection"
+            );
+        } else if (error.message.includes("Upload failed")) {
+            throw new Error(
+                "Upload failed - please check your Cloudinary configuration"
+            );
         }
 
         throw error;
@@ -188,16 +204,16 @@ const buildSystemInstructions = (settings) => {
 
     // Personality-based instructions
     switch (personality) {
-        case 'Friendly':
+        case "Friendly":
             instructions += `Be warm, approachable, and friendly in your interactions. Use positive language and show genuine interest in helping the user. `;
             break;
-        case 'Professional':
+        case "Professional":
             instructions += `Maintain a professional tone throughout the conversation. Be formal, precise, and business-appropriate in your responses. `;
             break;
-        case 'Humorous':
+        case "Humorous":
             instructions += `Incorporate appropriate humor and wit into your responses while remaining helpful and informative. `;
             break;
-        case 'Direct':
+        case "Direct":
             instructions += `Be straightforward and concise. Get to the point quickly without unnecessary elaboration. `;
             break;
         default:
@@ -206,13 +222,13 @@ const buildSystemInstructions = (settings) => {
 
     // Response style instructions
     switch (responseStyle) {
-        case 'Detailed':
+        case "Detailed":
             instructions += `Provide comprehensive, in-depth responses with thorough explanations and examples. `;
             break;
-        case 'Balanced':
+        case "Balanced":
             instructions += `Offer well-rounded responses that are informative but not overwhelming. `;
             break;
-        case 'Concise':
+        case "Concise":
             instructions += `Keep responses brief and to the point while still being helpful. `;
             break;
         default:
@@ -221,13 +237,13 @@ const buildSystemInstructions = (settings) => {
 
     // Length instructions
     switch (length) {
-        case 'Short':
+        case "Short":
             instructions += `Keep responses brief, typically 1-2 sentences for simple questions. `;
             break;
-        case 'Medium':
+        case "Medium":
             instructions += `Provide moderate-length responses that are comprehensive but not lengthy. `;
             break;
-        case 'Long':
+        case "Long":
             instructions += `Give detailed, comprehensive responses with extensive information and examples. `;
             break;
         default:
@@ -236,7 +252,9 @@ const buildSystemInstructions = (settings) => {
 
     // Tools/capabilities instructions
     if (tools && Array.isArray(tools) && tools.length > 0) {
-        instructions += `You have access to the following capabilities: ${tools.join(', ')}. `;
+        instructions += `You have access to the following capabilities: ${tools.join(
+            ", "
+        )}. `;
         instructions += `When appropriate, mention or utilize these capabilities to enhance your responses. `;
     }
 
@@ -321,7 +339,7 @@ export const getChatHistory = async (uid, t) => {
         const chats = await Promise.all(chatPromises);
 
         // Sort chats by latest timestamp (newest first)
-        return chats.reverse()
+        return chats.reverse();
     } catch (error) {
         console.error("Error fetching chat history:", error);
         throw error;
@@ -336,7 +354,10 @@ export const getChatHistory = async (uid, t) => {
  */
 export const getChatMessages = async (uid, chatId) => {
     try {
-        const messagesRef = ref(database, `chats/${uid}/ALLY-3/${chatId}/messages`);
+        const messagesRef = ref(
+            database,
+            `chats/${uid}/ALLY-3/${chatId}/messages`
+        );
         const snapshot = await get(messagesRef);
 
         if (!snapshot.exists()) {
@@ -347,11 +368,10 @@ export const getChatMessages = async (uid, chatId) => {
         const messageKeys = Object.keys(messagesData);
 
         // Sort messages by timestamp
-        const sortedMessages = messageKeys
-            .map(key => ({
-                id: key,
-                ...messagesData[key]
-            }))
+        const sortedMessages = messageKeys.map((key) => ({
+            id: key,
+            ...messagesData[key],
+        }));
 
         return sortedMessages;
     } catch (error) {
@@ -377,6 +397,26 @@ export const removeChatHistory = async (uid) => {
 };
 
 /**
+ * Remove a single chat for a user
+ * @param {string} uid - User ID
+ * @param {string} chatId - Chat ID to remove
+ * @returns {Promise<void>}
+ */
+export const deleteChat = async (uid, chatId) => {
+    try {
+        if (!uid || !chatId) {
+            throw new Error("Missing uid or chatId");
+        }
+        const chatRef = ref(database, `chats/${uid}/ALLY-3/${chatId}`);
+        await remove(chatRef);
+        console.log(`Deleted chat ${chatId} for user ${uid}`);
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        throw error;
+    }
+};
+
+/**
  * Send a message to a chat
  * @param {string} uid - User ID
  * @param {string|null} chatId - Chat ID, null for new chat
@@ -386,7 +426,14 @@ export const removeChatHistory = async (uid) => {
  * @param {Object|string|null} imageUri - Image data object with uri property, or image URL string, or null
  * @returns {Promise<string>} The chat ID
  */
-export const sendMessage = async (uid, chatId, message, model, author = "user", imageUri = null) => {
+export const sendMessage = async (
+    uid,
+    chatId,
+    message,
+    model,
+    author = "user",
+    imageUri = null
+) => {
     try {
         if (!chatId) {
             // const symbol = model === "ALLY-3" ? "a" : model === "ALLY-IMAGINE" ? "i" : "a";
@@ -398,27 +445,36 @@ export const sendMessage = async (uid, chatId, message, model, author = "user", 
         let imageUrl = null;
         if (imageUri) {
             // If imageUri is already a URL (from AI generation), use it directly
-            if (typeof imageUri === 'string' && imageUri.startsWith('http')) {
+            if (typeof imageUri === "string" && imageUri.startsWith("http")) {
                 imageUrl = imageUri;
-            } else if (typeof imageUri === 'object' && (imageUri.uri || imageUri.path)) {
+            } else if (
+                typeof imageUri === "object" &&
+                (imageUri.uri || imageUri.path)
+            ) {
                 // If it's an image data object with uri/path property, upload it
                 imageUrl = await uploadImage(uid, imageUri);
             } else {
-                console.warn('Invalid imageUri format:', imageUri);
+                console.warn("Invalid imageUri format:", imageUri);
             }
         }
 
-        const messagesRef = ref(database, `chats/${uid}/ALLY-3/${chatId}/messages`);
+        const messagesRef = ref(
+            database,
+            `chats/${uid}/ALLY-3/${chatId}/messages`
+        );
         const snapshot = await get(messagesRef);
         const messages = snapshot.val() || {};
         const count = Object.keys(messages).length;
-        const paddedCount = count.toString().padStart(6, '0');
-        const messageRef = ref(database, `chats/${uid}/ALLY-3/${chatId}/messages/${paddedCount}`);
+        const paddedCount = count.toString().padStart(6, "0");
+        const messageRef = ref(
+            database,
+            `chats/${uid}/ALLY-3/${chatId}/messages/${paddedCount}`
+        );
         await set(messageRef, {
             author,
             message,
             timestamp: new Date().toISOString(),
-            imageUrl: imageUrl || null
+            imageUrl: imageUrl || null,
         });
         return chatId;
     } catch (error) {
@@ -439,8 +495,8 @@ export const generateImageResponse = async (uid, prompt) => {
             inputs: prompt,
             parameters: {
                 num_inference_steps: 4,
-                guidance_scale: 0.0
-            }
+                guidance_scale: 0.0,
+            },
         };
 
         const response = await fetch(
@@ -462,7 +518,7 @@ export const generateImageResponse = async (uid, prompt) => {
 
         const result = await response.arrayBuffer();
         const uint8Array = new Uint8Array(result);
-        let binary = '';
+        let binary = "";
         for (let i = 0; i < uint8Array.length; i++) {
             binary += String.fromCharCode(uint8Array[i]);
         }
@@ -487,10 +543,16 @@ export const generateImageResponse = async (uid, prompt) => {
  * @param {string} model - The model to use ('ALLY-3' or 'ALLY-IMAGINE')
  * @returns {Promise<string>} AI response text or image URL
  */
-export const generateAIResponse = async (uid, userMessage, chatHistory = [], imageUrl = null, model = 'ALLY-3') => {
+export const generateAIResponse = async (
+    uid,
+    userMessage,
+    chatHistory = [],
+    imageUrl = null,
+    model = "ALLY-3"
+) => {
     try {
         // Handle image generation model
-        if (model === 'ALLY-IMAGINE') {
+        if (model === "ALLY-IMAGINE") {
             return await generateImageResponse(uid, userMessage);
         }
 
@@ -503,7 +565,10 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         try {
             userSettings = await getUserSettings(uid);
         } catch (settingsError) {
-            console.warn('Error fetching user settings, using defaults:', settingsError);
+            console.warn(
+                "Error fetching user settings, using defaults:",
+                settingsError
+            );
             userSettings = null;
         }
 
@@ -511,16 +576,19 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         const systemInstruction = buildSystemInstructions(userSettings);
 
         // Select model based on response speed setting (default to enhanced for backward compatibility)
-        const modelName = (userSettings && userSettings.responseSpeed === "faster") ? "gemini-1.5-flash" : "gemini-2.5-flash";
+        const modelName =
+            userSettings && userSettings.responseSpeed === "faster"
+                ? "gemini-1.5-flash"
+                : "gemini-2.5-flash";
 
         const geminiModel = genAI.getGenerativeModel({
             model: modelName,
-            systemInstruction: systemInstruction
+            systemInstruction: systemInstruction,
         });
 
         // Prepare message parts (text + optional image)
         const messageParts = [];
-        if (userMessage && typeof userMessage === 'string') {
+        if (userMessage && typeof userMessage === "string") {
             messageParts.push({ text: userMessage });
         }
 
@@ -531,12 +599,12 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
                     messageParts.push({
                         inlineData: {
                             mimeType: "image/jpeg",
-                            data: imageData
-                        }
+                            data: imageData,
+                        },
                     });
                 }
             } catch (imageError) {
-                console.warn('Failed to process current image:', imageError);
+                console.warn("Failed to process current image:", imageError);
             }
         }
 
@@ -544,29 +612,38 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         const processedHistory = [];
         if (Array.isArray(chatHistory) && chatHistory.length > 0) {
             for (const msg of chatHistory) {
-                if (!msg || typeof msg !== 'object') continue;
+                if (!msg || typeof msg !== "object") continue;
 
                 const parts = [];
-                
+
                 // Add text part if message exists
-                if (msg.message && typeof msg.message === 'string') {
+                if (msg.message && typeof msg.message === "string") {
                     parts.push({ text: msg.message });
                 }
-                
+
                 // Add image part if imageUrl exists (only for user messages)
-                if (msg.author === 'user' && msg.imageUrl && typeof msg.imageUrl === 'string') {
+                if (
+                    msg.author === "user" &&
+                    msg.imageUrl &&
+                    typeof msg.imageUrl === "string"
+                ) {
                     try {
-                        const imageData = await fetchImageAsBase64(msg.imageUrl);
+                        const imageData = await fetchImageAsBase64(
+                            msg.imageUrl
+                        );
                         if (imageData) {
                             parts.push({
                                 inlineData: {
                                     mimeType: "image/jpeg",
-                                    data: imageData
-                                }
+                                    data: imageData,
+                                },
                             });
                         }
                     } catch (imageError) {
-                        console.warn('Failed to process image in chat history:', imageError);
+                        console.warn(
+                            "Failed to process image in chat history:",
+                            imageError
+                        );
                         // Continue without the image
                     }
                 }
@@ -574,8 +651,8 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
                 // Only add to history if we have valid parts
                 if (parts.length > 0) {
                     processedHistory.push({
-                        role: msg.author === 'user' ? 'user' : 'model',
-                        parts: parts
+                        role: msg.author === "user" ? "user" : "model",
+                        parts: parts,
                     });
                 }
             }
@@ -601,11 +678,14 @@ export const generateAIResponse = async (uid, userMessage, chatHistory = [], ima
         console.error("Error generating AI response:", error);
 
         // Provide more specific error messages
-        if (error.message?.includes('API_KEY')) {
+        if (error.message?.includes("API_KEY")) {
             return "API key error. Please check your Gemini API configuration.";
-        } else if (error.message?.includes('quota')) {
+        } else if (error.message?.includes("quota")) {
             return "API quota exceeded. Please try again later.";
-        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        } else if (
+            error.message?.includes("network") ||
+            error.message?.includes("fetch")
+        ) {
             return "Network error. Please check your internet connection and try again.";
         }
 

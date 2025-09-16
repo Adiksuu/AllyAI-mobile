@@ -9,8 +9,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { getChatHistory } from "../functions/chat";
+import { getChatHistory, deleteChat } from "../functions/chat";
 import { getCurrentUser, onAuthStateChanged } from "../functions/auth";
+import ClearChatHistoryModal from "./ClearChatHistoryModal";
 
 const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     const { t } = useTranslation();
@@ -20,6 +21,8 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAll, setShowAll] = useState(false);
+    const [confirmVisible, setConfirmVisible] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(async (user) => {
@@ -53,7 +56,8 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
         const diff = now - date;
         const minutes = Math.floor(diff / 60000);
         if (minutes < 1) return t("chatHistory.time.justNow");
-        if (minutes < 60) return `${minutes}${t("chatHistory.time.minutesSuffix")}`;
+        if (minutes < 60)
+            return `${minutes}${t("chatHistory.time.minutesSuffix")}`;
         const hours = Math.floor(minutes / 60);
         if (hours < 24) return `${hours}${t("chatHistory.time.hoursSuffix")}`;
         const days = Math.floor(hours / 24);
@@ -61,6 +65,30 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
     };
 
     const styles = getStyles(colors);
+
+    const performDeleteChat = async (chatId) => {
+        try {
+            const user = getCurrentUser();
+            if (!user) return;
+            await deleteChat(user.uid, chatId);
+            setChatHistory((prev) => prev.filter((c) => c.id !== chatId));
+        } catch (err) {
+            console.error("Failed to delete chat:", err);
+            setError(err.message || "Failed to delete chat");
+        }
+    };
+
+    const handleRequestDelete = (chatId) => {
+        setPendingDeleteId(chatId);
+        setConfirmVisible(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!pendingDeleteId) return;
+        await performDeleteChat(pendingDeleteId);
+        setPendingDeleteId(null);
+        setConfirmVisible(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -147,11 +175,31 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                                         </View>
                                     </View>
                                 </View>
-                                <Ionicons
-                                    name="chevron-forward"
-                                    size={16}
-                                    color={colors.text.muted}
-                                />
+                                <View style={styles.actionsRow}>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            handleRequestDelete(chat.id)
+                                        }
+                                        hitSlop={{
+                                            top: 8,
+                                            bottom: 8,
+                                            left: 8,
+                                            right: 8,
+                                        }}
+                                        style={styles.iconButton}
+                                    >
+                                        <Ionicons
+                                            name="trash-outline"
+                                            size={18}
+                                            color={colors.text.muted}
+                                        />
+                                    </TouchableOpacity>
+                                    <Ionicons
+                                        name="chevron-forward"
+                                        size={16}
+                                        color={colors.text.muted}
+                                    />
+                                </View>
                             </TouchableOpacity>
                         )
                     )}
@@ -177,6 +225,14 @@ const ChatHistoryList = ({ onChatPress, onClearHistory }) => {
                     )}
                 </ScrollView>
             )}
+            <ClearChatHistoryModal
+                visible={confirmVisible}
+                onClose={() => {
+                    setConfirmVisible(false);
+                    setPendingDeleteId(null);
+                }}
+                onConfirm={handleConfirmDelete}
+            />
         </View>
     );
 };
@@ -269,6 +325,16 @@ const getStyles = (colors) =>
             fontSize: 10,
             color: colors.background.primary,
             fontWeight: "600",
+        },
+        actionsRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+        },
+        iconButton: {
+            paddingHorizontal: 6,
+            paddingVertical: 4,
+            borderRadius: 6,
         },
         emptyState: {
             alignItems: "center",
