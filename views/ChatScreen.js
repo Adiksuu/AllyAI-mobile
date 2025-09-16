@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, startTransiti
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import Markdown from 'react-native-markdown-display';
 import { useTranslation } from "../contexts/TranslationContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -19,6 +20,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     const [inputText, setInputText] = useState("");
     const [localChatId, setLocalChatId] = useState(chatId);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [userSettings, setUserSettings] = useState(null);
@@ -112,12 +114,38 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         setSelectedImage(null);
     }, []);
 
+    // Pick file from device
+    const pickFile = useCallback(async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: ['application/pdf', 'text/*', 'application/xml', 'application/xhtml+xml'],
+                copyToCacheDirectory: true,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                setSelectedFile(result.assets[0]);
+            }
+        } catch (error) {
+            console.error('Error picking file:', error);
+            Alert.alert('Error', 'Failed to pick file');
+        }
+    }, []);
+
+    // Remove selected file
+    const removeFile = useCallback(() => {
+        setSelectedFile(null);
+    }, []);
+
     // Calculate token cost for a message
-    const calculateTokenCost = (model, hasImage = false, imageCount = 1) => {
+    const calculateTokenCost = (model, hasImage = false, imageCount = 1, hasFile = false) => {
         let cost = 1; // Base cost for text message
 
         if (hasImage) {
             cost += 5 * imageCount; // Additional cost for images
+        }
+
+        if (hasFile) {
+            cost += 3; // Additional cost for file analysis
         }
 
         if (model === 'ALLY-IMAGINE') {
@@ -136,6 +164,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         // Capture input values AFTER validation
         const userMessageText = inputText.trim();
         const userImage = selectedImage;
+        const userFile = selectedFile;
 
         const user = getCurrentUser();
         if (!user) {
@@ -146,7 +175,8 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     
         // Calculate token cost
         const hasImage = !!userImage;
-        const tokenCost = calculateTokenCost(selectedModel, hasImage, hasImage ? 1 : 0);
+        const hasFile = !!userFile;
+        const tokenCost = calculateTokenCost(selectedModel, hasImage, hasImage ? 1 : 0, hasFile);
     
         // Check if user can afford the tokens
         const canAfford = await canAffordTokens(user.uid, tokenCost);
@@ -160,6 +190,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             setIsSending(true);
             setInputText("");  // Clear input after capturing the value
             setSelectedImage(null);
+            setSelectedFile(null);
         });
     
         // Add user message to UI immediately
@@ -168,7 +199,12 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             author: 'user',
             message: userMessageText,
             timestamp: new Date().toISOString(),
-            imageUrl: null // Will be set after upload
+            imageUrl: null, // Will be set after upload
+            fileData: userFile ? {
+                name: userFile.name,
+                size: userFile.size,
+                mimeType: userFile.mimeType || 'application/octet-stream',
+            } : null
         };
     
         // If there's an image, we need to upload it first
@@ -192,10 +228,10 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         try {
             let currentChatId = localChatId;
             if (!currentChatId) {
-                currentChatId = await sendMessage(user.uid, null, userMessageText, selectedModel, "user", userImage);
+                currentChatId = await sendMessage(user.uid, null, userMessageText, selectedModel, "user", userImage, userFile);
                 setLocalChatId(currentChatId);
             } else {
-                await sendMessage(user.uid, currentChatId, userMessageText, selectedModel, "user", userImage);
+                await sendMessage(user.uid, currentChatId, userMessageText, selectedModel, "user", userImage, userFile);
             }
     
             // Deduct tokens for user message
@@ -206,10 +242,11 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     
             setIsGenerating(true);
             try {
-                // Generate AI response (pass image URL if available)
+                // Generate AI response (pass image URL and file if available)
                 const lastMessage = updatedMessages[updatedMessages.length - 1];
                 const imageUrl = lastMessage?.imageUrl || null;
-                const aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel);
+                const fileData = lastMessage?.fileData || null;
+                const aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel, fileData);
     
                 if (selectedModel === 'ALLY-IMAGINE') {
                     // For image generation, aiResponse is the image URL
@@ -239,7 +276,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 setIsSending(false);
             });
         }
-    }, [inputText, selectedImage, selectedModel, localChatId, userSettings, t, isSending]);
+    }, [inputText, selectedImage, selectedFile, selectedModel, localChatId, userSettings, t, isSending]);
 
     const styles = useMemo(() => getStyles(colors), [colors]);
     const memoizedMarkdownStyles = useMemo(() => markdownStyles(colors), [colors]);
@@ -312,6 +349,25 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                                                 fadeDuration={0}
                                             />
                                         )}
+                                        {msg.fileData && (
+                                            <View style={styles.messageFile}>
+                                                <Ionicons name="document-text-outline" size={20} color={colors.text.primary} />
+                                                <View style={styles.fileInfo}>
+                                                    <Text style={styles.fileNameText} numberOfLines={1}>
+                                                        {(() => {
+                                                            const mimeTypeLength = msg.fileData.mimeType?.length || 0;
+                                                            const maxFileNameLength = mimeTypeLength > 15 ? 12 : mimeTypeLength > 10 ? 15 : 18;
+                                                            return msg.fileData.name.length > maxFileNameLength
+                                                                ? msg.fileData.name.substring(0, maxFileNameLength) + '...'
+                                                                : msg.fileData.name;
+                                                        })()}
+                                                    </Text>
+                                                    <Text style={styles.fileSizeText}>
+                                                        {(msg.fileData.size / 1024).toFixed(1)} KB  •  {msg.fileData.mimeType}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        )}
                                         <Text style={styles.userMessageText}>
                                             {msg.message}
                                         </Text>
@@ -364,10 +420,36 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                     </View>
                 )}
 
+                {/* File Preview */}
+                {selectedFile && (
+                    <View style={styles.filePreviewContainer}>
+                        <View style={styles.fileInfo}>
+                            <Ionicons name="document-text-outline" size={24} style={styles.fileIcon} />
+                            <View style={styles.fileDetails}>
+                                <Text style={styles.fileName} numberOfLines={1}>
+                                    {selectedFile.name || 'Unknown file'}
+                                </Text>
+                                <Text style={styles.fileSize}>
+                                    {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Size unknown'}
+                                    {selectedFile.mimeType && `  •  ${selectedFile.mimeType}`}
+                                </Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity style={styles.removeFileButton} onPress={removeFile}>
+                            <Ionicons name="close-circle" size={24} color={colors.text.primary} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 <View style={styles.inputContainer}>
                     {userSettings && userSettings.tools && userSettings.tools.includes('Image Generation') && selectedModel !== 'ALLY-IMAGINE' && (
                         <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating || isSending}>
                             <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
+                        </TouchableOpacity>
+                    )}
+                    {userSettings && userSettings.tools && userSettings.tools.includes('File Analysis') && (
+                        <TouchableOpacity style={styles.uploadButton} onPress={pickFile} disabled={isGenerating || isSending}>
+                            <Ionicons name="document-attach" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
                         </TouchableOpacity>
                     )}
                     <TextInput
@@ -478,6 +560,32 @@ const getStyles = (colors) =>
             marginBottom: 8,
             alignSelf: 'flex-end',
         },
+        messageFile: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.background.secondary,
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 8,
+            alignSelf: 'flex-end',
+            justifyContent: 'space-between',
+            gap: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        fileInfo: {
+            marginLeft: 8,
+            flex: 1,
+        },
+        fileNameText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.text.primary,
+        },
+        fileSizeText: {
+            fontSize: 12,
+            color: colors.text.secondary,
+        },
         aiMessage: {
             backgroundColor: colors.background.card,
             padding: 16,
@@ -548,6 +656,42 @@ const getStyles = (colors) =>
             position: 'absolute',
             top: 5,
             right: 5,
+            backgroundColor: colors.background.primary,
+            borderRadius: 12,
+        },
+        filePreviewContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            padding: 15,
+            backgroundColor: colors.background.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        fileInfo: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+        },
+        fileIcon: {
+            color: colors.text.primary,
+        },
+        fileDetails: {
+            marginLeft: 10,
+            flex: 1,
+        },
+        fileName: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.text.primary,
+        },
+        fileSize: {
+            fontSize: 12,
+            color: colors.text.secondary,
+        },
+        removeFileButton: {
+            marginLeft: 10,
             backgroundColor: colors.background.primary,
             borderRadius: 12,
         },

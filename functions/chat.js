@@ -424,6 +424,7 @@ export const deleteChat = async (uid, chatId) => {
  * @param {string} model - Model name
  * @param {string} author - Author of the message ("user" or "AI")
  * @param {Object|string|null} imageUri - Image data object with uri property, or image URL string, or null
+ * @param {Object|null} fileData - File data object from DocumentPicker, or null
  * @returns {Promise<string>} The chat ID
  */
 export const sendMessage = async (
@@ -432,7 +433,8 @@ export const sendMessage = async (
     message,
     model,
     author = "user",
-    imageUri = null
+    imageUri = null,
+    fileData = null
 ) => {
     try {
         if (!chatId) {
@@ -458,6 +460,50 @@ export const sendMessage = async (
             }
         }
 
+        // Process file if provided
+        let processedFileData = null;
+        if (fileData) {
+            try {
+                // Check file size (20MB limit for inline data)
+                const maxSize = 20 * 1024 * 1024; // 20MB
+                if (fileData.size > maxSize) {
+                    throw new Error('File size exceeds 20MB limit. Please use a smaller file or contact support for larger file handling.');
+                }
+
+                const fileUri = fileData.uri;
+                const fileBase64 = await readAsStringAsync(fileUri, {
+                    encoding: EncodingType.Base64,
+                });
+
+                // Determine MIME type (use provided mimeType or determine from file extension)
+                let mimeType = fileData.mimeType || 'application/octet-stream';
+                if (!fileData.mimeType) {
+                    const fileName = fileData.name || '';
+                    if (fileName.toLowerCase().endsWith('.pdf')) {
+                        mimeType = 'application/pdf';
+                    } else if (fileName.toLowerCase().endsWith('.txt')) {
+                        mimeType = 'text/plain';
+                    } else if (fileName.toLowerCase().endsWith('.md')) {
+                        mimeType = 'text/markdown';
+                    } else if (fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm')) {
+                        mimeType = 'text/html';
+                    } else if (fileName.toLowerCase().endsWith('.xml')) {
+                        mimeType = 'application/xml';
+                    }
+                }
+
+                processedFileData = {
+                    name: fileData.name,
+                    size: fileData.size,
+                    mimeType: mimeType,
+                    data: fileBase64,
+                };
+            } catch (fileError) {
+                console.error('Error processing file:', fileError);
+                throw new Error(fileError.message || 'Failed to process file');
+            }
+        }
+
         const messagesRef = ref(
             database,
             `chats/${uid}/ALLY-3/${chatId}/messages`
@@ -475,6 +521,7 @@ export const sendMessage = async (
             message,
             timestamp: new Date().toISOString(),
             imageUrl: imageUrl || null,
+            fileData: processedFileData || null,
         });
         return chatId;
     } catch (error) {
@@ -541,6 +588,7 @@ export const generateImageResponse = async (uid, prompt) => {
  * @param {Array} chatHistory - Array of previous messages
  * @param {string|null} imageUrl - Image URL to analyze (optional)
  * @param {string} model - The model to use ('ALLY-3' or 'ALLY-IMAGINE')
+ * @param {Object|null} fileData - File data to process (optional)
  * @returns {Promise<string>} AI response text or image URL
  */
 export const generateAIResponse = async (
@@ -548,7 +596,8 @@ export const generateAIResponse = async (
     userMessage,
     chatHistory = [],
     imageUrl = null,
-    model = "ALLY-3"
+    model = "ALLY-3",
+    fileData = null
 ) => {
     try {
         // Handle image generation model
@@ -586,10 +635,19 @@ export const generateAIResponse = async (
             systemInstruction: systemInstruction,
         });
 
-        // Prepare message parts (text + optional image)
+        // Prepare message parts (text + optional image + optional file)
         const messageParts = [];
         if (userMessage && typeof userMessage === "string") {
-            messageParts.push({ text: userMessage });
+            let prompt = userMessage;
+            if (fileData) {
+                // If a file is attached and the message doesn't already reference documents/files,
+                // modify the prompt to instruct the AI to analyze the document
+                const lowerMessage = userMessage.toLowerCase();
+                if (!lowerMessage.includes('document') && !lowerMessage.includes('file') && !lowerMessage.includes('analyze') && !lowerMessage.includes('summarize')) {
+                    prompt = `Please analyze the attached document and answer the following question: ${userMessage}`;
+                }
+            }
+            messageParts.push({ text: prompt });
         }
 
         if (imageUrl) {
@@ -605,6 +663,19 @@ export const generateAIResponse = async (
                 }
             } catch (imageError) {
                 console.warn("Failed to process current image:", imageError);
+            }
+        }
+
+        if (fileData) {
+            try {
+                messageParts.push({
+                    inlineData: {
+                        mimeType: fileData.mimeType,
+                        data: fileData.data,
+                    },
+                });
+            } catch (fileError) {
+                console.warn("Failed to process current file:", fileError);
             }
         }
 
@@ -645,6 +716,28 @@ export const generateAIResponse = async (
                             imageError
                         );
                         // Continue without the image
+                    }
+                }
+
+                // Add file part if fileData exists (only for user messages)
+                if (
+                    msg.author === "user" &&
+                    msg.fileData &&
+                    typeof msg.fileData === "object"
+                ) {
+                    try {
+                        parts.push({
+                            inlineData: {
+                                mimeType: msg.fileData.mimeType,
+                                data: msg.fileData.data,
+                            },
+                        });
+                    } catch (fileError) {
+                        console.warn(
+                            "Failed to process file in chat history:",
+                            fileError
+                        );
+                        // Continue without the file
                     }
                 }
 
