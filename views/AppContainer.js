@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, StatusBar, BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 import { useTheme } from "../contexts/ThemeContext";
 import { onAuthStateChanged, updateUserLastLogin } from "../functions/auth";
 import NavigationBar from "./NavigationBar";
@@ -12,6 +13,7 @@ import AccountManagementScreen from "./AccountManagementScreen";
 import AIChatbotSettingsScreen from "./AIChatbotSettingsScreen";
 import LoginRegisterScreen from "./LoginRegisterScreen";
 import OnboardingScreen from "./OnboardingScreen";
+import NoInternetScreen from "./NoInternetScreen";
 
 const ONBOARDING_COMPLETED_KEY = "@allyai_onboarding_completed";
 
@@ -24,6 +26,7 @@ const AppContainer = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentChatId, setCurrentChatId] = useState(null);
     const [selectedModel, setSelectedModel] = useState("ALLY-3");
+    const [isConnected, setIsConnected] = useState(true);
     const { colors, getEffectiveTheme } = useTheme();
 
     const handleNavigateToChat = (chatId = null, model = "ALLY-3") => {
@@ -45,6 +48,11 @@ const AppContainer = () => {
             console.error("Error saving onboarding completion:", error);
             setHasCompletedOnboarding(true); // Still proceed
         }
+    };
+
+    const checkConnection = async () => {
+        const state = await NetInfo.fetch();
+        setIsConnected(state.isConnected);
     };
 
     const navigation = {
@@ -121,6 +129,15 @@ const AppContainer = () => {
         return () => backHandler.remove();
     }, [navigationStack]);
 
+    // Network connection listener
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            setIsConnected(state.isConnected);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
     const renderScreen = () => {
         // Check if we're in a nested screen
         if (navigationStack.length > 0) {
@@ -186,6 +203,20 @@ const AppContainer = () => {
                     translucent={false}
                 />
                 <OnboardingScreen onComplete={handleOnboardingComplete} />
+            </View>
+        );
+    }
+
+    // Show no internet screen if not connected
+    if (!isConnected) {
+        return (
+            <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+                <StatusBar
+                    barStyle={statusBarStyle}
+                    backgroundColor={colors.background.primary}
+                    translucent={false}
+                />
+                <NoInternetScreen onRetry={checkConnection} />
             </View>
         );
     }

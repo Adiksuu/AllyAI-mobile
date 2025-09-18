@@ -546,4 +546,11 @@ export const pl = {
         next: "Dalej",
         done: "Rozpocznij",
     },
+
+    // No Internet
+    noInternet: {
+        title: "Brak Połączenia z Internetem",
+        message: "Sprawdź swoje połączenie internetowe i spróbuj ponownie.",
+        retry: "Spróbuj Ponownie",
+    },
 };

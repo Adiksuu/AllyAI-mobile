@@ -541,4 +541,11 @@ export const en = {
         next: "Next",
         done: "Get Started",
     },
+
+    // No Internet
+    noInternet: {
+        title: "No Internet Connection",
+        message: "Please check your internet connection and try again.",
+        retry: "Retry",
+    },
 };
