@@ -760,13 +760,30 @@ export const generateAIResponse = async (
             history: processedHistory,
             generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 2048,
+                maxOutputTokens: 8192,
             },
         });
 
         const result = await chat.sendMessage(messageParts);
         const response = await result.response;
-        return response.text();
+        const responseText = response.text();
+
+        // Check if response appears to be truncated (ends abruptly without proper punctuation)
+        if (responseText && responseText.length > 10) {
+            const lastChars = responseText.slice(-10).trim();
+            // If response doesn't end with sentence-ending punctuation and doesn't seem to be a list/heading
+            if (!/[.!?]$/.test(lastChars) &&
+                !lastChars.includes('\n') &&
+                !lastChars.includes('- ') &&
+                !lastChars.includes('*') &&
+                !lastChars.includes('#')) {
+                console.warn("Response appears to be truncated, response length:", responseText.length);
+                // For now, we'll still return it but log the issue
+                // In future, could implement retry logic here
+            }
+        }
+
+        return responseText;
     } catch (error) {
         console.error("Error generating AI response:", error);
 
