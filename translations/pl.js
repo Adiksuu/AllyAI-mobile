@@ -522,6 +522,17 @@ export const pl = {
         selectModel: "WYBIERZ SWÓJ",
     },
 
+    // Update Modal
+    updateModal: {
+        title: "Dostępna Aktualizacja",
+        newVersion: "NOWA WERSJA",
+        updateNow: "Aktualizuj Teraz",
+        later: "Później",
+        whatsNew: "Co Nowego",
+        currentVersion: "Obecna Wersja",
+        newVersionLabel: "Nowa Wersja",
+    },
+
     // Notifications
     notifications: {
         tokenReset: {

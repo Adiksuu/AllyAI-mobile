@@ -116,6 +116,8 @@ const SettingsScreen = ({ navigation, isAuthenticated }) => {
         console.log("Theme changed to:", theme.name);
     };
 
+
+
     const allSettingsItems = [
         {
             icon: "person-outline",
@@ -274,6 +276,7 @@ const SettingsScreen = ({ navigation, isAuthenticated }) => {
                 onThemeSelect={handleThemeSelect}
                 currentTheme={currentTheme}
             />
+
         </ScrollView>
     );
 };

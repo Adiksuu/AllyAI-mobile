@@ -19,6 +19,8 @@ export { default as LanguageModal } from "./LanguageModal";
 export { default as LanguageModalContent } from "./LanguageModalContent";
 export { default as ThemeModal } from "./ThemeModal";
 export { default as ThemeModalContent } from "./ThemeModalContent";
+export { default as UpdateModal } from "./UpdateModal";
+export { default as UpdateModalContent } from "./UpdateModalContent";
 export { default as LogoutModal } from "./LogoutModal";
 export { default as LogoutModalContent } from "./LogoutModalContent";
 export { default as DeleteAccountModal } from "./DeleteAccountModal";

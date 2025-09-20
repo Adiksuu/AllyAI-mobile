@@ -516,6 +516,17 @@ export const en = {
         selectModel: "SELECT YOUR",
     },
 
+    // Update Modal
+    updateModal: {
+        title: "Update Available",
+        newVersion: "NEW VERSION",
+        updateNow: "Update Now",
+        later: "Later",
+        whatsNew: "What's New",
+        currentVersion: "Current Version",
+        newVersionLabel: "New Version",
+    },
+
     // Notifications
     notifications: {
         tokenReset: {
