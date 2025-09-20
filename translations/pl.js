@@ -198,6 +198,16 @@ export const pl = {
         loginSubtitle: "Zaloguj się do swojego konta",
     },
 
+    // File Picker Modal
+    filePickerModal: {
+        title: "Załącznik",
+        selectOption: "WYBIERZ SWÓJ",
+        selectImage: "Wybierz Obraz",
+        selectImageDescription: "Wybierz obraz z galerii",
+        selectFile: "Wybierz Plik",
+        selectFileDescription: "Wybierz dokument lub plik tekstowy",
+    },
+
     // Modals
     modals: {
         logout: {

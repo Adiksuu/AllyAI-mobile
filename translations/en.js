@@ -197,6 +197,16 @@ export const en = {
         loginSubtitle: "Login to your account",
     },
 
+    // File Picker Modal
+    filePickerModal: {
+        title: "Attachment",
+        selectOption: "SELECT YOUR",
+        selectImage: "Select Image",
+        selectImageDescription: "Choose an image from your gallery",
+        selectFile: "Select File",
+        selectFileDescription: "Choose a document or text file",
+    },
+
     // Modals
     modals: {
         logout: {

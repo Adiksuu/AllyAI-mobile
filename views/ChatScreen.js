@@ -9,6 +9,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { getChatMessages, sendMessage, generateAIResponse, uploadImage } from "../functions/chat";
 import { getCurrentUser, getUserSettings, canAffordTokens, deductTokens } from "../functions/auth";
 import ModelSelectionModal from "../components/ModelSelectionModal";
+import FilePickerModal from "../components/FilePickerModal";
 import PremiumModal from "../components/PremiumModal";
 
 const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3" }) => {
@@ -26,6 +27,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     const [userSettings, setUserSettings] = useState(null);
     const [selectedModel, setSelectedModel] = useState(initialModel);
     const [modelModalVisible, setModelModalVisible] = useState(false);
+    const [filePickerModalVisible, setFilePickerModalVisible] = useState(false);
     const [premiumModalVisible, setPremiumModalVisible] = useState(false);
     const scrollViewRef = useRef(null);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
@@ -442,14 +444,13 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 )}
 
                 <View style={styles.inputContainer}>
-                    {userSettings && userSettings.tools && userSettings.tools.includes('Image Generation') && selectedModel !== 'ALLY-IMAGINE' && (
-                        <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isGenerating || isSending}>
-                            <Ionicons name="image" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
-                        </TouchableOpacity>
-                    )}
-                    {userSettings && userSettings.tools && userSettings.tools.includes('File Analysis') && (
-                        <TouchableOpacity style={styles.uploadButton} onPress={pickFile} disabled={isGenerating || isSending}>
-                            <Ionicons name="document-attach" size={24} color={isGenerating ? colors.text.muted : colors.text.muted} />
+                    {userSettings && userSettings.tools && (userSettings.tools.includes('Image Generation') || userSettings.tools.includes('File Analysis')) && selectedModel !== 'ALLY-IMAGINE' && (
+                        <TouchableOpacity 
+                            style={styles.uploadButton} 
+                            onPress={() => setFilePickerModalVisible(true)} 
+                            disabled={isGenerating || isSending}
+                        >
+                            <Ionicons name="add" size={24} color={isGenerating || isSending ? colors.text.muted : colors.text.secondary} />
                         </TouchableOpacity>
                     )}
                     <TextInput
@@ -479,6 +480,20 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 onClose={() => setModelModalVisible(false)}
                 onModelSelect={setSelectedModel}
                 currentModel={selectedModel}
+            />
+            <FilePickerModal
+                visible={filePickerModalVisible}
+                onClose={() => setFilePickerModalVisible(false)}
+                onSelectImage={() => {
+                    if (userSettings && userSettings.tools && userSettings.tools.includes('Image Generation')) {
+                        pickImage();
+                    }
+                }}
+                onSelectFile={() => {
+                    if (userSettings && userSettings.tools && userSettings.tools.includes('File Analysis')) {
+                        pickFile();
+                    }
+                }}
             />
             <PremiumModal
                 visible={premiumModalVisible}

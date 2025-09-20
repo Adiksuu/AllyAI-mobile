@@ -27,5 +27,7 @@ export { default as ClearChatHistoryModal } from "./ClearChatHistoryModal";
 export { default as ClearChatHistoryModalContent } from "./ClearChatHistoryModalContent";
 export { default as ModelSelectionModal } from "./ModelSelectionModal";
 export { default as ModelSelectionModalContent } from "./ModelSelectionModalContent";
+export { default as FilePickerModal } from "./FilePickerModal";
+export { default as FilePickerModalContent } from "./FilePickerModalContent";
 export { default as LoginForm } from "./LoginForm";
 export { default as RegisterForm } from "./RegisterForm";
