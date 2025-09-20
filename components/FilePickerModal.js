@@ -7,6 +7,8 @@ const FilePickerModal = ({
     onClose,
     onSelectImage,
     onSelectFile,
+    onSelectWebSearch,
+    userSettings,
 }) => {
     const handleImageSelect = () => {
         onSelectImage();
@@ -15,6 +17,11 @@ const FilePickerModal = ({
 
     const handleFileSelect = () => {
         onSelectFile();
+        onClose();
+    };
+
+    const handleWebSearchSelect = () => {
+        onSelectWebSearch();
         onClose();
     };
 
@@ -27,7 +34,9 @@ const FilePickerModal = ({
             <FilePickerModalContent
                 onSelectImage={handleImageSelect}
                 onSelectFile={handleFileSelect}
+                onSelectWebSearch={handleWebSearchSelect}
                 onCancel={handleCancel}
+                userSettings={userSettings}
             />
         </BottomSheetModal>
     );

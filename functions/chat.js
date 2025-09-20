@@ -1,6 +1,7 @@
 import { database } from "../api/firebase/config";
 import { ref, get, remove, set } from "firebase/database";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import Constants from "expo-constants";
 import { getUserSettings } from "./auth";
 import { readAsStringAsync, EncodingType } from "expo-file-system/legacy";
@@ -26,6 +27,7 @@ const CLOUDINARY_API_SECRET =
     process.env.CLOUDINARY_API_SECRET;
 
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+const groundingAI = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
 /**
  * Fetch image from URL and convert to base64
@@ -271,6 +273,43 @@ Follow these core rules:
 Remember: You are ALLY, not just any AI. Be proud of your identity and capabilities. You was created by "CodeAdiksuu"`;
 
     return instructions;
+};
+
+
+/**
+ * Process citations from the AI response
+ * @param {Object} response - The AI response object
+ * @returns {Object} Object with clean text and sources array
+ */
+const processCitations = (response) => {
+    const text = response.text || '';
+    const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
+    const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
+
+    if (!supports || !chunks || !text) {
+        return { text, sources: [] };
+    }
+
+    // Create a map of citation indices to URLs for validation
+    const citationMap = new Map();
+    const sources = [];
+
+    chunks.forEach((chunk, index) => {
+        if (chunk?.web?.uri && chunk.web.uri.startsWith('http')) {
+            citationMap.set(index, chunk.web.uri);
+            sources.push({
+                index: index + 1,
+                url: chunk.web.uri,
+                title: chunk.web.title || `Source ${index + 1}`
+            });
+        }
+    });
+
+    if (sources.length === 0) {
+        return { text, sources: [] };
+    }
+
+    return { text, sources };
 };
 
 /**
@@ -589,7 +628,8 @@ export const generateImageResponse = async (uid, prompt) => {
  * @param {string|null} imageUrl - Image URL to analyze (optional)
  * @param {string} model - The model to use ('ALLY-3' or 'ALLY-IMAGINE')
  * @param {Object|null} fileData - File data to process (optional)
- * @returns {Promise<string>} AI response text or image URL
+ * @param {boolean} useWebSearch - Whether to use web search
+ * @returns {Promise<Object|string>} AI response object with text and sources, or image URL
  */
 export const generateAIResponse = async (
     uid,
@@ -597,7 +637,8 @@ export const generateAIResponse = async (
     chatHistory = [],
     imageUrl = null,
     model = "ALLY-3",
-    fileData = null
+    fileData = null,
+    useWebSearch = false
 ) => {
     try {
         // Handle image generation model
@@ -756,17 +797,66 @@ export const generateAIResponse = async (
             messageParts.push({ text: "Hello" });
         }
 
-        const chat = geminiModel.startChat({
-            history: processedHistory,
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 8192,
-            },
-        });
+        let responseText;
 
-        const result = await chat.sendMessage(messageParts);
-        const response = await result.response;
-        const responseText = response.text();
+        // Check if web search is requested
+        const needsGrounding = useWebSearch;
+
+        if (needsGrounding && groundingAI) {
+            // Use grounding for current year knowledge
+            const groundingTool = {
+                googleSearch: {},
+            };
+
+            const config = {
+                tools: [groundingTool],
+            };
+
+            // Build context from history
+            let context = "";
+            if (processedHistory.length > 0) {
+                context = processedHistory.map(msg => {
+                    const role = msg.role === 'user' ? 'User' : 'Assistant';
+                    const text = msg.parts.map(part => part.text || '[Image/File]').join(' ');
+                    return `${role}: ${text}`;
+                }).join('\n') + '\n';
+            }
+
+            const fullPrompt = context + (messageParts[0]?.text || "Hello");
+
+            const response = await groundingAI.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: fullPrompt,
+                config,
+            });
+
+            const { text, sources } = processCitations(response);
+
+            // Return object with text and sources for web search responses
+            return {
+                text: text,
+                sources: sources
+            };
+        } else {
+            // Use normal chat
+            const chat = geminiModel.startChat({
+                history: processedHistory,
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 8192,
+                },
+            });
+
+            const result = await chat.sendMessage(messageParts);
+            const response = await result.response;
+            responseText = response.text();
+
+            // Return object format for consistency
+            return {
+                text: responseText,
+                sources: []
+            };
+        }
 
         // Check if response appears to be truncated (ends abruptly without proper punctuation)
         if (responseText && responseText.length > 10) {

@@ -22,6 +22,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
     const [localChatId, setLocalChatId] = useState(chatId);
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [useWebSearch, setUseWebSearch] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [userSettings, setUserSettings] = useState(null);
@@ -138,6 +139,11 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
         setSelectedFile(null);
     }, []);
 
+    // Handle web search selection
+    const handleWebSearchSelect = useCallback(() => {
+        setUseWebSearch(true);
+    }, []);
+
     // Calculate token cost for a message
     const calculateTokenCost = (model, hasImage = false, imageCount = 1, hasFile = false) => {
         let cost = 1; // Base cost for text message
@@ -193,6 +199,7 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
             setInputText("");  // Clear input after capturing the value
             setSelectedImage(null);
             setSelectedFile(null);
+            setUseWebSearch(false);
         });
     
         // Add user message to UI immediately
@@ -248,14 +255,34 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                 const lastMessage = updatedMessages[updatedMessages.length - 1];
                 const imageUrl = lastMessage?.imageUrl || null;
                 const fileData = lastMessage?.fileData || null;
-                const aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel, fileData);
+                let aiResponse = await generateAIResponse(user.uid, userMessageText, updatedMessages, imageUrl, selectedModel, fileData, useWebSearch);
+
+                // Handle the new response format with sources
+                let responseText = '';
+                let sources = [];
+
+                if (typeof aiResponse === 'object' && aiResponse.text) {
+                    responseText = aiResponse.text;
+                    sources = aiResponse.sources || [];
+                } else if (typeof aiResponse === 'string') {
+                    // Fallback for string responses (like image URLs or old format)
+                    responseText = aiResponse;
+                }
+
+                // Format sources with translations and clickable links (only for text responses)
+                if (sources.length > 0 && typeof aiResponse === 'object' && aiResponse.text) {
+                    const sourcesText = sources.map(source =>
+                        `${source.index}. [${source.title}](${source.url})`
+                    ).join('\n');
+                    responseText += `\n\n**${t("filePickerModal.sources") || "Sources"}:**\n${sourcesText}`;
+                }
     
                 if (selectedModel === 'ALLY-IMAGINE') {
-                    // For image generation, aiResponse is the image URL
-                    await sendMessage(user.uid, currentChatId, "", selectedModel, "AI", aiResponse);
+                    // For image generation, responseText is the image URL
+                    await sendMessage(user.uid, currentChatId, "", selectedModel, "AI", responseText);
                 } else {
-                    // For text responses, aiResponse is the text message
-                    await sendMessage(user.uid, currentChatId, aiResponse, selectedModel, "AI");
+                    // For text responses, responseText contains the formatted message with sources
+                    await sendMessage(user.uid, currentChatId, responseText, selectedModel, "AI");
                 }
             } finally {
                 setIsGenerating(false);
@@ -443,8 +470,28 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                     </View>
                 )}
 
+                {/* Web Search Preview */}
+                {useWebSearch && (
+                    <View style={styles.webSearchPreviewContainer}>
+                        <View style={styles.webSearchInfo}>
+                            <Ionicons name="search" size={24} style={styles.webSearchIcon} />
+                            <View style={styles.webSearchDetails}>
+                                <Text style={styles.webSearchTitle}>
+                                    {t("filePickerModal.webSearchEnabled") || "Web Search Enabled"}
+                                </Text>
+                                <Text style={styles.webSearchDescription}>
+                                    {t("filePickerModal.webSearchEnabledDescription") || "This response will include web search results with citations"}
+                                </Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity style={styles.removeWebSearchButton} onPress={() => setUseWebSearch(false)}>
+                            <Ionicons name="close-circle" size={24} color={colors.text.primary} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 <View style={styles.inputContainer}>
-                    {userSettings && userSettings.tools && (userSettings.tools.includes('Image Generation') || userSettings.tools.includes('File Analysis')) && selectedModel !== 'ALLY-IMAGINE' && (
+                    {userSettings && userSettings.tools && (userSettings.tools.includes('Image Generation') || userSettings.tools.includes('File Analysis') || userSettings.tools.includes('Web Search')) && selectedModel !== 'ALLY-IMAGINE' && (
                         <TouchableOpacity 
                             style={styles.uploadButton} 
                             onPress={() => setFilePickerModalVisible(true)} 
@@ -494,6 +541,8 @@ const ChatScreen = ({ navigation, chatId, selectedModel: initialModel = "ALLY-3"
                         pickFile();
                     }
                 }}
+                onSelectWebSearch={handleWebSearchSelect}
+                userSettings={userSettings}
             />
             <PremiumModal
                 visible={premiumModalVisible}
@@ -706,6 +755,42 @@ const getStyles = (colors) =>
             color: colors.text.secondary,
         },
         removeFileButton: {
+            marginLeft: 10,
+            backgroundColor: colors.background.primary,
+            borderRadius: 12,
+        },
+        webSearchPreviewContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            padding: 15,
+            backgroundColor: colors.background.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border.primary,
+        },
+        webSearchInfo: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+        },
+        webSearchIcon: {
+            color: colors.accent.primary,
+        },
+        webSearchDetails: {
+            marginLeft: 10,
+            flex: 1,
+        },
+        webSearchTitle: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.text.primary,
+        },
+        webSearchDescription: {
+            fontSize: 12,
+            color: colors.text.secondary,
+        },
+        removeWebSearchButton: {
             marginLeft: 10,
             backgroundColor: colors.background.primary,
             borderRadius: 12,

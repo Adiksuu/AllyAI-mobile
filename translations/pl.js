@@ -206,6 +206,11 @@ export const pl = {
         selectImageDescription: "Wybierz obraz z galerii",
         selectFile: "Wybierz Plik",
         selectFileDescription: "Wybierz dokument lub plik tekstowy",
+        selectWebSearch: "Wyszukiwanie w Sieci",
+        selectWebSearchDescription: "Wyszukuj informacje w internecie w czasie rzeczywistym",
+        webSearchEnabled: "Wyszukiwanie w Sieci Włączone",
+        webSearchEnabledDescription: "Ta odpowiedź będzie zawierać wyniki wyszukiwania z cytatami",
+        sources: "Źródła",
     },
 
     // Modals

@@ -12,27 +12,48 @@ import { useTheme } from "../contexts/ThemeContext";
 const FilePickerModalContent = ({
     onSelectImage,
     onSelectFile,
+    onSelectWebSearch,
     onCancel,
+    userSettings,
 }) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
 
-    const options = [
+    // Base options that are always available
+    const baseOptions = [
         {
             key: "image",
             title: t("filePickerModal.selectImage") || "Select Image",
             description: t("filePickerModal.selectImageDescription") || "Choose an image from your gallery",
             icon: "image",
             onPress: onSelectImage,
+            requiredTool: "Image Generation",
         },
-        {
+    ];
+
+    // Conditionally add file option if File Analysis is enabled
+    if (userSettings?.tools?.includes("File Analysis")) {
+        baseOptions.push({
             key: "file",
             title: t("filePickerModal.selectFile") || "Select File",
             description: t("filePickerModal.selectFileDescription") || "Choose a document or text file",
             icon: "document-text",
             onPress: onSelectFile,
-        },
-    ];
+        });
+    }
+
+    // Conditionally add web search option if Web Search is enabled
+    if (userSettings?.tools?.includes("Web Search")) {
+        baseOptions.push({
+            key: "webSearch",
+            title: t("filePickerModal.selectWebSearch") || "Web Search",
+            description: t("filePickerModal.selectWebSearchDescription") || "Search the web for current information",
+            icon: "search",
+            onPress: onSelectWebSearch,
+        });
+    }
+
+    const options = baseOptions;
 
     const styles = getStyles(colors);
 

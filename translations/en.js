@@ -205,6 +205,11 @@ export const en = {
         selectImageDescription: "Choose an image from your gallery",
         selectFile: "Select File",
         selectFileDescription: "Choose a document or text file",
+        selectWebSearch: "Web Search",
+        selectWebSearchDescription: "Search the web for current information",
+        webSearchEnabled: "Web Search Enabled",
+        webSearchEnabledDescription: "This response will include web search results with citations",
+        sources: "Sources",
     },
 
     // Modals
